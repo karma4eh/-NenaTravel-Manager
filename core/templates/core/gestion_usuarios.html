@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios y Roles | Viajes Nena</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;850;900&display=swap" rel="stylesheet">
+
+    <!-- Anti-flicker theme script -->
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('viajes_nena_theme');
+                const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    <style>
+        :root {
+            --font-main: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+            --navy: #102b46;
+            --navy-deep: #0a1b2d;
+            --navy-light: #163657;
+            --turquoise: #16b8b0;
+            --turquoise-dark: #0e8f89;
+            --turquoise-light: #e6f8f7;
+            --background: #f4f7fb;
+            --surface: #ffffff;
+            --surface-hover: #f8fafc;
+            --surface-alt: #f1f5f9;
+            --text: #1e293b;
+            --text-secondary: #475569;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --border-light: #edf2f7;
+            --card-shadow: 0 4px 20px -2px rgba(16, 43, 70, 0.06);
+            --card-shadow-hover: 0 12px 30px -4px rgba(16, 43, 70, 0.12);
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --warning: #d97706;
+            --warning-light: #fffbeb;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --purple: #7c3aed;
+            --purple-light: #f5f3ff;
+        }
+
+        [data-theme="dark"] {
+            --navy: #e2e8f0;
+            --navy-deep: #080f18;
+            --navy-light: #162438;
+            --turquoise: #22d3ee;
+            --turquoise-dark: #06b6d4;
+            --turquoise-light: rgba(34, 211, 238, 0.14);
+            --background: #09121f;
+            --surface: #121e30;
+            --surface-hover: #17263c;
+            --surface-alt: #0d1726;
+            --text: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --muted: #94a3b8;
+            --border: #1e314b;
+            --border-light: #18283e;
+            --card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.5);
+            --card-shadow-hover: 0 12px 30px -4px rgba(0, 0, 0, 0.75);
+            --success: #34d399;
+            --success-light: rgba(52, 211, 153, 0.15);
+            --warning: #fbbf24;
+            --warning-light: rgba(251, 191, 36, 0.15);
+            --danger: #f87171;
+            --danger-light: rgba(248, 113, 113, 0.15);
+            --indigo: #818cf8;
+            --indigo-light: rgba(129, 140, 248, 0.15);
+            --purple: #c084fc;
+            --purple-light: rgba(168, 85, 247, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: var(--font-main);
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        button, input, select, textarea { font-family: inherit; }
+        a { text-decoration: none; color: inherit; }
+
+        /* SVG ICONS */
+        .svg-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            background: #102b46;
+            color: white;
+            padding: 14px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 2px solid var(--turquoise);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+        }
+
+        [data-theme="dark"] .topbar {
+            background: #091320;
+            border-bottom: 2px solid #22d3ee;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #16b8b0 0%, #0e8f89 100%);
+            color: #0a1b2d;
+            font-size: 20px;
+            font-weight: 900;
+        }
+
+        .brand-name {
+            font-size: 17px;
+            font-weight: 850;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-subtitle {
+            font-size: 12px;
+            font-weight: 600;
+            color: #b8d5ed;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 7px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            transition: all 0.2s ease;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            transform: translateX(-2px);
+        }
+
+        /* CONTAINER */
+        .container {
+            width: min(1200px, 94%);
+            margin: 28px auto 60px;
+            flex-grow: 1;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .eyebrow {
+            color: var(--turquoise);
+            font-size: 11.5px;
+            font-weight: 850;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        [data-theme="dark"] .eyebrow {
+            color: #22d3ee;
+        }
+
+        h1 {
+            color: var(--navy);
+            font-size: clamp(24px, 3.5vw, 32px);
+            font-weight: 850;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .page-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            max-width: 680px;
+            line-height: 1.6;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 11px;
+            font-size: 13.5px;
+            font-weight: 750;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+        }
+
+        .btn:active { transform: translateY(0); }
+
+        .btn-primary {
+            background: var(--turquoise);
+            color: #091320;
+            border-color: var(--turquoise-dark);
+            font-weight: 850;
+        }
+
+        .btn-primary:hover {
+            background: #14a39b;
+        }
+
+        .btn-outline {
+            background: var(--surface);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .btn-outline:hover {
+            background: var(--surface-hover);
+            border-color: var(--muted);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12.5px;
+            border-radius: 8px;
+        }
+
+        .btn-danger-outline {
+            background: transparent;
+            color: var(--danger);
+            border-color: rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-danger-outline:hover {
+            background: var(--danger-light);
+            border-color: var(--danger);
+        }
+
+        .btn-success-outline {
+            background: transparent;
+            color: var(--success);
+            border-color: rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-success-outline:hover {
+            background: var(--success-light);
+            border-color: var(--success);
+        }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: var(--turquoise);
+        }
+
+        .stat-icon-wrapper {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .icon-blue { background: var(--indigo-light); color: var(--indigo); }
+        .icon-purple { background: var(--purple-light); color: var(--purple); }
+        .icon-emerald { background: var(--success-light); color: var(--success); }
+        .icon-amber { background: var(--warning-light); color: var(--warning); }
+
+        .stat-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--navy);
+            line-height: 1.1;
+        }
+
+        .stat-subtext {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+            font-weight: 600;
+        }
+
+        /* MESSAGES ALERT */
+        .messages-container {
+            margin-bottom: 20px;
+        }
+
+        .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 650;
+            margin-bottom: 10px;
+            border: 1px solid;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .alert-success { background: var(--success-light); color: var(--success); border-color: rgba(5, 150, 105, 0.3); }
+        .alert-error { background: var(--danger-light); color: var(--danger); border-color: rgba(220, 38, 38, 0.3); }
+        .alert-warning { background: var(--warning-light); color: var(--warning); border-color: rgba(217, 119, 6, 0.3); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* TOOLBAR FILTER */
+        .toolbar-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-box-wrapper {
+            position: relative;
+            flex-grow: 1;
+            min-width: 260px;
+            max-width: 440px;
+        }
+
+        .search-icon-pos {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 14px 10px 42px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface-alt);
+            color: var(--text);
+            font-size: 13.5px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--turquoise);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(22, 184, 176, 0.18);
+        }
+
+        .filter-chips-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .chip-label {
+            font-size: 12px;
+            font-weight: 750;
+            color: var(--muted);
+            margin-right: 4px;
+        }
+
+        .filter-chip {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 700;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--turquoise);
+            color: var(--navy);
+        }
+
+        .filter-chip.active {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+        }
+
+        [data-theme="dark"] .filter-chip.active {
+            background: var(--turquoise);
+            color: #091320;
+            border-color: var(--turquoise);
+        }
+
+        /* USERS TABLE CARD */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13.5px;
+        }
+
+        .users-table th {
+            background: var(--surface-alt);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .users-table td {
+            padding: 13px 16px;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+        }
+
+        .users-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .users-table tr:hover td {
+            background: var(--surface-hover);
+        }
+
+        /* USER IDENTITY & CONTACT COMBINED */
+        .user-identity-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .user-avatar-lg {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            font-size: 14px;
+            font-weight: 900;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .avatar-admin {
+            background: linear-gradient(135deg, #102b46 0%, #1e3a8a 100%);
+        }
+
+        .avatar-vendedor {
+            background: linear-gradient(135deg, #0e8f89 0%, #16b8b0 100%);
+        }
+
+        .user-info-text {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .user-name-title {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-wrap: wrap;
+            line-height: 1.3;
+        }
+
+        .user-full-name {
+            font-weight: 800;
+            color: var(--navy);
+            font-size: 14px;
+        }
+
+        .user-login-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .you-badge {
+            background: rgba(22, 184, 176, 0.15);
+            color: var(--turquoise-dark);
+            font-size: 10px;
+            font-weight: 850;
+            padding: 1px 6px;
+            border-radius: 6px;
+            border: 1px solid rgba(22, 184, 176, 0.3);
+            line-height: 1.4;
+        }
+
+        [data-theme="dark"] .you-badge {
+            background: rgba(34, 211, 238, 0.15);
+            color: #22d3ee;
+            border-color: rgba(34, 211, 238, 0.3);
+        }
+
+        .user-contact-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 3px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .contact-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .contact-icon {
+            width: 12px;
+            height: 12px;
+            color: var(--muted);
+        }
+
+        .contact-dot {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        /* ROLE BADGES */
+        .badge-role {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+
+        .badge-role-admin {
+            background: #eef2ff;
+            color: #3730a3;
+            border: 1px solid #c7d2fe;
+        }
+
+        [data-theme="dark"] .badge-role-admin {
+            background: rgba(99, 102, 241, 0.18);
+            color: #a5b4fc;
+            border-color: rgba(99, 102, 241, 0.35);
+        }
+
+        .badge-role-vendedor {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        [data-theme="dark"] .badge-role-vendedor {
+            background: rgba(16, 185, 129, 0.18);
+            color: #6ee7b7;
+            border-color: rgba(16, 185, 129, 0.35);
+        }
+
+        /* STATUS BADGE */
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 11.5px;
+            font-weight: 750;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .badge-status-active {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.25);
+        }
+        .badge-status-active .status-dot { background: var(--success); }
+
+        .badge-status-inactive {
+            background: var(--danger-light);
+            color: var(--danger);
+            border: 1px solid rgba(220, 38, 38, 0.25);
+        }
+        .badge-status-inactive .status-dot { background: var(--danger); }
+
+        /* LAST ACCESS */
+        .last-access-cell {
+            white-space: nowrap;
+        }
+        .last-access-date {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--navy);
+        }
+        .last-access-time {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        /* ACTION BUTTONS GROUP */
+        .actions-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: flex-end;
+            white-space: nowrap;
+        }
+
+        .btn-icon-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-secondary);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-icon-action:hover {
+            border-color: var(--turquoise);
+            color: var(--turquoise-dark);
+            background: var(--surface-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-icon-action.danger:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .btn-icon-action.success:hover {
+            border-color: var(--success);
+            color: var(--success);
+            background: var(--success-light);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--surface-alt);
+            color: var(--muted);
+            display: grid;
+            place-items: center;
+            margin: 0 auto 16px;
+        }
+
+        .empty-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 6px;
+        }
+
+        .empty-desc {
+            font-size: 13.5px;
+            color: var(--muted);
+            max-width: 380px;
+            margin: 0 auto;
+        }
+
+        /* MODAL STYLES */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 27, 45, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: min(540px, 96%);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: zoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes zoomIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 2;
+        }
+
+        .modal-title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-icon-bubble {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+        }
+
+        .modal-title {
+            font-size: 17px;
+            font-weight: 850;
+            color: var(--navy);
+        }
+
+        .modal-subtitle {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .btn-close-modal {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-close-modal:hover {
+            background: var(--surface-alt);
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 750;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .form-label-required::after {
+            content: " *";
+            color: var(--danger);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface-alt);
+            color: var(--text);
+            font-size: 13.5px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--turquoise);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(22, 184, 176, 0.18);
+        }
+
+        .form-help {
+            font-size: 11.5px;
+            color: var(--muted);
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        /* ROLE SELECTOR CARDS IN MODAL */
+        .role-selector-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        .role-option-card {
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background: var(--surface);
+        }
+
+        .role-option-card:hover {
+            border-color: var(--turquoise);
+        }
+
+        .role-option-card input[type="radio"] {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            accent-color: var(--turquoise);
+        }
+
+        .role-option-card.selected {
+            border-color: var(--turquoise);
+            background: var(--turquoise-light);
+        }
+
+        .role-card-title {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .role-card-desc {
+            font-size: 11.5px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            background: var(--surface-alt);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
+
+        /* FOOTER */
+        .footer {
+            margin-top: auto;
+            background: #102b46;
+            color: #94a3b8;
+            padding: 22px 5%;
+            font-size: 12.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        [data-theme="dark"] .footer {
+            background: #091320;
+            border-top-color: #1e314b;
+        }
+
+        .footer-brand {
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        @media (max-width: 768px) {
+            .page-header { flex-direction: column; align-items: stretch; }
+            .form-grid-2 { grid-template-columns: 1fr; }
+            .role-selector-options { grid-template-columns: 1fr; }
+            .toolbar-card { flex-direction: column; align-items: stretch; }
+            .search-box-wrapper { max-width: 100%; }
+            .footer { flex-direction: column; text-align: center; }
+
+            /* TABLA RESPONSIVA EN TARJETAS PARA MÓVIL */
+            .table-card {
+                background: transparent;
+                border: none;
+                box-shadow: none;
+            }
+            .users-table, .users-table tbody {
+                display: block;
+                width: 100%;
+            }
+            .users-table thead {
+                display: none;
+            }
+            .users-table tr.user-row {
+                display: block;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 16px;
+                margin-bottom: 14px;
+                box-shadow: var(--card-shadow);
+            }
+            .users-table td {
+                display: block;
+                padding: 6px 0;
+                border: none;
+            }
+            .users-table td.cell-user-identity {
+                padding-top: 0;
+                border-bottom: 1px solid var(--border-light);
+                padding-bottom: 12px;
+                margin-bottom: 10px;
+            }
+            .users-table td.cell-actions {
+                border-top: 1px solid var(--border-light);
+                padding-top: 12px;
+                margin-top: 10px;
+            }
+            .users-table td.cell-actions .actions-group {
+                justify-content: flex-start;
+            }
+            .users-table td:nth-child(2),
+            .users-table td:nth-child(3) {
+                display: inline-block;
+                padding-right: 10px;
+                vertical-align: middle;
+            }
+            .users-table td:nth-child(4) {
+                padding-top: 6px;
+            }
+        }
+    </style>
+    {% include "core/includes/dark_mode_head.html" %}
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <a href="{% url 'home' %}" class="brand">
+            <div class="brand-icon">V</div>
+            <div>
+                <div class="brand-name">VIAJES NENA</div>
+                <div class="brand-subtitle">Gestión de Usuarios y Roles</div>
+            </div>
+        </a>
+
+        <div class="top-right">
+            {% include "core/includes/dark_mode_toggle.html" %}
+
+            <a href="{% url 'home' %}" class="back-link">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                <span>Volver al inicio</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="container">
+
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+            <div>
+                <div class="eyebrow">
+                    <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/></svg>
+                    Seguridad y Control de Accesos
+                </div>
+                <h1>Gestión de Usuarios y Roles</h1>
+                <p class="page-desc">
+                    Administra el personal con acceso a Viajes Nena. Define quién opera como <strong>Administrador</strong> con control global o como <strong>Vendedor</strong> para el registro de consumos y cobros.
+                </p>
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="abrirModalCrear()">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                Nuevo Usuario
+            </button>
+        </div>
+
+        <!-- MESSAGES -->
+        {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                    <div class="alert-item {% if message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-success{% endif %}">
+                        <svg class="svg-icon" viewBox="0 0 24 24">
+                            {% if message.tags == 'error' %}
+                                <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                            {% elif message.tags == 'warning' %}
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                            {% else %}
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                            {% endif %}
+                        </svg>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- STATS CARDS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon-wrapper icon-blue">
+                    <svg class="svg-icon" style="width:24px;height:24px;" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div>
+                    <div class="stat-label">Total Usuarios</div>
+                    <div class="stat-value">{{ total_usuarios }}</div>
+                    <div class="stat-subtext">{{ total_activos }} activos en la plataforma</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper icon-purple">
+                    <svg class="svg-icon" style="width:24px;height:24px;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/><polyline points="9 11 12 14 22 4"/></svg>
+                </div>
+                <div>
+                    <div class="stat-label">Administradores</div>
+                    <div class="stat-value">{{ total_admins }}</div>
+                    <div class="stat-subtext">Acceso total a finanzas y cierre</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper icon-emerald">
+                    <svg class="svg-icon" style="width:24px;height:24px;" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>
+                </div>
+                <div>
+                    <div class="stat-label">Vendedores</div>
+                    <div class="stat-value">{{ total_vendedores }}</div>
+                    <div class="stat-subtext">Consumos, pagos y listín</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon-wrapper icon-amber">
+                    <svg class="svg-icon" style="width:24px;height:24px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div>
+                    <div class="stat-label">Inactivos / Bloqueados</div>
+                    <div class="stat-value">{{ total_inactivos }}</div>
+                    <div class="stat-subtext">Cuentas con acceso suspendido</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOOLBAR: FILTERS AND SEARCH -->
+        <div class="toolbar-card">
+            <div class="search-box-wrapper">
+                <svg class="svg-icon search-icon-pos" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text"
+                       id="searchInput"
+                       class="search-input"
+                       placeholder="Buscar por nombre, usuario, correo o teléfono..."
+                       value="{{ busqueda }}"
+                       onkeyup="filtrarTablaLocal()">
+            </div>
+
+            <div class="filter-chips-group">
+                <span class="chip-label">Rol:</span>
+                <a href="?{% if busqueda %}q={{ busqueda }}&{% endif %}{% if filtro_estado %}estado={{ filtro_estado }}{% endif %}"
+                   class="filter-chip {% if not filtro_rol %}active{% endif %}">Todos</a>
+                <a href="?rol=ADMIN{% if busqueda %}&q={{ busqueda }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}"
+                   class="filter-chip {% if filtro_rol == 'ADMIN' %}active{% endif %}">Admin</a>
+                <a href="?rol=VENDEDOR{% if busqueda %}&q={{ busqueda }}{% endif %}{% if filtro_estado %}&estado={{ filtro_estado }}{% endif %}"
+                   class="filter-chip {% if filtro_rol == 'VENDEDOR' %}active{% endif %}">Vendedor</a>
+
+                <span class="chip-label" style="margin-left:8px;">Estado:</span>
+                <a href="?{% if busqueda %}q={{ busqueda }}&{% endif %}{% if filtro_rol %}rol={{ filtro_rol }}{% endif %}"
+                   class="filter-chip {% if not filtro_estado %}active{% endif %}">Todos</a>
+                <a href="?estado=activos{% if busqueda %}&q={{ busqueda }}{% endif %}{% if filtro_rol %}&rol={{ filtro_rol }}{% endif %}"
+                   class="filter-chip {% if filtro_estado == 'activos' %}active{% endif %}">Activos</a>
+                <a href="?estado=inactivos{% if busqueda %}&q={{ busqueda }}{% endif %}{% if filtro_rol %}&rol={{ filtro_rol }}{% endif %}"
+                   class="filter-chip {% if filtro_estado == 'inactivos' %}active{% endif %}">Inactivos</a>
+            </div>
+        </div>
+
+        <!-- USERS TABLE -->
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="users-table" id="tablaUsuarios">
+                    <thead>
+                        <tr>
+                            <th style="width:42%;">Usuario / Contacto</th>
+                            <th style="width:16%;">Rol Asignado</th>
+                            <th style="width:12%;">Estado</th>
+                            <th style="width:16%;">Último Acceso</th>
+                            <th style="width:14%;text-align:right;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                            <tr class="user-row"
+                                data-username="{{ u.username|lower }}"
+                                data-nombre="{{ u.get_full_name|lower }}"
+                                data-email="{{ u.email|lower }}"
+                                data-telefono="{{ u.perfil.telefono|lower }}">
+                                <td class="cell-user-identity">
+                                    <div class="user-identity-cell">
+                                        <div class="user-avatar-lg {% if u.is_superuser or u.perfil.rol == 'ADMIN' %}avatar-admin{% else %}avatar-vendedor{% endif %}">
+                                            {{ u.username|slice:":1"|upper }}
+                                        </div>
+                                        <div class="user-info-text">
+                                            <div class="user-name-title">
+                                                <span class="user-full-name">{{ u.get_full_name|default:u.username }}</span>
+                                                <span class="user-login-name">@{{ u.username }}</span>
+                                                {% if u.id == request.user.id %}
+                                                    <span class="you-badge">Tú</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="user-contact-row">
+                                                {% if u.email %}
+                                                    <span class="contact-item" title="Correo electrónico">
+                                                        <svg class="svg-icon contact-icon" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                                        <span>{{ u.email }}</span>
+                                                    </span>
+                                                {% endif %}
+                                                {% if u.email and u.perfil.telefono %}
+                                                    <span class="contact-dot">&bull;</span>
+                                                {% endif %}
+                                                {% if u.perfil.telefono %}
+                                                    <span class="contact-item" title="Teléfono / WhatsApp">
+                                                        <svg class="svg-icon contact-icon" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                                        <span>{{ u.perfil.telefono }}</span>
+                                                    </span>
+                                                {% endif %}
+                                                {% if not u.email and not u.perfil.telefono %}
+                                                    <span style="color:var(--muted);font-style:italic;font-size:11.5px;">Sin datos de contacto</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {% if u.is_superuser or u.perfil.rol == 'ADMIN' %}
+                                        <span class="badge-role badge-role-admin">
+                                            <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/></svg>
+                                            Administrador
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-role badge-role-vendedor">
+                                            <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                            Vendedor
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if u.is_active %}
+                                        <span class="badge-status badge-status-active">
+                                            <span class="status-dot"></span>
+                                            Activo
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-status badge-status-inactive">
+                                            <span class="status-dot"></span>
+                                            Inactivo
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <div class="last-access-cell">
+                                        {% if u.last_login %}
+                                            <div class="last-access-date">{{ u.last_login|date:"d/m/Y" }}</div>
+                                            <div class="last-access-time">{{ u.last_login|time:"h:i A" }}</div>
+                                        {% else %}
+                                            <span style="color:var(--muted);font-size:12px;font-style:italic;">Nunca ha ingresado</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <td class="cell-actions" style="text-align:right;">
+                                    <div class="actions-group">
+                                        <!-- BOTÓN EDITAR -->
+                                        <button type="button"
+                                                class="btn-icon-action"
+                                                title="Editar datos y rol"
+                                                onclick="abrirModalEditar('{{ u.id }}', '{{ u.username|escapejs }}', '{{ u.first_name|escapejs }}', '{{ u.last_name|escapejs }}', '{{ u.email|escapejs }}', '{{ u.perfil.telefono|escapejs }}', '{% if u.is_superuser or u.perfil.rol == 'ADMIN' %}ADMIN{% else %}VENDEDOR{% endif %}', {{ u.is_superuser|yesno:'true,false' }})">
+                                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        </button>
+
+                                        <!-- BOTÓN CAMBIAR CONTRASEÑA -->
+                                        <button type="button"
+                                                class="btn-icon-action"
+                                                title="Cambiar contraseña"
+                                                onclick="abrirModalPassword('{{ u.id }}', '{{ u.username|escapejs }}')">
+                                            <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                        </button>
+
+                                        <!-- BOTÓN ACTIVAR / DESACTIVAR -->
+                                        {% if u.id != request.user.id %}
+                                            {% if u.is_active %}
+                                                <button type="button"
+                                                        class="btn-icon-action danger"
+                                                        title="Desactivar usuario (bloquear acceso)"
+                                                        onclick="confirmarToggleEstado('{{ u.id }}', '{{ u.username|escapejs }}', false)">
+                                                    <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                                </button>
+                                            {% else %}
+                                                <button type="button"
+                                                        class="btn-icon-action success"
+                                                        title="Activar usuario"
+                                                        onclick="confirmarToggleEstado('{{ u.id }}', '{{ u.username|escapejs }}', true)">
+                                                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                                </button>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">
+                                            <svg class="svg-icon" style="width:28px;height:28px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                        </div>
+                                        <div class="empty-title">No se encontraron usuarios</div>
+                                        <div class="empty-desc">No hay usuarios que coincidan con los filtros aplicados. Intenta reiniciar la búsqueda.</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL: CREAR USUARIO -->
+    <div class="modal-backdrop" id="modalCrear" style="display:none;" onclick="cerrarBackdrop(event, 'modalCrear')">
+        <div class="modal-card">
+            <header class="modal-header">
+                <div class="modal-title-group">
+                    <div class="modal-icon-bubble icon-blue">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    </div>
+                    <div>
+                        <div class="modal-title">Registrar Nuevo Usuario</div>
+                        <div class="modal-subtitle">Asigna credenciales y rol de permisos</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="cerrarModal('modalCrear')">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </header>
+
+            <form action="{% url 'crear_usuario' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label form-label-required" for="c_username">Usuario (Login)</label>
+                            <input type="text" id="c_username" name="username" class="form-control" placeholder="ej: javier.perez" required autocomplete="off">
+                            <div class="form-help">Identificador único para iniciar sesión.</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="c_email">Correo Electrónico</label>
+                            <input type="email" id="c_email" name="email" class="form-control" placeholder="correo@ejemplo.com">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label" for="c_first_name">Nombre</label>
+                            <input type="text" id="c_first_name" name="first_name" class="form-control" placeholder="Nombre">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="c_last_name">Apellido</label>
+                            <input type="text" id="c_last_name" name="last_name" class="form-control" placeholder="Apellido">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="c_telefono">Teléfono / WhatsApp</label>
+                        <input type="text" id="c_telefono" name="telefono" class="form-control" placeholder="+58 412 1234567">
+                    </div>
+
+                    <!-- SELECCIÓN DE ROL -->
+                    <div class="form-group">
+                        <label class="form-label form-label-required">Rol de Acceso en el Sistema</label>
+                        <div class="role-selector-options">
+                            <label class="role-option-card selected" id="card_rol_vendedor" onclick="seleccionarRolCrear('VENDEDOR')">
+                                <input type="radio" name="rol" value="VENDEDOR" checked>
+                                <div class="role-card-title">
+                                    <svg class="svg-icon" style="color:var(--success);width:15px;height:15px;" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    Vendedor
+                                </div>
+                                <div class="role-card-desc">Operativo: Carga consumos, recibe abonos/cobros y listín Los Juanes. Sin acceso a tasas ni cierre.</div>
+                            </label>
+
+                            <label class="role-option-card" id="card_rol_admin" onclick="seleccionarRolCrear('ADMIN')">
+                                <input type="radio" name="rol" value="ADMIN">
+                                <div class="role-card-title">
+                                    <svg class="svg-icon" style="color:var(--purple);width:15px;height:15px;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/></svg>
+                                    Administrador
+                                </div>
+                                <div class="role-card-desc">Acceso Total: Gestión usuarios, crear viajes, tasas BCV, precios base y cierre financiero.</div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label form-label-required" for="c_password">Contraseña</label>
+                            <input type="password" id="c_password" name="password" class="form-control" placeholder="Mínimo 4 caracteres" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label form-label-required" for="c_password_confirm">Confirmar Contraseña</label>
+                            <input type="password" id="c_password_confirm" name="password_confirm" class="form-control" placeholder="Repite la contraseña" required>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalCrear')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        Guardar Usuario
+                    </button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR USUARIO -->
+    <div class="modal-backdrop" id="modalEditar" style="display:none;" onclick="cerrarBackdrop(event, 'modalEditar')">
+        <div class="modal-card">
+            <header class="modal-header">
+                <div class="modal-title-group">
+                    <div class="modal-icon-bubble icon-purple">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                    <div>
+                        <div class="modal-title">Editar Usuario</div>
+                        <div class="modal-subtitle" id="editModalSub">Modificando perfil</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="cerrarModal('modalEditar')">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </header>
+
+            <form id="formEditarUsuario" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">Nombre de Usuario (Login)</label>
+                        <input type="text" id="e_username" class="form-control" disabled style="opacity:0.75;cursor:not-allowed;">
+                        <div class="form-help">El nombre de usuario es inmutable por trazabilidad del sistema.</div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label" for="e_first_name">Nombre</label>
+                            <input type="text" id="e_first_name" name="first_name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="e_last_name">Apellido</label>
+                            <input type="text" id="e_last_name" name="last_name" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label class="form-label" for="e_email">Correo Electrónico</label>
+                            <input type="email" id="e_email" name="email" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="e_telefono">Teléfono / WhatsApp</label>
+                            <input type="text" id="e_telefono" name="telefono" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- SELECCIÓN DE ROL EN EDICIÓN -->
+                    <div class="form-group">
+                        <label class="form-label form-label-required">Rol de Acceso</label>
+                        <div class="role-selector-options">
+                            <label class="role-option-card" id="e_card_rol_vendedor" onclick="seleccionarRolEditar('VENDEDOR')">
+                                <input type="radio" name="rol" id="e_radio_vendedor" value="VENDEDOR">
+                                <div class="role-card-title">
+                                    <svg class="svg-icon" style="color:var(--success);width:15px;height:15px;" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    Vendedor
+                                </div>
+                                <div class="role-card-desc">Operativo: Consumos y cobros sin acceso administrativo.</div>
+                            </label>
+
+                            <label class="role-option-card" id="e_card_rol_admin" onclick="seleccionarRolEditar('ADMIN')">
+                                <input type="radio" name="rol" id="e_radio_admin" value="ADMIN">
+                                <div class="role-card-title">
+                                    <svg class="svg-icon" style="color:var(--purple);width:15px;height:15px;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/></svg>
+                                    Administrador
+                                </div>
+                                <div class="role-card-desc">Acceso Total: Configuración, tasas, usuarios y cierre.</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalEditar')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        Guardar Cambios
+                    </button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CAMBIAR CONTRASEÑA -->
+    <div class="modal-backdrop" id="modalPassword" style="display:none;" onclick="cerrarBackdrop(event, 'modalPassword')">
+        <div class="modal-card" style="width:min(440px, 94%);">
+            <header class="modal-header">
+                <div class="modal-title-group">
+                    <div class="modal-icon-bubble icon-amber">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div>
+                        <div class="modal-title">Cambiar Contraseña</div>
+                        <div class="modal-subtitle" id="pwdModalSub">Asignar nueva clave</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close-modal" onclick="cerrarModal('modalPassword')">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </header>
+
+            <form id="formPasswordUsuario" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label form-label-required" for="p_nuevo_password">Nueva Contraseña</label>
+                        <input type="password" id="p_nuevo_password" name="nuevo_password" class="form-control" placeholder="Mínimo 4 caracteres" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label form-label-required" for="p_confirmar_password">Confirmar Nueva Contraseña</label>
+                        <input type="password" id="p_confirmar_password" name="confirmar_password" class="form-control" placeholder="Repite la nueva contraseña" required>
+                    </div>
+                </div>
+
+                <footer class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalPassword')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        Actualizar Contraseña
+                    </button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
+    <!-- FORM OCULTO PARA TOGGLE DE ESTADO -->
+    <form id="formToggleEstado" method="POST" style="display:none;">
+        {% csrf_token %}
+    </form>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-brand">
+            Viajes Nena &bull; Sistema de Gestión Turística
+        </div>
+        <div>
+            Control de Acceso Seguro &bull; Karma Studio
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        function cerrarBackdrop(e, modalId) {
+            if (e.target.id === modalId) {
+                cerrarModal(modalId);
+            }
+        }
+
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        function abrirModalCrear() {
+            document.getElementById("modalCrear").style.display = "flex";
+            document.getElementById("c_username").focus();
+        }
+
+        function seleccionarRolCrear(rol) {
+            const cardVend = document.getElementById("card_rol_vendedor");
+            const cardAdm = document.getElementById("card_rol_admin");
+            if (rol === "ADMIN") {
+                cardAdm.classList.add("selected");
+                cardVend.classList.remove("selected");
+                cardAdm.querySelector("input").checked = true;
+            } else {
+                cardVend.classList.add("selected");
+                cardAdm.classList.remove("selected");
+                cardVend.querySelector("input").checked = true;
+            }
+        }
+
+        function abrirModalEditar(userId, username, firstName, lastName, email, telefono, rol, isSuperuser) {
+            document.getElementById("formEditarUsuario").action = "/usuarios/" + userId + "/editar/";
+            document.getElementById("editModalSub").textContent = "Modificando a @" + username;
+            document.getElementById("e_username").value = username;
+            document.getElementById("e_first_name").value = firstName || "";
+            document.getElementById("e_last_name").value = lastName || "";
+            document.getElementById("e_email").value = email || "";
+            document.getElementById("e_telefono").value = telefono || "";
+
+            seleccionarRolEditar(rol);
+            document.getElementById("modalEditar").style.display = "flex";
+        }
+
+        function seleccionarRolEditar(rol) {
+            const cardVend = document.getElementById("e_card_rol_vendedor");
+            const cardAdm = document.getElementById("e_card_rol_admin");
+            const radioVend = document.getElementById("e_radio_vendedor");
+            const radioAdm = document.getElementById("e_radio_admin");
+
+            if (rol === "ADMIN") {
+                cardAdm.classList.add("selected");
+                cardVend.classList.remove("selected");
+                radioAdm.checked = true;
+            } else {
+                cardVend.classList.add("selected");
+                cardAdm.classList.remove("selected");
+                radioVend.checked = true;
+            }
+        }
+
+        function abrirModalPassword(userId, username) {
+            document.getElementById("formPasswordUsuario").action = "/usuarios/" + userId + "/password/";
+            document.getElementById("pwdModalSub").textContent = "Usuario @" + username;
+            document.getElementById("p_nuevo_password").value = "";
+            document.getElementById("p_confirmar_password").value = "";
+            document.getElementById("modalPassword").style.display = "flex";
+            document.getElementById("p_nuevo_password").focus();
+        }
+
+        function confirmarToggleEstado(userId, username, nuevoEstadoActivo) {
+            const accion = nuevoEstadoActivo ? "activar" : "desactivar";
+            const advertencia = nuevoEstadoActivo 
+                ? "¿Deseas reactivar el acceso al sistema para @" + username + "?" 
+                : "¿Estás seguro de desactivar a @" + username + "? El usuario perderá acceso inmediato a la plataforma.";
+
+            if (confirm(advertencia)) {
+                const form = document.getElementById("formToggleEstado");
+                form.action = "/usuarios/" + userId + "/toggle-estado/";
+                form.submit();
+            }
+        }
+
+        function filtrarTablaLocal() {
+            const term = document.getElementById("searchInput").value.toLowerCase().trim();
+            const rows = document.querySelectorAll("#tablaUsuarios tbody tr.user-row");
+
+            rows.forEach(row => {
+                const username = row.getAttribute("data-username") || "";
+                const nombre = row.getAttribute("data-nombre") || "";
+                const email = row.getAttribute("data-email") || "";
+                const telefono = row.getAttribute("data-telefono") || "";
+
+                if (!term || username.includes(term) || nombre.includes(term) || email.includes(term) || telefono.includes(term)) {
+                    row.style.display = "";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        }
+
+        // Cierre con Escape
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") {
+                cerrarModal("modalCrear");
+                cerrarModal("modalEditar");
+                cerrarModal("modalPassword");
+            }
+        });
+    </script>
+</body>
+</html>

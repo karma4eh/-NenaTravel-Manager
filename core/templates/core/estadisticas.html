@@ -1,0 +1,1429 @@
+{% load moneda_tags %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas y Reportes Financieros | Viajes Nena</title>
+
+    <!-- Script anti-parpadeo para modo oscuro -->
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('viajes_nena_theme');
+                const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    <!-- Chart.js local y CDN fallback -->
+    <script src="{% static 'core/chart.min.js' %}"></script>
+    <script>
+        if (typeof Chart === 'undefined') {
+            document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>');
+        }
+    </script>
+
+    <style>
+        :root {
+            --navy: #102b46;
+            --navy-deep: #0a1b2d;
+            --navy-light: #163657;
+            --turquoise: #16b8b0;
+            --turquoise-dark: #0e8f89;
+            --turquoise-light: #e6f8f7;
+            --turquoise-glow: rgba(22, 184, 176, 0.25);
+            --background: #f4f7fb;
+            --surface: #ffffff;
+            --surface-hover: #fcfdfe;
+            --surface-alt: #f8fafc;
+            --text: #1e293b;
+            --text-secondary: #334155;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --border-light: #edf2f7;
+            --card-shadow: 0 4px 20px -2px rgba(16, 43, 70, 0.06);
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --orange: #d97706;
+            --orange-light: #fffbeb;
+            --red: #dc2626;
+            --red-light: #fef2f2;
+            --blue: #2563eb;
+            --blue-light: #eff6ff;
+            --purple: #7c3aed;
+            --purple-light: #f5f3ff;
+        }
+
+        [data-theme="dark"] {
+            --navy: #e2e8f0;
+            --navy-deep: #080f18;
+            --navy-light: #162438;
+            --turquoise: #22d3ee;
+            --turquoise-dark: #06b6d4;
+            --turquoise-light: rgba(34, 211, 238, 0.14);
+            --turquoise-glow: rgba(34, 211, 238, 0.3);
+            --background: #09121f;
+            --surface: #121e30;
+            --surface-hover: #17263c;
+            --surface-alt: #0d1726;
+            --text: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --muted: #94a3b8;
+            --border: #1e314b;
+            --border-light: #18283e;
+            --card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.5);
+            --success: #34d399;
+            --success-light: rgba(52, 211, 153, 0.15);
+            --orange: #fbbf24;
+            --orange-light: rgba(251, 191, 36, 0.15);
+            --red: #f87171;
+            --red-light: rgba(248, 113, 113, 0.15);
+            --blue: #60a5fa;
+            --blue-light: rgba(59, 130, 246, 0.15);
+            --purple: #c084fc;
+            --purple-light: rgba(168, 85, 247, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: var(--background);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        button, a, select, input { font: inherit; }
+
+        .svg-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            background: #102b46;
+            color: white;
+            padding: 13px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+            border-bottom: 2px solid var(--turquoise);
+        }
+
+        [data-theme="dark"] .topbar {
+            background: #091320;
+            border-bottom: 2px solid #22d3ee;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .brand-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--turquoise) 0%, var(--turquoise-dark) 100%);
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            color: #052a28;
+            font-size: 15px;
+            box-shadow: 0 2px 10px var(--turquoise-glow);
+        }
+
+        .brand-text h1 {
+            font-size: 16px;
+            font-weight: 850;
+            line-height: 1.15;
+            letter-spacing: -0.2px;
+        }
+
+        .brand-text small {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 500;
+        }
+
+        .topbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 13px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav:hover, .btn-nav.active {
+            background: var(--turquoise);
+            color: #052a28;
+            border-color: var(--turquoise);
+        }
+
+        /* WATERMARK BADGE */
+        .watermark-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 11.5px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .watermark-pill {
+            background: rgba(34, 211, 238, 0.2);
+            color: #22d3ee;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 7px 11px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* CONTAINER */
+        .container {
+            width: 90%;
+            max-width: 1360px;
+            margin: 22px auto 40px auto;
+            flex: 1;
+        }
+
+        /* HEADER SECTION */
+        .stats-header-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 24px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stats-header-title h2 {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--navy);
+            letter-spacing: -0.4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-header-title p {
+            font-size: 13.5px;
+            color: var(--muted);
+            font-weight: 600;
+            margin-top: 3px;
+        }
+
+        .stats-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-weight: 800;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 0;
+        }
+
+        .btn-turquoise {
+            background: linear-gradient(135deg, var(--turquoise) 0%, var(--turquoise-dark) 100%);
+            color: #052a28;
+            box-shadow: 0 4px 14px var(--turquoise-glow);
+        }
+        .btn-turquoise:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .btn-navy {
+            background: var(--navy-deep);
+            color: white;
+            border: 1px solid var(--border);
+        }
+        [data-theme="dark"] .btn-navy {
+            background: #17263c;
+            color: var(--text);
+            border-color: var(--border);
+        }
+        .btn-navy:hover {
+            background: #163657;
+        }
+
+        .btn-outline {
+            background: var(--surface);
+            color: var(--text);
+            border: 1.5px solid var(--border);
+        }
+        .btn-outline:hover {
+            background: var(--surface-hover);
+            border-color: var(--turquoise);
+        }
+
+        /* RATE BADGES ROW */
+        .rates-pills-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+            flex-wrap: wrap;
+        }
+
+        .rate-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .rate-pill strong {
+            color: var(--navy);
+            font-weight: 900;
+        }
+
+        /* 4 TOP KPI CARDS */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px -4px rgba(16, 43, 70, 0.1);
+        }
+
+        .kpi-card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--muted);
+        }
+
+        .kpi-icon-wrap {
+            width: 36px;
+            height: 36px;
+            border-radius: 9px;
+            display: grid;
+            place-items: center;
+        }
+
+        .kpi-amount-main {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--navy);
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .kpi-equivs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12.5px;
+            font-weight: 750;
+            color: var(--muted);
+            flex-wrap: wrap;
+        }
+
+        .kpi-pill-pct {
+            font-size: 11px;
+            font-weight: 850;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .pct-success {
+            background: rgba(5, 150, 105, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.25);
+        }
+
+        .pct-warning {
+            background: rgba(217, 119, 6, 0.12);
+            color: var(--orange);
+            border: 1px solid rgba(217, 119, 6, 0.25);
+        }
+
+        .pct-danger {
+            background: rgba(220, 38, 38, 0.12);
+            color: var(--red);
+            border: 1px solid rgba(220, 38, 38, 0.25);
+        }
+
+        /* 3 CURRENCY SPECIFIC CARDS */
+        .currency-recaudo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .curr-box {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+        }
+
+        .curr-box-cop { border-top: 4px solid #10b981; }
+        .curr-box-usd { border-top: 4px solid #0891b2; }
+        .curr-box-bs  { border-top: 4px solid #b45309; }
+
+        .curr-box-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .curr-box-title {
+            font-size: 14px;
+            font-weight: 850;
+            color: var(--navy);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .curr-badge-orig {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .curr-amount-orig {
+            font-size: 26px;
+            font-weight: 900;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .curr-cop-val { color: #059669; }
+        [data-theme="dark"] .curr-cop-val { color: #34d399; }
+        .curr-usd-val { color: #0891b2; }
+        [data-theme="dark"] .curr-usd-val { color: #22d3ee; }
+        .curr-bs-val  { color: #b45309; }
+        [data-theme="dark"] .curr-bs-val  { color: #fbbf24; }
+
+        .curr-equiv-note {
+            font-size: 12.5px;
+            color: var(--muted);
+            font-weight: 650;
+        }
+
+        /* CHARTS SECTION */
+        .charts-row-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .charts-row-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chart-title {
+            font-size: 15px;
+            font-weight: 850;
+            color: var(--navy);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-chart-toggle {
+            padding: 4px 10px;
+            font-size: 11.5px;
+            font-weight: 800;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--surface-alt);
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-chart-toggle.active {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+        }
+        [data-theme="dark"] .btn-chart-toggle.active {
+            background: var(--turquoise);
+            color: #052a28;
+            border-color: var(--turquoise);
+        }
+
+        .chart-canvas-wrap {
+            position: relative;
+            flex: 1;
+            min-height: 270px;
+            width: 100%;
+        }
+
+        /* TABLES SECTION */
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(540px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .tables-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .table-card-title {
+            font-size: 15px;
+            font-weight: 850;
+            color: var(--navy);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 9px 12px;
+            background: var(--surface-alt);
+            color: var(--navy);
+            font-weight: 850;
+            border-bottom: 1px solid var(--border);
+            font-size: 11.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: middle;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .data-table tr:hover td {
+            background: var(--surface-hover);
+        }
+
+        .rank-medal {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .rank-1 { background: #fef3c7; color: #b45309; }
+        .rank-2 { background: #f1f5f9; color: #475569; }
+        .rank-3 { background: #ffedd5; color: #c2410c; }
+        .rank-other { background: var(--surface-alt); color: var(--muted); }
+
+        /* FOOTER / WATERMARK */
+        .page-footer {
+            margin-top: 30px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--muted);
+            font-size: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            .no-print, .topbar, .stats-header-actions, .theme-toggle-btn { display: none !important; }
+            body { background: white !important; color: black !important; font-size: 11px !important; }
+            .container { width: 100% !important; max-width: none !important; margin: 0 !important; }
+            .kpi-card, .curr-box, .chart-card, .table-card { box-shadow: none !important; border: 1px solid #ccc !important; }
+            .chart-canvas-wrap { min-height: 220px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <header class="topbar no-print">
+        <a href="{% url 'home' %}" class="brand">
+            <div class="brand-avatar">VN</div>
+            <div class="brand-text">
+                <h1>Viajes Nena</h1>
+                <small>Estadísticas y Reportes Financieros</small>
+            </div>
+        </a>
+
+        <div class="topbar-nav">
+            <!-- Karma Studio Watermark Badge -->
+            <div class="watermark-badge">
+                <svg class="svg-icon" style="width:13px;height:13px;color:#22d3ee;" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span>Viajes Nena • Karma Studio</span>
+                <span class="watermark-pill">v1.0.0</span>
+            </div>
+
+            <!-- Dark Mode Toggle -->
+            <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Cambiar tema día/noche">
+                <svg class="svg-icon theme-icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+
+            <a href="{% url 'home' %}" class="btn-nav">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Panel Principal</span>
+            </a>
+            <a href="{% url 'registrar_consumos' %}?viaje={{ viaje.id }}" class="btn-nav">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                <span>Consumos</span>
+            </a>
+            <a href="{% url 'cobros' %}" class="btn-nav">
+                <svg class="svg-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>
+                <span>Cobros</span>
+            </a>
+            <a href="{% url 'finalizar_viaje' %}" class="btn-nav" style="border-color:rgba(239,68,68,0.3);color:#f87171;">
+                <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><polyline points="9 16 12 19 16 14"/></svg>
+                <span>Finalizar Viaje</span>
+            </a>
+            <a href="{% url 'logout' %}" class="btn-nav">
+                <span>Salir</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- CABECERA DE LA PÁGINA -->
+        <section class="stats-header-bar">
+            <div class="stats-header-title">
+                <h2>
+                    <svg class="svg-icon" style="width:26px;height:26px;color:var(--turquoise);" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span>Métricas y Reporte Financiero</span>
+                </h2>
+                <p>
+                    Viaje: <strong>{{ viaje.nombre }}</strong> ({{ viaje.destino }}) • Del {{ viaje.fecha_inicio|date:"d/m/Y" }} al {{ viaje.fecha_fin|date:"d/m/Y" }}
+                    {% if viaje.estado == 'ACTIVO' %}
+                        <span style="display:inline-flex;align-items:center;gap:4px;color:var(--success);font-weight:800;margin-left:6px;">
+                            <span style="width:7px;height:7px;border-radius:50%;background:currentColor;"></span> En curso
+                        </span>
+                    {% else %}
+                        <span style="color:var(--muted);font-weight:700;margin-left:6px;">(Finalizado)</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="stats-header-actions no-print">
+                {% if viajes|length > 1 %}
+                <form method="get" action="{% url 'estadisticas' %}" style="display:flex;align-items:center;gap:6px;">
+                    <select name="viaje" class="form-select" onchange="this.form.submit()" style="padding:7px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;">
+                        {% for v in viajes %}
+                            <option value="{{ v.id }}" {% if v.id == viaje.id %}selected{% endif %}>
+                                {{ v.nombre }} ({{ v.fecha_inicio|date:"d/m/Y" }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+                {% endif %}
+
+                <button type="button" class="btn-action btn-outline" onclick="window.print()">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    <span>Imprimir Reporte</span>
+                </button>
+
+                <a href="{% url 'cobros' %}" class="btn-action btn-navy">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    <span>Ir a Cobros</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- TASAS DE CAMBIO OFICIALES DEL VIAJE -->
+        <section class="rates-pills-row">
+            <div class="rate-pill">
+                <svg class="svg-icon" style="color:var(--turquoise);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Tasa USD a COP:</span>
+                <strong>{{ viaje.tasa_usd_cop|punto_miles }} COP</strong>
+            </div>
+
+            <div class="rate-pill">
+                <svg class="svg-icon" style="color:var(--turquoise);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>Tasa USD a Bolívares (BCV):</span>
+                <strong>{{ viaje.tasa_usd_bs }} Bs.</strong>
+            </div>
+
+            <div class="rate-pill">
+                <svg class="svg-icon" style="color:#059669;" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                <span>Pasajeros en viaje:</span>
+                <strong>{{ total_pasajeros }} viajeros</strong>
+            </div>
+
+            <div class="rate-pill">
+                <svg class="svg-icon" style="color:#7c3aed;" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <span>Total Unidades Consumidas:</span>
+                <strong>{{ tot_unidades }} unidades</strong>
+            </div>
+        </section>
+
+        <!-- 4 KPI CARDS PRINCIPALES -->
+        <section class="kpi-grid">
+            <!-- 1. Total Facturado -->
+            <div class="kpi-card">
+                <div class="kpi-card-top">
+                    <span class="kpi-label">Total Facturado</span>
+                    <div class="kpi-icon-wrap" style="background:rgba(8,145,178,0.12);color:#0891b2;">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                </div>
+                <div class="kpi-amount-main">COP {{ total_facturado_cop|punto_miles }}</div>
+                <div class="kpi-equivs">
+                    <span>${{ total_facturado_usd }} USD</span>
+                    <span>•</span>
+                    <span>{{ total_facturado_bs|floatformat:2 }} Bs</span>
+                </div>
+            </div>
+
+            <!-- 2. Total Recaudado -->
+            <div class="kpi-card">
+                <div class="kpi-card-top">
+                    <span class="kpi-label">Total Recaudado</span>
+                    <span class="kpi-pill-pct pct-success">{{ pct_recaudado }}% Cobrado</span>
+                </div>
+                <div class="kpi-amount-main" style="color:#059669;">COP {{ total_recaudado_cop|punto_miles }}</div>
+                <div class="kpi-equivs">
+                    <span>${{ total_recaudado_usd }} USD</span>
+                    <span>•</span>
+                    <span>{{ total_recaudado_bs|floatformat:2 }} Bs</span>
+                </div>
+            </div>
+
+            <!-- 3. Saldo Pendiente -->
+            <div class="kpi-card">
+                <div class="kpi-card-top">
+                    <span class="kpi-label">Saldo Pendiente</span>
+                    <span class="kpi-pill-pct {% if saldo_pendiente_cop > 0 %}pct-danger{% else %}pct-success{% endif %}">
+                        {{ pct_pendiente }}% Pendiente
+                    </span>
+                </div>
+                <div class="kpi-amount-main" style="color:{% if saldo_pendiente_cop > 0 %}#dc2626{% else %}#059669{% endif %};">
+                    COP {{ saldo_pendiente_cop|punto_miles }}
+                </div>
+                <div class="kpi-equivs">
+                    <span>${{ saldo_pendiente_usd }} USD</span>
+                    <span>•</span>
+                    <span>{{ saldo_pendiente_bs|floatformat:2 }} Bs</span>
+                </div>
+            </div>
+
+            <!-- 4. Solvencia de Pasajeros -->
+            <div class="kpi-card">
+                <div class="kpi-card-top">
+                    <span class="kpi-label">Solvencia de Pasajeros</span>
+                    <span class="kpi-pill-pct {% if cant_deudores == 0 %}pct-success{% else %}pct-warning{% endif %}">
+                        {{ pct_solventes }}% Solvente
+                    </span>
+                </div>
+                <div class="kpi-amount-main">
+                    {{ cant_solventes }} <span style="font-size:15px;color:var(--muted);font-weight:normal;">de {{ total_pasajeros }} pasajeros</span>
+                </div>
+                <div class="kpi-equivs">
+                    {% if cant_deudores > 0 %}
+                        <span style="color:var(--red);font-weight:800;">{{ cant_deudores }} pasajero{{ cant_deudores|pluralize }} con saldo pendiente</span>
+                    {% else %}
+                        <span style="color:var(--success);font-weight:800;">¡Todos los pasajeros solventes!</span>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- RECAUDACIÓN REAL POR CADA MONEDA ORIGINAL -->
+        <div style="margin-bottom:12px;">
+            <h3 style="font-size:16px;font-weight:850;color:var(--navy);display:flex;align-items:center;gap:8px;">
+                <svg class="svg-icon" style="color:var(--turquoise);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg>
+                <span>Recaudo Real Captado por Moneda Original</span>
+            </h3>
+            <p style="font-size:12.5px;color:var(--muted);">Muestra con qué moneda física o transferencia pagaron los clientes en caja:</p>
+        </div>
+
+        <section class="currency-recaudo-grid">
+            <!-- Pesos COP -->
+            <div class="curr-box curr-box-cop">
+                <div class="curr-box-header">
+                    <span class="curr-box-title">
+                        <svg class="svg-icon" style="color:#059669;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                        Pesos Colombianos (COP)
+                    </span>
+                    <span class="curr-badge-orig">{{ recaudado_monedas.COP.count }} pagos</span>
+                </div>
+                <div class="curr-amount-orig curr-cop-val">
+                    COP {{ recaudado_monedas.COP.monto_original|punto_miles }}
+                </div>
+                <div class="curr-equiv-note">
+                    Equivale al <strong>{{ recaudado_monedas.COP.pct }}%</strong> del total cobrado (~${{ recaudado_monedas.COP.equivalente_usd }} USD)
+                </div>
+            </div>
+
+            <!-- Dólares USD -->
+            <div class="curr-box curr-box-usd">
+                <div class="curr-box-header">
+                    <span class="curr-box-title">
+                        <svg class="svg-icon" style="color:#0891b2;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        Dólares Americanos (USD)
+                    </span>
+                    <span class="curr-badge-orig">{{ recaudado_monedas.USD.count }} pagos</span>
+                </div>
+                <div class="curr-amount-orig curr-usd-val">
+                    ${{ recaudado_monedas.USD.monto_original|floatformat:2 }} USD
+                </div>
+                <div class="curr-equiv-note">
+                    Equivale a <strong>COP {{ recaudado_monedas.USD.equivalente_cop|punto_miles }}</strong> ({{ recaudado_monedas.USD.pct }}% del recaudo)
+                </div>
+            </div>
+
+            <!-- Bolívares Bs -->
+            <div class="curr-box curr-box-bs">
+                <div class="curr-box-header">
+                    <span class="curr-box-title">
+                        <svg class="svg-icon" style="color:#b45309;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg>
+                        Bolívares (Bs - BCV)
+                    </span>
+                    <span class="curr-badge-orig">{{ recaudado_monedas.BS.count }} pagos</span>
+                </div>
+                <div class="curr-amount-orig curr-bs-val">
+                    {{ recaudado_monedas.BS.monto_original|floatformat:2 }} Bs
+                </div>
+                <div class="curr-equiv-note">
+                    Equivale a <strong>COP {{ recaudado_monedas.BS.equivalente_cop|punto_miles }}</strong> ({{ recaudado_monedas.BS.pct }}% del recaudo)
+                </div>
+            </div>
+        </section>
+
+        <!-- GRÁFICOS INTERACTIVOS (CHART.JS) -->
+        <section class="charts-row-grid">
+            <!-- GRÁFICO 1: TOP PRODUCTOS MÁS VENDIDOS -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg class="svg-icon" style="color:var(--turquoise);" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        <span>Top Productos Más Consumidos</span>
+                    </div>
+                    <div class="chart-actions">
+                        <button type="button" class="btn-chart-toggle active" id="btnToggleUnits" onclick="setChartMetric('units')">Por Unidades</button>
+                        <button type="button" class="btn-chart-toggle" id="btnToggleCop" onclick="setChartMetric('cop')">Por Monto COP</button>
+                    </div>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartTopProductos"></canvas>
+                </div>
+            </div>
+
+            <!-- GRÁFICO 2: MÉTODOS DE PAGO Y MONEDA -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg class="svg-icon" style="color:#0891b2;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>Distribución por Método de Pago & Moneda</span>
+                    </div>
+                    <span style="font-size:12px;color:var(--muted);font-weight:700;">Participación en caja</span>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartMetodosPago"></canvas>
+                </div>
+            </div>
+
+            <!-- GRÁFICO 3: CONSUMO POR EVENTO / DÍA -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg class="svg-icon" style="color:#7c3aed;" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span>Ventas por Evento / Día del Viaje</span>
+                    </div>
+                    <span style="font-size:12px;color:var(--muted);font-weight:700;">Flujo por jornada</span>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartEventos"></canvas>
+                </div>
+            </div>
+
+            <!-- GRÁFICO 4: PROGRESO Y SOLVENCIA -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <svg class="svg-icon" style="color:#059669;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>Eficacia de Cobranza (Recaudado vs Por Cobrar)</span>
+                    </div>
+                    <span style="font-size:12px;color:var(--muted);font-weight:700;">{{ pct_recaudado }}% completado</span>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="chartSolvencia"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- TABLAS DE DETALLE -->
+        <section class="tables-grid">
+            <!-- TABLA 1: RANKING COMPLETO DE PRODUCTOS -->
+            <div class="table-card">
+                <div class="table-card-title">
+                    <span>🏆 Ranking Completo de Productos Vendidos</span>
+                    <span style="font-size:12px;color:var(--muted);font-weight:normal;">{{ top_productos|length }} productos catalogados</span>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width:38px;text-align:center;">#</th>
+                                <th>Producto / Ítem</th>
+                                <th style="text-align:center;">Cant.</th>
+                                <th style="text-align:right;">Precio Unit.</th>
+                                <th style="text-align:right;">Total Ventas</th>
+                                <th style="text-align:right;">% Bar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in top_productos %}
+                            <tr>
+                                <td style="text-align:center;">
+                                    <span class="rank-medal {% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% else %}rank-other{% endif %}">
+                                        {{ forloop.counter }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong>{{ p.concepto }}</strong>
+                                    {% if p.es_juanes %}
+                                        <span style="font-size:10px;background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:4px;">Los Juanes</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:center;font-weight:800;">
+                                    {{ p.unidades }} un.
+                                </td>
+                                <td style="text-align:right;color:var(--muted);">
+                                    COP {{ p.precio_promedio|punto_miles }}
+                                </td>
+                                <td style="text-align:right;font-weight:850;color:var(--navy);">
+                                    COP {{ p.total_cop|punto_miles }}
+                                    <div style="font-size:11px;color:var(--muted);font-weight:normal;">~${{ p.total_usd }} USD</div>
+                                </td>
+                                <td style="text-align:right;font-weight:700;color:var(--turquoise-dark);">
+                                    {{ p.pct_unidades }}%
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">
+                                    No hay consumos registrados en este viaje.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TABLA 2: HISTORIAL DE MÉTODOS DE PAGO Y EVENTOS -->
+            <div class="table-card">
+                <div class="table-card-title">
+                    <span>💳 Métodos de Pago & Liquidación</span>
+                    <span style="font-size:12px;color:var(--muted);font-weight:normal;">{{ lista_metodos|length }} canales</span>
+                </div>
+                <div style="overflow-x:auto;margin-bottom:20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Método de Pago</th>
+                                <th style="text-align:center;">Pagos</th>
+                                <th style="text-align:right;">Monto Captado</th>
+                                <th style="text-align:right;">Equivalente COP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in lista_metodos %}
+                            <tr>
+                                <td>
+                                    <strong>{{ m.metodo }}</strong>
+                                    <span style="font-size:11px;color:var(--muted);margin-left:4px;">({{ m.moneda }})</span>
+                                </td>
+                                <td style="text-align:center;font-weight:800;">{{ m.transacciones }}</td>
+                                <td style="text-align:right;font-weight:800;">
+                                    {% if m.moneda == 'USD' %}${% elif m.moneda == 'BS' %}Bs {% endif %}
+                                    {{ m.monto_original|floatformat:2 }}
+                                    {% if m.moneda == 'COP' %}COP{% endif %}
+                                </td>
+                                <td style="text-align:right;font-weight:850;color:#059669;">
+                                    COP {{ m.equivalente_cop|punto_miles }}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align:center;padding:20px;color:var(--muted);">
+                                    No hay pagos registrados aún.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-card-title">
+                    <span>📅 Consumo por Evento / Jornada</span>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Jornada / Evento</th>
+                                <th style="text-align:center;">Unidades</th>
+                                <th style="text-align:right;">Total COP</th>
+                                <th style="text-align:right;">% Viaje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ev in lista_eventos %}
+                            <tr>
+                                <td><strong>{{ ev.nombre }}</strong></td>
+                                <td style="text-align:center;font-weight:800;">{{ ev.unidades }} un.</td>
+                                <td style="text-align:right;font-weight:850;color:var(--navy);">
+                                    COP {{ ev.total_cop|punto_miles }}
+                                </td>
+                                <td style="text-align:right;font-weight:700;color:var(--turquoise-dark);">{{ ev.pct }}%</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align:center;padding:16px;color:var(--muted);">Sin eventos registrados.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER / WATERMARK -->
+        <footer class="page-footer">
+            <div class="watermark-badge">
+                <svg class="svg-icon" style="width:13px;height:13px;color:var(--turquoise);" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span>Viajes Nena • Karma Studio</span>
+                <span class="watermark-pill">v1.0.0</span>
+            </div>
+            <div>
+                Reporte generado el {{ "now"|date:"d/m/Y H:i" }} • Sistema Integral de Cobros y Liquidación Multimoneda
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- SCRIPT DE GRÁFICOS Y TEMA -->
+    <script>
+        // Datos del backend
+        const rawChartData = {{ json_chart_data|safe }};
+
+        // Dark Mode Toggle Logic
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        function isDarkMode() {
+            return document.documentElement.getAttribute('data-theme') === 'dark';
+        }
+
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', function() {
+                const current = isDarkMode();
+                const next = current ? 'light' : 'dark';
+                if (next === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('viajes_nena_theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('viajes_nena_theme', 'light');
+                }
+                rebuildAllCharts();
+            });
+        }
+
+        // Color palettes based on theme
+        function getChartColors() {
+            const dark = isDarkMode();
+            return {
+                text: dark ? '#cbd5e1' : '#334155',
+                grid: dark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+                primary: dark ? '#22d3ee' : '#16b8b0',
+                success: dark ? '#34d399' : '#059669',
+                warning: dark ? '#fbbf24' : '#d97706',
+                danger: dark ? '#f87171' : '#dc2626',
+                purple: dark ? '#c084fc' : '#7c3aed',
+                blue: dark ? '#60a5fa' : '#2563eb',
+            };
+        }
+
+        let chartTopProductos = null;
+        let chartMetodosPago = null;
+        let chartEventos = null;
+        let chartSolvencia = null;
+        let currentProductMetric = 'units';
+
+        function renderChartProductos() {
+            const ctx = document.getElementById('chartTopProductos');
+            if (!ctx) return;
+            const c = getChartColors();
+            if (chartTopProductos) chartTopProductos.destroy();
+
+            const isUnits = currentProductMetric === 'units';
+            const dataVals = isUnits ? rawChartData.productos.units : rawChartData.productos.cop;
+            const labelStr = isUnits ? 'Unidades Vendidas' : 'Total Facturado (COP)';
+
+            chartTopProductos = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: rawChartData.productos.labels,
+                    datasets: [{
+                        label: labelStr,
+                        data: dataVals,
+                        backgroundColor: isUnits ? (isDarkMode() ? 'rgba(34, 211, 238, 0.7)' : 'rgba(22, 184, 176, 0.75)') : 'rgba(5, 150, 105, 0.75)',
+                        borderColor: isUnits ? c.primary : c.success,
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (isUnits) return `${context.raw} unidades`;
+                                    return `COP ${Math.round(context.raw).toLocaleString('es-CO')}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: c.grid },
+                            ticks: { color: c.text }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: c.text, font: { weight: '600' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setChartMetric(metric) {
+            currentProductMetric = metric;
+            document.getElementById('btnToggleUnits')?.classList.toggle('active', metric === 'units');
+            document.getElementById('btnToggleCop')?.classList.toggle('active', metric === 'cop');
+            renderChartProductos();
+        }
+
+        function renderChartMetodos() {
+            const ctx = document.getElementById('chartMetodosPago');
+            if (!ctx) return;
+            const c = getChartColors();
+            if (chartMetodosPago) chartMetodosPago.destroy();
+
+            const palette = [
+                '#0891b2', '#059669', '#d97706', '#7c3aed', '#dc2626', '#2563eb', '#14b8a6', '#64748b'
+            ];
+
+            chartMetodosPago = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: rawChartData.metodos.labels.length > 0 ? rawChartData.metodos.labels : ['Sin pagos'],
+                    datasets: [{
+                        data: rawChartData.metodos.cop.length > 0 ? rawChartData.metodos.cop : [1],
+                        backgroundColor: palette,
+                        borderWidth: 2,
+                        borderColor: isDarkMode() ? '#121e30' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: c.text, boxWidth: 12, padding: 12 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` COP ${Math.round(context.raw).toLocaleString('es-CO')}`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '62%'
+                }
+            });
+        }
+
+        function renderChartEventos() {
+            const ctx = document.getElementById('chartEventos');
+            if (!ctx) return;
+            const c = getChartColors();
+            if (chartEventos) chartEventos.destroy();
+
+            chartEventos = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: rawChartData.eventos.labels,
+                    datasets: [{
+                        label: 'Ventas en COP',
+                        data: rawChartData.eventos.cop,
+                        backgroundColor: isDarkMode() ? 'rgba(192, 132, 252, 0.75)' : 'rgba(124, 58, 237, 0.75)',
+                        borderColor: c.purple,
+                        borderWidth: 1.5,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `COP ${Math.round(context.raw).toLocaleString('es-CO')}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: c.text, font: { weight: '600' } }
+                        },
+                        y: {
+                            grid: { color: c.grid },
+                            ticks: {
+                                color: c.text,
+                                callback: val => Math.round(val / 1000) + 'k'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderChartSolvencia() {
+            const ctx = document.getElementById('chartSolvencia');
+            if (!ctx) return;
+            const c = getChartColors();
+            if (chartSolvencia) chartSolvencia.destroy();
+
+            const rec = rawChartData.solvencia.recaudado;
+            const pend = rawChartData.solvencia.pendiente;
+
+            chartSolvencia = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Ya Recaudado', 'Falta por Cobrar'],
+                    datasets: [{
+                        data: [rec, pend],
+                        backgroundColor: [
+                            isDarkMode() ? '#34d399' : '#059669',
+                            isDarkMode() ? '#f87171' : '#dc2626'
+                        ],
+                        borderWidth: 2,
+                        borderColor: isDarkMode() ? '#121e30' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: c.text, boxWidth: 14, padding: 14 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` COP ${Math.round(context.raw).toLocaleString('es-CO')}`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function rebuildAllCharts() {
+            renderChartProductos();
+            renderChartMetodos();
+            renderChartEventos();
+            renderChartSolvencia();
+        }
+
+        document.addEventListener('DOMContentLoaded', rebuildAllCharts);
+    </script>
+
+    {% include "core/includes/inactivity_timeout.html" %}
+</body>
+</html>

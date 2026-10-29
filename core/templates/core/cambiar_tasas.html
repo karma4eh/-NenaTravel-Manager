@@ -1,0 +1,691 @@
+{% load moneda_tags %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambiar Tasas de Cambio | Viajes Nena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;850;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #102b46;
+            --navy-deep: #071727;
+            --navy-light: #163657;
+            --turquoise: #16b8b0;
+            --turquoise-dark: #0e8f89;
+            --turquoise-light: rgba(22, 184, 176, 0.12);
+            --turquoise-glow: rgba(22, 184, 176, 0.25);
+            --background: #f4f8fb;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --surface-hover: #f1f5f9;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --border-light: #edf2f7;
+            --success: #059669;
+            --success-light: rgba(5, 150, 105, 0.12);
+            --danger: #dc2626;
+            --danger-light: rgba(220, 38, 38, 0.12);
+            --orange: #d97706;
+            --orange-light: rgba(217, 119, 6, 0.12);
+            --blue: #2563eb;
+            --blue-light: rgba(37, 99, 235, 0.12);
+            --card-shadow: 0 4px 20px -2px rgba(16, 43, 70, 0.06), 0 2px 6px -1px rgba(16, 43, 70, 0.04);
+            --card-shadow-hover: 0 12px 30px -4px rgba(16, 43, 70, 0.12);
+            --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        [data-theme="dark"] {
+            --navy: #f8fafc;
+            --navy-deep: #080f18;
+            --navy-light: #162438;
+            --turquoise: #22d3ee;
+            --turquoise-dark: #06b6d4;
+            --turquoise-light: rgba(34, 211, 238, 0.15);
+            --turquoise-glow: rgba(34, 211, 238, 0.3);
+            --background: #090f19;
+            --surface: #121c2d;
+            --surface-alt: #0d1522;
+            --surface-hover: #18253b;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --muted: #94a3b8;
+            --border: #1e2c40;
+            --border-light: #182333;
+            --success: #34d399;
+            --success-light: rgba(52, 211, 153, 0.18);
+            --danger: #f87171;
+            --danger-light: rgba(248, 113, 113, 0.18);
+            --orange: #fbbf24;
+            --orange-light: rgba(251, 191, 36, 0.18);
+            --blue: #60a5fa;
+            --blue-light: rgba(96, 165, 250, 0.18);
+            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+            --card-shadow-hover: 0 12px 30px -4px rgba(0, 0, 0, 0.6);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: var(--font-main);
+            font-size: 14px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        .svg-icon {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            background: linear-gradient(135deg, #0a1b2d 0%, #081524 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        [data-theme="dark"] .topbar {
+            background: #080f19;
+            border-bottom-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .brand-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #16b8b0 0%, #0e8f89 100%);
+            color: #072e2b;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: 0 4px 14px var(--turquoise-glow);
+        }
+
+        .brand-title {
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 900;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-sub {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-topbar-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 750;
+            transition: all 0.2s ease;
+        }
+
+        .btn-topbar-nav:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: var(--turquoise);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        /* CONTAINER */
+        .container {
+            width: min(840px, 92%);
+            margin: 32px auto 60px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* HERO CARD */
+        .page-hero {
+            margin-bottom: 24px;
+        }
+
+        .eyebrow {
+            color: var(--turquoise-dark);
+            font-size: 11.5px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        [data-theme="dark"] .eyebrow {
+            color: #22d3ee;
+        }
+
+        h1 {
+            color: var(--navy);
+            font-size: clamp(24px, 3.5vw, 30px);
+            font-weight: 900;
+            letter-spacing: -0.6px;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        .page-description {
+            color: var(--muted);
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        /* MESSAGES */
+        .messages { margin-bottom: 20px; }
+        .message-alert {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 18px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-size: 13.5px;
+            font-weight: 700;
+        }
+        .message-alert.success {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.25);
+        }
+        .message-alert.error {
+            background: var(--danger-light);
+            color: var(--danger);
+            border: 1px solid rgba(220, 38, 38, 0.25);
+        }
+
+        /* MAIN FORM CARD */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* TRIP SUMMARY CHIP */
+        .trip-summary-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .trip-title-text {
+            font-size: 15px;
+            font-weight: 850;
+            color: var(--navy);
+            letter-spacing: -0.2px;
+        }
+
+        .trip-dates-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .active-pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.25);
+            font-size: 11.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* BCV OFFICIAL BANNER BOX */
+        .bcv-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 18px 22px;
+            border-radius: 16px;
+            background: var(--turquoise-light);
+            border: 1.5px solid rgba(22, 184, 176, 0.35);
+            margin-bottom: 26px;
+            flex-wrap: wrap;
+        }
+
+        [data-theme="dark"] .bcv-box {
+            background: rgba(34, 211, 238, 0.08);
+            border-color: rgba(34, 211, 238, 0.3);
+        }
+
+        .bcv-title {
+            font-size: 12.5px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--turquoise-dark);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        [data-theme="dark"] .bcv-title {
+            color: #22d3ee;
+        }
+
+        .bcv-rate {
+            font-size: 30px;
+            font-weight: 900;
+            color: var(--navy);
+            letter-spacing: -0.8px;
+            line-height: 1.1;
+            margin: 4px 0;
+        }
+
+        .bcv-date {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .btn-bcv-scrape {
+            min-height: 46px;
+            padding: 0 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #16b8b0 0%, #0e8f89 100%);
+            color: #072e2b;
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 850;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px var(--turquoise-glow);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        [data-theme="dark"] .btn-bcv-scrape {
+            background: #22d3ee;
+            color: #082f49;
+        }
+
+        .btn-bcv-scrape:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+
+        /* FORM FIELDS */
+        .field {
+            margin-bottom: 24px;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 13.5px;
+            font-weight: 800;
+            color: var(--navy);
+            margin-bottom: 8px;
+            letter-spacing: -0.1px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .form-input {
+            width: 100%;
+            min-height: 48px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            background: var(--surface-alt);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 750;
+            padding: 10px 16px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--turquoise);
+            box-shadow: 0 0 0 3px var(--turquoise-glow);
+            background: var(--surface);
+        }
+
+        .btn-use-rate {
+            min-height: 48px;
+            padding: 0 18px;
+            border-radius: 12px;
+            background: var(--surface-alt);
+            border: 1.5px solid var(--border);
+            color: var(--turquoise-dark);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 850;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        [data-theme="dark"] .btn-use-rate {
+            color: #22d3ee;
+        }
+
+        .btn-use-rate:hover {
+            border-color: var(--turquoise);
+            background: var(--turquoise-light);
+            transform: translateY(-1px);
+        }
+
+        .field-help {
+            display: block;
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ACTIONS */
+        .actions-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 32px;
+            padding-top: 22px;
+            border-top: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .btn-submit-main {
+            min-height: 48px;
+            padding: 0 26px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #16b8b0 0%, #0e8f89 100%);
+            color: #072e2b;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px var(--turquoise-glow);
+            transition: all 0.2s ease;
+        }
+
+        [data-theme="dark"] .btn-submit-main {
+            background: #22d3ee;
+            color: #082f49;
+        }
+
+        .btn-submit-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px var(--turquoise-glow);
+        }
+
+        .btn-cancel {
+            min-height: 48px;
+            padding: 0 20px;
+            border-radius: 12px;
+            background: var(--surface-alt);
+            border: 1.5px solid var(--border);
+            color: var(--text-secondary);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 800;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel:hover {
+            background: var(--surface-hover);
+            border-color: var(--muted);
+            color: var(--navy);
+        }
+
+        /* FOOTER */
+        .page-footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 30px 0 10px;
+        }
+    </style>
+    {% include "core/includes/dark_mode_head.html" %}
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <a href="{% url 'home' %}" class="brand-link" title="Ir al panel de control">
+            <div class="brand-icon">V</div>
+            <div>
+                <div class="brand-title">VIAJES NENA</div>
+                <div class="brand-sub">Sistema de gestión operativa</div>
+            </div>
+        </a>
+
+        <div class="topbar-right">
+            {% include "core/includes/dark_mode_toggle.html" %}
+
+            <a href="{% url 'home' %}" class="btn-topbar-nav">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                <span>Volver al Inicio</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="page-hero">
+            <div class="eyebrow">
+                <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+                Gestión de Divisas & Tasas Oficiales
+            </div>
+            <h1>Cambiar Tasas de Cambio</h1>
+            <p class="page-description">
+                Actualiza las tasas oficiales de conversión del viaje activo. Los consumos, cobros y liquidaciones se calcularán con estos valores en tiempo real.
+            </p>
+        </section>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message-alert {% if 'success' in message.tags %}success{% elif 'error' in message.tags %}error{% else %}success{% endif %}">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="card">
+            {% if viaje_activo %}
+                <!-- RESUMEN DEL VIAJE ACTIVO -->
+                <div class="trip-summary-box">
+                    <div>
+                        <div class="trip-title-text">{{ viaje_activo.nombre }} ({{ viaje_activo.destino }})</div>
+                        <div class="trip-dates-text">Del {{ viaje_activo.fecha_inicio|date:"d/m/Y" }} al {{ viaje_activo.fecha_fin|date:"d/m/Y" }}</div>
+                    </div>
+                    <span class="active-pill-badge">
+                        <span class="mini-live-dot" style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>
+                        Viaje Activo
+                    </span>
+                </div>
+
+                <!-- BANNER BCV OFICIAL -->
+                <div class="bcv-box">
+                    <div>
+                        <div class="bcv-title">
+                            <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                            Banco Central de Venezuela (BCV Oficial)
+                        </div>
+                        <div class="bcv-rate">{{ info_bcv.tasa }} Bs / USD</div>
+                        <div class="bcv-date">
+                            {% if info_bcv.fecha_valor %}
+                                Fecha valor oficial: <strong>{{ info_bcv.fecha_valor }}</strong> ·
+                            {% endif %}
+                            Última consulta: {{ info_bcv.actualizado_en|date:"d/m/Y h:i A" }}
+                        </div>
+                    </div>
+
+                    <form method="post" style="margin: 0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="accion" value="actualizar_bcv">
+                        <button type="submit" class="btn-bcv-scrape" id="btnScrapeBcv" title="Consultar tasa actualizada en bcv.org.ve">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                            <span>Consultar BCV en Vivo</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- FORMULARIO DE EDICIÓN DE TASAS -->
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="guardar_tasas">
+
+                    <div class="field">
+                        <label for="tasa_usd_bs" class="field-label">Tasa USD a Bolívares (USD / Bs)</label>
+                        <div class="input-group">
+                            <input type="number"
+                                   step="0.01"
+                                   min="0.01"
+                                   name="tasa_usd_bs"
+                                   id="tasa_usd_bs"
+                                   class="form-input"
+                                   value="{{ viaje_activo.tasa_usd_bs }}"
+                                   required>
+                            <button type="button" class="btn-use-rate" onclick="usarTasaBcv('{{ info_bcv.tasa }}')" title="Copiar tasa oficial del BCV">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                                <span>Usar {{ info_bcv.tasa }} Bs</span>
+                            </button>
+                        </div>
+                        <span class="field-help">
+                            Tasa de cambio para liquidar consumos y cargos en Bolívares del viaje activo.
+                        </span>
+                    </div>
+
+                    <div class="field">
+                        <label for="tasa_usd_cop" class="field-label">Tasa USD a Pesos Colombianos (USD / COP)</label>
+                        <input type="number"
+                               step="0.01"
+                               min="0.01"
+                               name="tasa_usd_cop"
+                               id="tasa_usd_cop"
+                               class="form-input"
+                               value="{{ viaje_activo.tasa_usd_cop }}"
+                               required>
+                        <span class="field-help">
+                            Tasa de conversión en Pesos (COP). Ejemplo actual: <strong>{{ viaje_activo.tasa_usd_cop|punto_miles }} COP</strong> por cada 1 USD.
+                        </span>
+                    </div>
+
+                    <div class="actions-row">
+                        <button type="submit" class="btn-submit-main">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            <span>Guardar Tasas</span>
+                        </button>
+                        <a href="{% url 'home' %}" class="btn-cancel">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+
+            {% else %}
+                <div style="text-align:center;padding:30px 10px;">
+                    <p style="color:var(--muted);font-size:15px;margin-bottom:18px;">
+                        No hay ningún viaje activo para ajustar tasas.
+                    </p>
+                    <a href="{% url 'home' %}" class="btn-cancel">Volver al Inicio</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <footer class="page-footer">
+            Viajes Nena · Sistema de Gestión de Viajes
+        </footer>
+    </main>
+
+    <script>
+        function usarTasaBcv(tasa) {
+            const input = document.getElementById("tasa_usd_bs");
+            if (input && tasa) {
+                input.value = tasa.replace(',', '.');
+                input.focus();
+            }
+        }
+    </script>
+</body>
+</html>

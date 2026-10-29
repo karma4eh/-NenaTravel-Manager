@@ -1,0 +1,59 @@
+<!-- MARCA DE AGUA KARMA STUDIO Y TOGGLE DE TEMA -->
+<div class="topbar-karma-group" style="display:inline-flex;align-items:center;gap:10px;">
+    <div class="karma-topbar-badge" title="Desarrollado por Karma Studio — Programación y Marketing Digital">
+        <svg class="karma-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="7 6 2 12 7 18"/>
+            <polyline points="17 6 22 12 17 18"/>
+            <path d="M9 15l3-3.5 3 2.5 4-5"/>
+            <path d="M16 9h3v3"/>
+        </svg>
+        <span class="karma-name">Karma Studio</span>
+        <span class="karma-v-tag">v1.0.0</span>
+    </div>
+
+    <button type="button" class="btn-theme-toggle" id="themeToggleBtn" title="Cambiar tema (Claro / Oscuro)" aria-label="Cambiar tema">
+        <svg class="svg-icon theme-icon-sun" id="iconSun" style="display:none;width:18px;height:18px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="svg-icon theme-icon-moon" id="iconMoon" style="width:18px;height:18px;" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+</div>
+
+<script>
+(function() {
+    const themeBtn = document.getElementById("themeToggleBtn");
+    const iconSun = document.getElementById("iconSun");
+    const iconMoon = document.getElementById("iconMoon");
+
+    function updateThemeIcons(isDark) {
+        if (!iconSun || !iconMoon) return;
+        if (isDark) {
+            iconSun.style.display = "inline-block";
+            iconMoon.style.display = "none";
+            if (themeBtn) themeBtn.setAttribute("title", "Cambiar a modo claro");
+        } else {
+            iconSun.style.display = "none";
+            iconMoon.style.display = "inline-block";
+            if (themeBtn) themeBtn.setAttribute("title", "Cambiar a modo oscuro");
+        }
+    }
+
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    updateThemeIcons(currentTheme === "dark");
+
+    if (themeBtn) {
+        themeBtn.addEventListener("click", function() {
+            const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+            if (isDark) {
+                document.documentElement.removeAttribute("data-theme");
+                localStorage.setItem("viajes_nena_theme", "light");
+                updateThemeIcons(false);
+            } else {
+                document.documentElement.setAttribute("data-theme", "dark");
+                localStorage.setItem("viajes_nena_theme", "dark");
+                updateThemeIcons(true);
+            }
+        });
+    }
+})();
+</script>
+
+{% include "core/includes/inactivity_timeout.html" %}

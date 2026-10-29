@@ -1,0 +1,611 @@
+{% load moneda_tags %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de precios | Viajes Nena</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;850;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-main: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+            --navy: #102b46;
+            --turquoise: #16b8b0;
+            --turquoise-light: #e7f9f7;
+            --background: #f3f7fb;
+            --white: #ffffff;
+            --text: #24364b;
+            --muted: #748397;
+            --border: #e2eaf1;
+            --success: #14865b;
+            --danger: #bd4141;
+            --orange: #e58b12;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family: var(--font-main); -webkit-font-smoothing: antialiased;
+            font-size: 14px;
+        }
+
+        .topbar {
+            background: var(--navy);
+            color: white;
+            padding: 16px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; }
+
+        .brand-icon {
+            width: 43px; height: 43px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            background: var(--turquoise);
+            color: var(--navy);
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .brand-name { font-size: 18px; font-weight: 750; }
+        .brand-subtitle { margin-top: 3px; color: #c5d5e4; font-size: 12px; }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #d4e3ef;
+            font-size: 13px;
+        }
+
+        .back-link {
+            color: #a0b8cf;
+            text-decoration: none;
+            font-size: 12px;
+            padding: 5px 12px;
+            border: 1px solid #3a556e;
+            border-radius: 7px;
+            transition: background .2s, color .2s;
+        }
+
+        .back-link:hover { background: rgba(255,255,255,.1); color: white; }
+
+        .container { width: min(1080px, 92%); margin: 30px auto 55px; }
+
+        .page-heading { margin-bottom: 25px; }
+
+        .eyebrow {
+            color: #0b918c;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.7px;
+        }
+
+        h1 { color: var(--navy); font-size: clamp(26px, 4vw, 34px); margin: 8px 0; }
+
+        .page-description { color: var(--muted); line-height: 1.7; margin: 0; max-width: 700px; }
+
+        .messages { margin-bottom: 20px; }
+        .message {
+            padding: 13px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            background: #fff4df;
+            color: #80551a;
+            border: 1px solid #f0dfbd;
+        }
+        .message.success { background: #e8f8ef; color: var(--success); border-color: #c6ebd5; }
+        .message.error { background: #fff0f0; color: var(--danger); border-color: #f1cece; }
+        .message.info { background: #eaf5fc; color: #24536e; border-color: #d3e8f5; }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 22px;
+            padding: 16px 20px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(16, 43, 70, .03);
+        }
+
+        .toolbar-stats {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .toolbar-stats strong { color: var(--navy); }
+
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 42px;
+            padding: 0 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all .15s ease;
+            border: 0;
+        }
+
+        .btn-primary { background: var(--turquoise); color: #073a43; }
+        .btn-primary:hover { filter: brightness(.95); }
+
+        .btn-secondary { background: var(--navy); color: white; }
+        .btn-secondary:hover { filter: brightness(1.1); }
+
+        .btn-outline {
+            background: var(--white);
+            border: 1px solid #c2d8e8;
+            color: var(--navy);
+        }
+        .btn-outline:hover { background: #f2f7fb; }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 28px rgba(16, 43, 70, .045);
+        }
+
+        /* TABLA DE PRECIOS */
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .prices-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 600px;
+        }
+
+        .prices-table th {
+            background: #f7fafc;
+            color: var(--muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            padding: 13px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .prices-table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #edf1f5;
+            vertical-align: middle;
+        }
+
+        .prices-table tr:last-child td { border-bottom: 0; }
+        .prices-table tr:hover { background: #f9fcfe; }
+
+        .prod-name { font-weight: 750; color: var(--navy); font-size: 14px; }
+        .prod-cat {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: #f0f4f8;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .price-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            max-width: 180px;
+        }
+
+        .price-input-wrapper input {
+            width: 100%;
+            min-height: 40px;
+            padding: 8px 12px;
+            border: 1px solid #d8e2ec;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 750;
+            color: var(--navy);
+            text-align: right;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .price-input-wrapper input:focus {
+            border-color: var(--turquoise);
+            box-shadow: 0 0 0 3px rgba(22, 184, 176, .15);
+        }
+
+        .currency-label { font-size: 12px; font-weight: 700; color: var(--muted); }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 750;
+            border: 0;
+            cursor: pointer;
+        }
+
+        .badge-status.active { background: #e8f8ef; color: var(--success); }
+        .badge-status.inactive { background: #fdeaea; color: var(--danger); }
+
+        .bottom-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 22px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sync-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13.5px;
+            color: var(--navy);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .sync-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--turquoise);
+            cursor: pointer;
+        }
+
+        /* MODAL NUEVO PRODUCTO */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            background: rgba(8, 27, 45, .62);
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay[hidden] { display: none; }
+
+        .modal {
+            width: min(480px, 100%);
+            padding: 28px 24px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 24px 80px rgba(16, 43, 70, .22);
+        }
+
+        .modal h2 { margin: 0 0 16px; color: var(--navy); font-size: 20px; }
+        .field { margin-bottom: 16px; }
+        .field label { display: block; font-weight: 700; margin-bottom: 6px; color: var(--navy); }
+        .field input, .field select {
+            width: 100%; min-height: 44px; padding: 10px 12px;
+            border: 1px solid #d8e2ec; border-radius: 8px; font: inherit; font-size: 14px;
+        }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+        .footer { text-align: center; color: #8a98a8; font-size: 12px; padding: 25px 0; }
+    
+        [data-theme="dark"] {
+            --navy: #f8fafc;
+            --turquoise: #22d3ee;
+            --turquoise-light: rgba(34, 211, 238, 0.15);
+            --background: #090f19;
+            --white: #121c2d;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --border: #1e2c40;
+            --success: #34d399;
+            --danger: #f87171;
+            --orange: #fbbf24;
+        }
+
+        [data-theme="dark"] .page-heading h1 {
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .eyebrow {
+            color: #22d3ee;
+        }
+
+        [data-theme="dark"] .sync-option {
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .prod-name {
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .prod-cat {
+            background: #0d1522;
+            color: #94a3b8;
+            border: 1px solid #1e2c40;
+        }
+
+        [data-theme="dark"] .btn-outline {
+            background: #121c2d;
+            border-color: #2a3d56;
+            color: #cbd5e1;
+        }
+
+        [data-theme="dark"] .btn-outline:hover {
+            background: #18253b;
+            color: #ffffff;
+            border-color: #22d3ee;
+        }
+
+        [data-theme="dark"] .price-input-wrapper input {
+            background: #0d1522;
+            color: #f8fafc;
+            border-color: #2a3d56;
+        }
+
+        [data-theme="dark"] .price-input-wrapper input:focus {
+            border-color: #22d3ee;
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.2);
+        }
+
+        [data-theme="dark"] .field label {
+            color: #f8fafc;
+        }
+
+        [data-theme="dark"] .field input,
+        [data-theme="dark"] .field select {
+            background: #0d1522;
+            color: #f8fafc;
+            border-color: #2a3d56;
+        }
+
+        [data-theme="dark"] .modal h2 {
+            color: #f8fafc;
+        }
+    
+    </style>
+{% include "core/includes/dark_mode_head.html" %}
+</head>
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        <div class="brand-icon">V</div>
+        <div>
+            <div class="brand-name">VIAJES NENA</div>
+            <div class="brand-subtitle">Sistema de gestión de viajes</div>
+        </div>
+    </div>
+    <div class="top-right" style="display:flex;align-items:center;gap:12px;">
+{% include "core/includes/dark_mode_toggle.html" %}
+        <a href="{% url 'home' %}" class="back-link">← Panel de control</a>
+    </div>
+</header>
+
+<main class="container">
+    <section class="page-heading">
+        <div class="eyebrow">Catálogo y tarifas</div>
+        <h1>Lista de precios de productos</h1>
+        <p class="page-description">
+            Controla la lista fija de productos y sus precios base en pesos colombianos (COP).
+            Cada viaje nuevo que crees cargará automáticamente estos precios, y puedes actualizarlos o sincronizarlos cuando quieras.
+        </p>
+    </section>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {% if 'success' in message.tags %}success{% elif 'error' in message.tags %}error{% elif 'info' in message.tags %}info{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- BARRA SUPERIOR DE ACCIONES -->
+    <div class="toolbar">
+        <div class="toolbar-stats">
+            <span>Total de productos: <strong>{{ total_productos }}</strong></span>
+            <span>✅ Activos: <strong>{{ total_activos }}</strong></span>
+            {% if viaje_activo %}
+                <span>Viaje activo: <strong>{{ viaje_activo.nombre }}</strong></span>
+            {% endif %}
+        </div>
+
+        <div class="toolbar-actions">
+            {% if viaje_activo %}
+                <form method="post" style="margin: 0;">
+                    {% csrf_token %}
+                    <input type="hidden" name="accion" value="sincronizar_viaje">
+                    <button type="submit" class="btn btn-outline" title="Copiar todos los precios base actuales al viaje activo">
+                        ⚡ Sincronizar con {{ viaje_activo.nombre }}
+                    </button>
+                </form>
+            {% endif %}
+            <button type="button" class="btn btn-secondary" onclick="abrirModalNuevo()">
+                + Nuevo producto
+            </button>
+        </div>
+    </div>
+
+    <!-- FORMULARIO DE TABLA DE PRECIOS -->
+    <div class="card">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="guardar_precios">
+
+            <div class="table-wrap">
+                <table class="prices-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Estado</th>
+                            <th style="text-align: right;">Precio base (COP)</th>
+                            {% if viaje_activo %}
+                                <th style="text-align: right;">En viaje activo</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in productos_data %}
+                            <tr>
+                                <td>
+                                    <span class="prod-name">{{ item.producto.nombre }}</span>
+                                </td>
+                                <td>
+                                    <span class="prod-cat">{{ item.producto.categoria|default:"Bebidas" }}</span>
+                                </td>
+                                <td>
+                                    <button type="button"
+                                            class="badge-status {% if item.producto.activo %}active{% else %}inactive{% endif %}"
+                                            onclick="toggleActivo('{{ item.producto.id }}')"
+                                            title="Clic para cambiar estado">
+                                        {% if item.producto.activo %}Activo{% else %}Inactivo{% endif %}
+                                    </button>
+                                </td>
+                                <td>
+                                    <div class="price-input-wrapper" style="margin-left: auto;">
+                                        <input type="number"
+                                               name="precio_{{ item.producto.id }}"
+                                               value="{{ item.precio_base|floatformat:0 }}"
+                                               step="100"
+                                               min="0"
+                                               required>
+                                        <span class="currency-label">COP</span>
+                                    </div>
+                                </td>
+                                {% if viaje_activo %}
+                                    <td style="text-align: right; font-weight: 700; color: var(--navy);">
+                                        {% if item.precio_viaje is not None %}
+                                            {{ item.precio_viaje|punto_miles }} COP
+                                        {% else %}
+                                            <span style="color: var(--orange); font-size: 12px;">Sin precio</span>
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="bottom-actions">
+                <div>
+                    {% if viaje_activo %}
+                        <label class="sync-option">
+                            <input type="checkbox" name="aplicar_viaje_activo" value="1" checked>
+                            Aplicar también estos cambios al viaje activo actual ({{ viaje_activo.nombre }})
+                        </label>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="padding: 12px 24px; font-size: 14.5px;">
+                    Guardar lista de precios
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- FORMULARIO OCULTO PARA TOGGLE ACTIVO -->
+    <form id="form-toggle-activo" method="post" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="accion" value="toggle_activo">
+        <input type="hidden" name="producto_id" id="toggle_producto_id">
+    </form>
+
+    <footer class="footer">Viajes Nena · El placer de viajar</footer>
+</main>
+
+<!-- MODAL: NUEVO PRODUCTO -->
+<div class="modal-overlay" id="modalNuevo" hidden role="dialog" aria-modal="true">
+    <div class="modal">
+        <h2>Agregar nuevo producto</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="crear_producto">
+
+            <div class="field">
+                <label for="nuevo_nombre">Nombre del producto</label>
+                <input type="text" id="nuevo_nombre" name="nombre" required placeholder="Ej: Ron Cacique 1L">
+            </div>
+
+            <div class="field">
+                <label for="nueva_categoria">Categoría</label>
+                <input type="text" id="nueva_categoria" name="categoria" placeholder="Bebidas, Básicos, etc." value="Bebidas">
+            </div>
+
+            <div class="field">
+                <label for="nuevo_precio">Precio base en COP</label>
+                <input type="number" id="nuevo_precio" name="precio_base" required step="100" min="0" placeholder="Ej: 15000">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-outline" onclick="cerrarModalNuevo()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar producto</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleActivo(prodId) {
+        document.getElementById('toggle_producto_id').value = prodId;
+        document.getElementById('form-toggle-activo').submit();
+    }
+
+    function abrirModalNuevo() {
+        document.getElementById('modalNuevo').hidden = false;
+        document.getElementById('nuevo_nombre').focus();
+    }
+
+    function cerrarModalNuevo() {
+        document.getElementById('modalNuevo').hidden = true;
+    }
+
+    document.getElementById('modalNuevo').addEventListener('click', function(e) {
+        if (e.target === this) cerrarModalNuevo();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') cerrarModalNuevo();
+    });
+</script>
+
+</body>
+</html>

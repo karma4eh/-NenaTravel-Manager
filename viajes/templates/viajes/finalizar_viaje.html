@@ -1,0 +1,708 @@
+{% load moneda_tags %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Viaje | Viajes Nena</title>
+
+    <!-- Script anti-parpadeo para modo oscuro -->
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('viajes_nena_theme');
+                const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    <style>
+        :root {
+            --navy: #102b46;
+            --navy-deep: #0a1b2d;
+            --navy-light: #163657;
+            --turquoise: #16b8b0;
+            --turquoise-dark: #0e8f89;
+            --turquoise-light: #e6f8f7;
+            --turquoise-glow: rgba(22, 184, 176, 0.25);
+            --background: #f4f7fb;
+            --surface: #ffffff;
+            --surface-hover: #fcfdfe;
+            --surface-alt: #f8fafc;
+            --text: #1e293b;
+            --text-secondary: #334155;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --border-light: #edf2f7;
+            --card-shadow: 0 4px 20px -2px rgba(16, 43, 70, 0.06);
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --orange: #d97706;
+            --orange-light: #fffbeb;
+            --red: #dc2626;
+            --red-light: #fef2f2;
+            --blue: #2563eb;
+            --blue-light: #eff6ff;
+        }
+
+        [data-theme="dark"] {
+            --navy: #e2e8f0;
+            --navy-deep: #080f18;
+            --navy-light: #162438;
+            --turquoise: #22d3ee;
+            --turquoise-dark: #06b6d4;
+            --turquoise-light: rgba(34, 211, 238, 0.14);
+            --turquoise-glow: rgba(34, 211, 238, 0.3);
+            --background: #09121f;
+            --surface: #121e30;
+            --surface-hover: #17263c;
+            --surface-alt: #0d1726;
+            --text: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --muted: #94a3b8;
+            --border: #1e314b;
+            --border-light: #18283e;
+            --card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.5);
+            --success: #34d399;
+            --success-light: rgba(52, 211, 153, 0.15);
+            --orange: #fbbf24;
+            --orange-light: rgba(251, 191, 36, 0.15);
+            --red: #f87171;
+            --red-light: rgba(248, 113, 113, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: var(--background);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        button, a { font: inherit; }
+
+        .svg-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            background: #102b46;
+            color: white;
+            padding: 13px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--turquoise);
+        }
+
+        [data-theme="dark"] .topbar {
+            background: #091320;
+            border-bottom: 2px solid #22d3ee;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .brand-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--turquoise) 0%, var(--turquoise-dark) 100%);
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            color: #052a28;
+            font-size: 15px;
+        }
+
+        .brand-text h1 {
+            font-size: 16px;
+            font-weight: 850;
+            line-height: 1.15;
+        }
+
+        .brand-text small {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .topbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 13px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-nav:hover {
+            background: var(--turquoise);
+            color: #052a28;
+        }
+
+        .watermark-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            font-size: 11.5px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .watermark-pill {
+            background: rgba(34, 211, 238, 0.2);
+            color: #22d3ee;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 7px 11px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* CONTAINER */
+        .container {
+            width: 90%;
+            max-width: 980px;
+            margin: 30px auto 50px auto;
+            flex: 1;
+        }
+
+        /* CARD MAIN */
+        .main-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        /* STATUS BANNER */
+        .status-hero-banner {
+            padding: 30px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .banner-blocked {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.08) 0%, rgba(220, 38, 38, 0.03) 100%);
+            border-bottom: 2px solid rgba(220, 38, 38, 0.25);
+        }
+
+        .banner-allowed {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.08) 0%, rgba(5, 150, 105, 0.03) 100%);
+            border-bottom: 2px solid rgba(5, 150, 105, 0.25);
+        }
+
+        .status-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .avatar-blocked {
+            background: rgba(220, 38, 38, 0.15);
+            color: var(--red);
+            border: 1.5px solid rgba(220, 38, 38, 0.3);
+        }
+
+        .avatar-allowed {
+            background: rgba(5, 150, 105, 0.15);
+            color: var(--success);
+            border: 1.5px solid rgba(5, 150, 105, 0.3);
+        }
+
+        .status-title {
+            font-size: 21px;
+            font-weight: 900;
+            line-height: 1.25;
+            margin-bottom: 6px;
+        }
+
+        .title-blocked { color: var(--red); }
+        .title-allowed { color: var(--success); }
+
+        .status-desc {
+            font-size: 14.5px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        /* KPI NUMBERS */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            padding: 24px 30px;
+            background: var(--surface-alt);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .kpi-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .kpi-col-label {
+            font-size: 11.5px;
+            font-weight: 850;
+            text-transform: uppercase;
+            color: var(--muted);
+            letter-spacing: 0.4px;
+            margin-bottom: 3px;
+        }
+
+        .kpi-col-val {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--navy);
+        }
+
+        .kpi-col-sub {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        /* BODY CONTENT */
+        .card-body {
+            padding: 26px 30px;
+        }
+
+        /* TABLE */
+        .deudores-table-wrap {
+            margin-top: 14px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .deudores-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        .deudores-table th {
+            background: var(--surface-alt);
+            padding: 10px 14px;
+            color: var(--navy);
+            font-weight: 850;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .deudores-table td {
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .deudores-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        /* BUTTONS */
+        .actions-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 22px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 850;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--turquoise) 0%, var(--turquoise-dark) 100%);
+            color: #052a28;
+            box-shadow: 0 4px 14px var(--turquoise-glow);
+        }
+        .btn-primary:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+        }
+        .btn-danger:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        .btn-disabled {
+            background: var(--surface-alt);
+            color: var(--muted);
+            border: 1.5px solid var(--border);
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+
+        .btn-outline {
+            background: var(--surface);
+            color: var(--text);
+            border: 1.5px solid var(--border);
+        }
+        .btn-outline:hover {
+            background: var(--surface-hover);
+        }
+
+        /* WATERMARK FOOTER */
+        .footer-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 24px;
+            color: var(--muted);
+            font-size: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <a href="{% url 'home' %}" class="brand">
+            <div class="brand-avatar">VN</div>
+            <div class="brand-text">
+                <h1>Viajes Nena</h1>
+                <small>Cierre y Finalización de Viaje</small>
+            </div>
+        </a>
+
+        <div class="topbar-nav">
+            <div class="watermark-badge">
+                <svg class="svg-icon" style="width:13px;height:13px;color:#22d3ee;" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span>Viajes Nena • Karma Studio</span>
+                <span class="watermark-pill">v1.0.0</span>
+            </div>
+
+            <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Cambiar tema">
+                <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+
+            <a href="{% url 'home' %}" class="btn-nav">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Panel Principal</span>
+            </a>
+            <a href="{% url 'estadisticas' %}" class="btn-nav">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>Estadísticas</span>
+            </a>
+            <a href="{% url 'cobros' %}" class="btn-nav">
+                <svg class="svg-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                <span>Cobros</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- MENSAJES DJANGO -->
+        {% if messages %}
+            {% for m in messages %}
+                <div style="padding:14px 18px;border-radius:10px;margin-bottom:18px;font-weight:750;{% if m.tags == 'error' %}background:#fef2f2;color:#991b1b;border:1.5px solid #f87171;{% else %}background:#ecfdf5;color:#065f46;border:1.5px solid #34d399;{% endif %}">
+                    {{ m }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="main-card">
+
+            {% if not puede_finalizar %}
+            <!-- ESTADO 1: FINALIZACIÓN BLOQUEADA (HAY DEUDAS) -->
+            <div class="status-hero-banner banner-blocked">
+                <div class="status-avatar avatar-blocked">
+                    <svg class="svg-icon" style="width:30px;height:30px;" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div>
+                    <h2 class="status-title title-blocked">
+                        Finalización Bloqueada: Cuentas Pendientes por Cobrar
+                    </h2>
+                    <p class="status-desc">
+                        No se puede finalizar el viaje <strong>«{{ viaje.nombre }}»</strong> en este momento porque aún existen cuentas con saldo pendiente. Por seguridad contable de Viajes Nena, el viaje solo puede cerrarse definitivamente cuando todos los pasajeros y grupos estén <strong>100% solventes</strong> (saldo 0 COP).
+                    </p>
+                </div>
+            </div>
+
+            <div class="kpi-row">
+                <div class="kpi-col">
+                    <span class="kpi-col-label">Deuda Total Pendiente</span>
+                    <span class="kpi-col-val" style="color:var(--red);">COP {{ total_deuda_cop|punto_miles }}</span>
+                    <span class="kpi-col-sub">${{ total_deuda_usd }} USD • {{ total_deuda_bs|floatformat:2 }} Bs</span>
+                </div>
+
+                <div class="kpi-col">
+                    <span class="kpi-col-label">Pasajeros Deudores</span>
+                    <span class="kpi-col-val" style="color:var(--red);">{{ deudores|length }} persona{{ deudores|length|pluralize }}</span>
+                    <span class="kpi-col-sub">Con cuentas activas</span>
+                </div>
+
+                <div class="kpi-col">
+                    <span class="kpi-col-label">Consumos sin Liquidar</span>
+                    <span class="kpi-col-val">{{ cargos_pendientes_count }} consumo{{ cargos_pendientes_count|pluralize }}</span>
+                    <span class="kpi-col-sub">Pendientes de cobro</span>
+                </div>
+
+                <div class="kpi-col">
+                    <span class="kpi-col-label">Recaudo Logrado</span>
+                    <span class="kpi-col-val" style="color:var(--success);">COP {{ total_recaudado_cop|punto_miles }}</span>
+                    <span class="kpi-col-sub">De COP {{ total_facturado_cop|punto_miles }} facturado</span>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <h3 style="font-size:15px;font-weight:850;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+                    <svg class="svg-icon" style="color:var(--red);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>Pasajeros que deben liquidar su cuenta antes de finalizar:</span>
+                </h3>
+
+                <div class="deudores-table-wrap">
+                    <table class="deudores-table">
+                        <thead>
+                            <tr>
+                                <th>Pasajero</th>
+                                <th>Grupo Familiar</th>
+                                <th style="text-align:center;">Consumos</th>
+                                <th style="text-align:right;">Saldo Pendiente</th>
+                                <th style="text-align:center;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in deudores %}
+                            <tr>
+                                <td>
+                                    <strong>{{ d.pasajero.nombre }}</strong>
+                                    {% if d.pasajero.cedula %}
+                                        <div style="font-size:11.5px;color:var(--muted);">C.I. {{ d.pasajero.cedula }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span style="font-weight:700;">{{ d.grupo.nombre }}</span>
+                                    {% if d.grupo.bus %}
+                                        <span style="font-size:11px;color:var(--muted);">(Bus {{ d.grupo.bus }})</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:center;font-weight:800;">
+                                    {{ d.cargos_pendientes }} ítem{{ d.cargos_pendientes|pluralize }}
+                                    <div style="font-size:11px;color:var(--muted);font-weight:normal;">{{ d.cargos_nombres|join:", " }}</div>
+                                </td>
+                                <td style="text-align:right;">
+                                    <div style="font-size:15px;font-weight:900;color:var(--red);">
+                                        COP {{ d.saldo|punto_miles }}
+                                    </div>
+                                    <div style="font-size:11px;color:var(--muted);font-weight:700;">
+                                        ${{ d.saldo_usd }} USD • {{ d.saldo_bs|floatformat:2 }} Bs
+                                    </div>
+                                </td>
+                                <td style="text-align:center;">
+                                    <a href="{% url 'cobros' %}?q={{ d.pasajero.nombre }}" class="btn btn-outline" style="padding:6px 14px;font-size:12.5px;font-weight:800;color:var(--navy);">
+                                        <svg class="svg-icon" style="width:14px;height:14px;color:var(--turquoise);" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                        <span>Cobrar</span>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="actions-bar">
+                    <a href="{% url 'cobros' %}" class="btn btn-primary" style="padding:12px 24px;font-size:15px;">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>
+                        <span>Ir a Cobros para Liquidar Cuentas</span>
+                    </a>
+
+                    <button type="button" class="btn btn-disabled" title="No puedes finalizar mientras existan deudas pendientes" disabled>
+                        <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span>Finalizar Viaje (Bloqueado)</span>
+                    </button>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- ESTADO 2: VIAJE SOLVENTE (LISTO PARA FINALIZAR) -->
+            <div class="status-hero-banner banner-allowed">
+                <div class="status-avatar avatar-allowed">
+                    <svg class="svg-icon" style="width:32px;height:32px;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div>
+                    <h2 class="status-title title-allowed">
+                        ¡Viaje Solvente! Listo para Finalizar
+                    </h2>
+                    <p class="status-desc">
+                        Todas las cuentas y consumos del viaje <strong>«{{ viaje.nombre }}»</strong> han sido liquidadas en su totalidad. No queda ningún saldo pendiente (Deuda: 0 COP). El ciclo operativo puede cerrarse formalmente.
+                    </p>
+                </div>
+            </div>
+
+            <div class="kpi-row">
+                <div class="kpi-col">
+                    <span class="kpi-col-label">Total Recaudado</span>
+                    <span class="kpi-col-val" style="color:var(--success);">COP {{ total_recaudado_cop|punto_miles }}</span>
+                    <span class="kpi-col-sub">100% de la facturación cobrada</span>
+                </div>
+
+                <div class="kpi-col">
+                    <span class="kpi-col-label">Saldo Pendiente</span>
+                    <span class="kpi-col-val" style="color:var(--success);">0 COP</span>
+                    <span class="kpi-col-sub">$0 USD • 0 Bs (Solvente)</span>
+                </div>
+
+                <div class="kpi-col">
+                    <span class="kpi-col-label">Total Pasajeros</span>
+                    <span class="kpi-col-val">{{ total_pasajeros }} pasajeros</span>
+                    <span class="kpi-col-sub">Todos al día</span>
+                </div>
+
+                <div class="kpi-col">
+                    <span class="kpi-col-label">Estado de Cierre</span>
+                    <span class="kpi-col-val" style="color:var(--turquoise-dark);">Aprobado</span>
+                    <span class="kpi-col-sub">Listo para archivar</span>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div style="background:var(--surface-alt);border:1.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;">
+                    <h4 style="font-size:14px;font-weight:850;color:var(--navy);margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+                        <svg class="svg-icon" style="color:var(--orange);" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span>¿Qué sucederá al finalizar el viaje?</span>
+                    </h4>
+                    <ul style="padding-left:22px;font-size:13.5px;color:var(--text-secondary);line-height:1.6;">
+                        <li>El estado del viaje pasará formalmente a <strong>FINALIZADO</strong>.</li>
+                        <li>Se archivará el registro de consumos y cobros en el histórico contable.</li>
+                        <li>Ya no se podrán cargar nuevos consumos ni modificar las tasas de cambio de este viaje.</li>
+                        <li>Quedará habilitada la creación de un nuevo viaje en el panel principal.</li>
+                    </ul>
+                </div>
+
+                <form method="post" action="{% url 'finalizar_viaje' %}">
+                    {% csrf_token %}
+                    <div class="actions-bar">
+                        <a href="{% url 'home' %}" class="btn btn-outline">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                            <span>Volver al Panel Principal</span>
+                        </a>
+
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás completamente seguro de que deseas FINALIZAR este viaje? Esta acción cerrará el ciclo operativo.');">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><polyline points="9 16 12 19 16 14"/></svg>
+                            <span>Confirmar y Finalizar Viaje Definitivamente</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <footer class="footer-bar">
+            <div class="watermark-badge">
+                <svg class="svg-icon" style="width:13px;height:13px;color:var(--turquoise);" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <span>Viajes Nena • Karma Studio</span>
+                <span class="watermark-pill">v1.0.0</span>
+            </div>
+            <div>
+                Módulo de Cierre y Liquidación de Ciclo Operativo
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', function() {
+                const currentDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                if (currentDark) {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('viajes_nena_theme', 'light');
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('viajes_nena_theme', 'dark');
+                }
+            });
+        }
+    </script>
+
+    {% include "core/includes/inactivity_timeout.html" %}
+</body>
+</html>

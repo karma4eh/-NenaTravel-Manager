@@ -1,0 +1,1767 @@
+{% load l10n %}
+{% load moneda_tags %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistencia a Los Juanes | Viajes Nena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;850;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #102b46;
+            --navy-deep: #071727;
+            --navy-light: #163657;
+            --turquoise: #16b8b0;
+            --turquoise-dark: #0e8f89;
+            --turquoise-light: rgba(22, 184, 176, 0.12);
+            --turquoise-glow: rgba(22, 184, 176, 0.25);
+            --background: #f4f8fb;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --surface-hover: #f1f5f9;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --border-light: #edf2f7;
+            --success: #059669;
+            --success-light: rgba(5, 150, 105, 0.12);
+            --orange: #d97706;
+            --orange-light: rgba(217, 119, 6, 0.12);
+            --blue: #2563eb;
+            --blue-light: rgba(37, 99, 235, 0.12);
+            --danger: #dc2626;
+            --danger-light: rgba(220, 38, 38, 0.12);
+            --card-shadow: 0 4px 20px -2px rgba(16, 43, 70, 0.06), 0 2px 6px -1px rgba(16, 43, 70, 0.04);
+            --card-shadow-hover: 0 12px 30px -4px rgba(16, 43, 70, 0.12), 0 4px 12px -2px rgba(16, 43, 70, 0.06);
+            --dock-shadow: 0 -8px 30px rgba(7, 23, 39, 0.16);
+            --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        [data-theme="dark"] {
+            --navy: #f8fafc;
+            --navy-deep: #080f18;
+            --navy-light: #162438;
+            --turquoise: #22d3ee;
+            --turquoise-dark: #06b6d4;
+            --turquoise-light: rgba(34, 211, 238, 0.15);
+            --turquoise-glow: rgba(34, 211, 238, 0.3);
+            --background: #090f19;
+            --surface: #121c2d;
+            --surface-alt: #0d1522;
+            --surface-hover: #18253b;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --muted: #94a3b8;
+            --border: #1e2c40;
+            --border-light: #182333;
+            --success: #34d399;
+            --success-light: rgba(52, 211, 153, 0.18);
+            --orange: #fbbf24;
+            --orange-light: rgba(251, 191, 36, 0.18);
+            --blue: #60a5fa;
+            --blue-light: rgba(96, 165, 250, 0.18);
+            --danger: #f87171;
+            --danger-light: rgba(248, 113, 113, 0.18);
+            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+            --card-shadow-hover: 0 12px 30px -4px rgba(0, 0, 0, 0.6);
+            --dock-shadow: 0 -8px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: var(--font-main);
+            font-size: 14px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            padding-bottom: 110px; /* Space for sticky dock */
+        }
+
+        /* SVG ICONS */
+        .svg-icon {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2.2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        /* ========================================================
+           TOPBAR
+        ======================================================== */
+        .topbar {
+            background: linear-gradient(135deg, #0a1b2d 0%, #081524 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 4%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        [data-theme="dark"] .topbar {
+            background: #080f19;
+            border-bottom-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .brand-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #16b8b0 0%, #0e8f89 100%);
+            color: #072e2b;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: 0 4px 14px var(--turquoise-glow);
+        }
+
+        .brand-title {
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 900;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-sub {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .btn-topbar-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 750;
+            transition: all 0.2s ease;
+        }
+
+        .btn-topbar-nav:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: var(--turquoise);
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
+        .trip-selector-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(22, 184, 176, 0.15);
+            border: 1px solid rgba(22, 184, 176, 0.35);
+            color: #22d3ee;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        /* ========================================================
+           CONTAINER & LAYOUT
+        ======================================================== */
+        .page-container {
+            width: min(1160px, 94%);
+            margin: 28px auto 40px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========================================================
+           HERO HEADER
+        ======================================================== */
+        .hero-header {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 24px 28px;
+            margin-bottom: 22px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #16b8b0 0%, #2563eb 50%, #d97706 100%);
+        }
+
+        .hero-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .hero-badge-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+            border: 1px solid rgba(22, 184, 176, 0.25);
+        }
+
+        [data-theme="dark"] .hero-badge-tag {
+            color: #22d3ee;
+        }
+
+        .hero-title-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .hero-icon-bubble {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(22, 184, 176, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+            border: 1.5px solid rgba(22, 184, 176, 0.35);
+            color: var(--turquoise-dark);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(22, 184, 176, 0.2);
+        }
+
+        [data-theme="dark"] .hero-icon-bubble {
+            color: #22d3ee;
+        }
+
+        .hero-icon-bubble .svg-icon {
+            width: 26px;
+            height: 26px;
+        }
+
+        .hero-heading {
+            font-size: clamp(22px, 3.2vw, 28px);
+            font-weight: 900;
+            color: var(--navy);
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            color: var(--muted);
+            font-size: 13.5px;
+            font-weight: 600;
+            max-width: 720px;
+            margin-top: 6px;
+            line-height: 1.6;
+        }
+
+        /* ========================================================
+           KPI STATS CARDS (4 COLUMNS)
+        ======================================================== */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px 22px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: rgba(22, 184, 176, 0.35);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .kpi-label {
+            font-size: 12px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--muted);
+        }
+
+        .kpi-icon-wrap {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+        }
+
+        .kpi-icon-wrap.icon-price {
+            background: rgba(37, 99, 235, 0.12);
+            color: #2563eb;
+        }
+        [data-theme="dark"] .kpi-icon-wrap.icon-price {
+            background: rgba(96, 165, 250, 0.15);
+            color: #60a5fa;
+        }
+
+        .kpi-icon-wrap.icon-confirmed {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .kpi-icon-wrap.icon-pending {
+            background: var(--orange-light);
+            color: var(--orange);
+        }
+
+        .kpi-icon-wrap.icon-revenue {
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+        }
+        [data-theme="dark"] .kpi-icon-wrap.icon-revenue {
+            color: #22d3ee;
+        }
+
+        .kpi-main-val {
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--navy);
+            letter-spacing: -0.6px;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .kpi-sub-total {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        .kpi-sub-note {
+            font-size: 12px;
+            font-weight: 650;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .usd-sign {
+            color: var(--success);
+            font-weight: 900;
+            margin-right: 1px;
+        }
+
+        .usd-currency {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--muted);
+        }
+
+        /* KPI MINI PROGRESS BAR */
+        .kpi-progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--border-light);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        [data-theme="dark"] .kpi-progress-bar {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .kpi-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            border-radius: 10px;
+            transition: width 0.4s ease;
+        }
+
+        /* ========================================================
+           INTERACTIVE TOOLBAR (FILTERS, SEARCH, BULK ACTIONS)
+        ======================================================== */
+        .control-toolbar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px 20px;
+            margin-bottom: 22px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-filters-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .filter-tab-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 30px;
+            background: var(--surface-alt);
+            border: 1.5px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .filter-tab-pill:hover {
+            border-color: var(--turquoise);
+            color: var(--navy);
+            transform: translateY(-1px);
+        }
+
+        .filter-tab-pill.active {
+            background: var(--turquoise);
+            color: #072e2b;
+            border-color: var(--turquoise);
+            box-shadow: 0 4px 12px var(--turquoise-glow);
+        }
+
+        [data-theme="dark"] .filter-tab-pill.active {
+            background: #22d3ee;
+            color: #082f49;
+            border-color: #22d3ee;
+        }
+
+        .filter-badge-count {
+            font-size: 11px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] .filter-badge-count {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* SEARCH BOX */
+        .search-box-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-width: 250px;
+            max-width: 320px;
+            flex: 1;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 36px 8px 36px;
+            border-radius: 30px;
+            border: 1.5px solid var(--border);
+            background: var(--surface-alt);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 650;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--turquoise);
+            box-shadow: 0 0 0 3px var(--turquoise-glow);
+            background: var(--surface);
+        }
+
+        .search-clear-btn {
+            position: absolute;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1;
+            padding: 4px;
+            display: none;
+        }
+
+        .search-clear-btn:hover {
+            color: var(--navy);
+        }
+
+        /* BULK ACTIONS RIGHT */
+        .toolbar-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action-tool {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface-alt);
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action-tool:hover {
+            background: var(--surface-hover);
+            border-color: var(--turquoise);
+            color: var(--navy);
+            transform: translateY(-1px);
+        }
+
+        /* ========================================================
+           PASSENGER GROUPS & CHECKLIST
+        ======================================================== */
+        .groups-container {
+            display: grid;
+            gap: 18px;
+        }
+
+        .group-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            transition: all 0.25s ease;
+        }
+
+        .group-card:hover {
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .group-card-header {
+            padding: 14px 20px;
+            background: var(--surface-alt);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .group-header-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .bus-pill-tag {
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: rgba(37, 99, 235, 0.12);
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.25);
+        }
+
+        [data-theme="dark"] .bus-pill-tag {
+            background: rgba(96, 165, 250, 0.18);
+            color: #60a5fa;
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        .group-title {
+            font-size: 15px;
+            font-weight: 850;
+            color: var(--navy);
+            margin: 0;
+            letter-spacing: -0.2px;
+        }
+
+        .group-status-stats {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 750;
+            color: var(--muted);
+            margin-left: 6px;
+        }
+
+        .btn-group-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 11px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 11.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-group-toggle:hover {
+            border-color: var(--turquoise);
+            color: var(--turquoise-dark);
+            background: var(--turquoise-light);
+        }
+
+        [data-theme="dark"] .btn-group-toggle:hover {
+            color: #22d3ee;
+        }
+
+        /* PASSENGERS LIST */
+        .passenger-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 10px;
+            padding: 14px;
+        }
+
+        .passenger-row-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: var(--surface);
+            border: 1.5px solid var(--border-light);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .passenger-row-card:hover {
+            background: var(--surface-hover);
+            border-color: rgba(22, 184, 176, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .passenger-row-card.is-active {
+            background: var(--turquoise-light);
+            border-color: rgba(22, 184, 176, 0.45);
+        }
+
+        [data-theme="dark"] .passenger-row-card.is-active {
+            background: rgba(34, 211, 238, 0.10);
+            border-color: rgba(34, 211, 238, 0.4);
+        }
+
+        .passenger-left-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        /* CUSTOM CHECKBOX */
+        .custom-checkbox-wrap {
+            position: relative;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            border: 2px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            outline: none;
+        }
+
+        .custom-checkbox:hover {
+            border-color: var(--turquoise);
+        }
+
+        .custom-checkbox:checked {
+            background: var(--turquoise);
+            border-color: var(--turquoise);
+            box-shadow: 0 0 10px var(--turquoise-glow);
+        }
+
+        [data-theme="dark"] .custom-checkbox:checked {
+            background: #22d3ee;
+            border-color: #22d3ee;
+        }
+
+        .checkbox-check-icon {
+            position: absolute;
+            pointer-events: none;
+            width: 13px;
+            height: 13px;
+            stroke: #072e2b;
+            stroke-width: 3;
+            opacity: 0;
+            transform: scale(0.6);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .custom-checkbox:checked + .checkbox-check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .passenger-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            color: var(--navy);
+            font-size: 12.5px;
+            font-weight: 850;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .passenger-row-card.is-active .passenger-avatar {
+            background: var(--turquoise);
+            color: #072e2b;
+            border-color: var(--turquoise);
+        }
+
+        [data-theme="dark"] .passenger-row-card.is-active .passenger-avatar {
+            background: #22d3ee;
+            color: #082f49;
+            border-color: #22d3ee;
+        }
+
+        .passenger-details {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .passenger-name-text {
+            font-size: 13.5px;
+            font-weight: 750;
+            color: var(--navy);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.3;
+        }
+
+        .passenger-doc-text {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .passenger-right-badge {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            transition: all 0.2s ease;
+        }
+
+        .status-badge.badge-asiste {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.25);
+        }
+
+        .status-badge.badge-no-asiste {
+            background: var(--surface-alt);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .fee-pill {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--muted);
+            opacity: 0.85;
+        }
+
+        /* ========================================================
+           STICKY BOTTOM DOCK
+        ======================================================== */
+        .bottom-dock {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 90;
+            background: rgba(10, 27, 45, 0.94);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: var(--dock-shadow);
+            backdrop-filter: blur(14px);
+            padding: 14px 4%;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        [data-theme="dark"] .bottom-dock {
+            background: rgba(8, 15, 25, 0.95);
+            border-top-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .dock-content {
+            width: min(1160px, 100%);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .dock-left-summary {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .dock-icon-chip {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--turquoise);
+            color: #072e2b;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px var(--turquoise-glow);
+        }
+
+        .dock-numbers {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dock-count-title {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 850;
+            letter-spacing: -0.2px;
+        }
+
+        .dock-count-sub {
+            color: #94a3b8;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        .dock-center-amount {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dock-amount-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dock-amount-lbl {
+            font-size: 10.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #cbd5e1;
+        }
+
+        .dock-amount-usd {
+            color: #ffffff;
+            font-size: 19px;
+            font-weight: 900;
+            letter-spacing: -0.3px;
+        }
+
+        .dock-amount-cop {
+            color: #22d3ee;
+            font-size: 12.5px;
+            font-weight: 800;
+        }
+
+        .dock-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .unsaved-badge {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(251, 191, 36, 0.15);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            color: #fbbf24;
+            font-size: 11.5px;
+            font-weight: 800;
+            animation: pulseUnsaved 2s infinite;
+        }
+
+        @keyframes pulseUnsaved {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .btn-save-attendance {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #16b8b0 0%, #0e8f89 100%);
+            color: #072e2b;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 900;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 18px var(--turquoise-glow);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            white-space: nowrap;
+        }
+
+        .btn-save-attendance:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--turquoise-glow);
+            filter: brightness(1.05);
+        }
+
+        .btn-save-attendance:active {
+            transform: translateY(0);
+        }
+
+        .btn-save-attendance.is-saving {
+            opacity: 0.75;
+            pointer-events: none;
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast-notification {
+            position: fixed;
+            top: 76px;
+            right: 24px;
+            z-index: 120;
+            padding: 12px 18px;
+            border-radius: 12px;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 13.5px;
+            font-weight: 750;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(22, 184, 176, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(-20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toast-notification.show {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* EMPTY STATE */
+        .empty-activity-card {
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 20px;
+            padding: 48px 30px;
+            text-align: center;
+            box-shadow: var(--card-shadow);
+        }
+
+        .empty-activity-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            background: var(--orange-light);
+            color: var(--orange);
+            display: grid;
+            place-items: center;
+            margin: 0 auto 16px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 820px) {
+            .dock-content {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            .dock-left-summary {
+                justify-content: space-between;
+            }
+            .dock-center-amount {
+                justify-content: space-between;
+            }
+            .dock-right-actions {
+                justify-content: flex-end;
+            }
+            .btn-save-attendance {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+    {% include "core/includes/dark_mode_head.html" %}
+</head>
+<body>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toastNotification" class="toast-notification" role="alert">
+        <svg class="svg-icon" style="color:var(--turquoise);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span id="toastMessage">Asistencia guardada correctamente.</span>
+    </div>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <a href="{% url 'home' %}" class="brand-link" title="Ir al panel principal">
+            <div class="brand-icon">V</div>
+            <div>
+                <div class="brand-title">VIAJES NENA</div>
+                <div class="brand-sub">Sistema de gestión operativa</div>
+            </div>
+        </a>
+
+        <div class="topbar-right">
+            {% if viajes and viajes|length > 1 %}
+            <div class="trip-selector-wrap" style="position:relative;">
+                <select id="tripSwitcher" onchange="window.location.href='/los-juanes/?viaje=' + this.value" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);color:#ffffff;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:750;outline:none;">
+                    {% for v in viajes %}
+                        <option value="{{ v.id }}" {% if viaje and viaje.id == v.id %}selected{% endif %} style="color:#0f172a;">
+                            {{ v.nombre }} ({{ v.destino }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+{% include "core/includes/dark_mode_toggle.html" %}
+
+            <a href="{% url 'home' %}" class="btn-topbar-nav">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                <span>Volver al Inicio</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="page-container">
+
+        <!-- MENSAJES DJANGO -->
+        {% if messages %}
+            <div style="margin-bottom:20px;">
+                {% for message in messages %}
+                    <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;margin-bottom:8px;font-size:13.5px;font-weight:700;
+                        {% if 'success' in message.tags %}background:var(--success-light);color:var(--success);border:1px solid rgba(5,150,105,0.25);
+                        {% elif 'error' in message.tags %}background:var(--danger-light);color:var(--danger);border:1px solid rgba(220,38,38,0.25);
+                        {% else %}background:var(--orange-light);color:var(--orange);border:1px solid rgba(217,119,6,0.25);{% endif %}">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if viaje %}
+            <!-- HERO HEADER -->
+            <section class="hero-header">
+                <div class="hero-top-row">
+                    <span class="hero-badge-tag">
+                        <svg class="svg-icon" style="width:13px;height:13px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Día 2 • Actividad Turística
+                    </span>
+                    <span class="trip-selector-pill">
+                        <svg class="svg-icon" style="width:13px;height:13px;" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                        Viaje: <strong>{{ viaje.nombre }}</strong> ({{ viaje.destino }})
+                    </span>
+                </div>
+
+                <div class="hero-title-row">
+                    <div class="hero-icon-bubble">
+                        <!-- Icono de lancha / mar / cayo -->
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 20a2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1 2.4 2.4 0 0 1 2-1 2.4 2.4 0 0 1 2 1 2.4 2.4 0 0 0 2 1 2.4 2.4 0 0 0 2-1"/><path d="M4 17l1.5-6h13l1.5 6"/><path d="M12 4v7"/><polyline points="9 8 12 5 15 8"/></svg>
+                    </div>
+                    <div>
+                        <h1 class="hero-heading">Asistencia a Los Juanes</h1>
+                        <p class="hero-subtitle">
+                            Control interactivo de pasajeros que asisten al cayo Los Juanes. Al marcar la asistencia se registrará automáticamente el cargo en COP al listín de cada pasajero.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            {% if evento and actividad %}
+                <!-- 4 KPI CARDS ROW -->
+                <section class="kpi-grid">
+                    <!-- 1. Tarifa individual -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Tarifa por Pasajero</span>
+                            <div class="kpi-icon-wrap icon-price">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-main-val">
+                            <span class="usd-sign">$</span>{{ precio|default:"0.00" }} <span class="usd-currency">USD</span>
+                        </div>
+                        <div class="kpi-sub-note">
+                            <span>COP {{ precio_cop|punto_miles }}</span>
+                            <span style="font-size:11px;color:var(--muted);">(Tasa: {{ viaje.tasa_usd_cop|punto_miles }} COP)</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Confirmados -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Asistentes Confirmados</span>
+                            <div class="kpi-icon-wrap icon-confirmed">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-main-val">
+                            <span id="kpiConfirmados">{{ stats.asisten }}</span>
+                            <span class="kpi-sub-total">/ {{ stats.total }}</span>
+                        </div>
+                        <div class="kpi-sub-note">
+                            <span id="kpiPorcentaje">{{ stats.porcentaje }}%</span> del listín total
+                        </div>
+                        <div class="kpi-progress-bar">
+                            <div class="kpi-progress-fill" id="kpiProgressBar" style="width: {{ stats.porcentaje }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Sin Confirmar -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Sin Confirmar</span>
+                            <div class="kpi-icon-wrap icon-pending">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-main-val" id="kpiPendientes">
+                            {{ stats.no_asisten }}
+                        </div>
+                        <div class="kpi-sub-note">
+                            Pasajeros pendientes o que no van al cayo
+                        </div>
+                    </div>
+
+                    <!-- 4. Recaudación Total Actividad -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Total Recaudación</span>
+                            <div class="kpi-icon-wrap icon-revenue">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            </div>
+                        </div>
+                        <div class="kpi-main-val">
+                            <span class="usd-sign">$</span><span id="kpiTotalUsd">{{ stats.total_usd }}</span> <span class="usd-currency">USD</span>
+                        </div>
+                        <div class="kpi-sub-note">
+                            Equiv: <strong id="kpiTotalCop" style="color:var(--turquoise-dark);">{{ stats.total_cop|punto_miles }}</strong> COP
+                        </div>
+                    </div>
+                </section>
+
+                {% if pasajeros %}
+                    <!-- INTERACTIVE TOOLBAR -->
+                    <section class="control-toolbar">
+                        <div class="toolbar-filters-left">
+                            <!-- BUS FILTER PILLS -->
+                            <div class="filter-tab-pill active" onclick="filtrarBus('all', this)">
+                                <span>Todos los Buses</span>
+                                <span class="filter-badge-count">{{ stats.total }}</span>
+                            </div>
+                            {% for b in buses %}
+                            <div class="filter-tab-pill" onclick="filtrarBus('{{ b }}', this)">
+                                <span>Bus {{ b }}</span>
+                            </div>
+                            {% endfor %}
+
+                            <!-- STATUS FILTER PILLS -->
+                            <div style="width:1px;height:24px;background:var(--border);margin:0 4px;"></div>
+                            <div class="filter-tab-pill" id="btnFilterAsisten" onclick="filtrarEstado('asisten', this)">
+                                <span>Solo Asistentes</span>
+                            </div>
+                            <div class="filter-tab-pill" id="btnFilterNoAsisten" onclick="filtrarEstado('no_asisten', this)">
+                                <span>Solo No Asisten</span>
+                            </div>
+                        </div>
+
+                        <!-- SEARCH BOX -->
+                        <div class="search-box-wrap">
+                            <svg class="svg-icon search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" class="search-input" id="passengerSearch" placeholder="Buscar pasajero o cédula..." oninput="buscarPasajero(this.value)">
+                            <button type="button" class="search-clear-btn" id="searchClearBtn" onclick="limpiarBusqueda()">✕</button>
+                        </div>
+
+                        <!-- BULK ACTIONS -->
+                        <div class="toolbar-actions-right">
+                            <button type="button" class="btn-action-tool" onclick="marcarTodos(true)" title="Marcar todos los pasajeros visibles">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Marcar Todos</span>
+                            </button>
+                            <button type="button" class="btn-action-tool" onclick="marcarTodos(false)" title="Desmarcar todos los pasajeros visibles">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                <span>Desmarcar Todos</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <!-- PASSENGERS FORM & GROUPS -->
+                    <form method="post" id="formJuanes" onsubmit="return handleFormSubmit(event)">
+                        {% csrf_token %}
+                        <input type="hidden" name="is_ajax" id="isAjaxField" value="0">
+
+                        {% regroup pasajeros by grupo as grupos %}
+
+                        <div class="groups-container">
+                            {% for grupo in grupos %}
+                            <section class="group-card" data-bus="{{ grupo.grouper.bus|default:'1' }}" id="group-card-{{ forloop.counter }}">
+                                <div class="group-card-header">
+                                    <div class="group-header-info">
+                                        <span class="bus-pill-tag">Bus {{ grupo.grouper.bus|default:"1" }}</span>
+                                        <h2 class="group-title">{{ grupo.grouper.nombre }}</h2>
+                                        <span class="group-status-stats">
+                                            • <span class="group-asistentes-count" id="grp-count-{{ forloop.counter }}">0</span> de {{ grupo.list|length }} asisten
+                                        </span>
+                                    </div>
+
+                                    <button type="button" class="btn-group-toggle" onclick="toggleGrupo('group-card-{{ forloop.counter }}')">
+                                        <svg class="svg-icon" style="width:13px;height:13px;" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                                        <span>Alternar Grupo</span>
+                                    </button>
+                                </div>
+
+                                <div class="passenger-grid">
+                                    {% for pasajero in grupo.list %}
+                                    <label class="passenger-row-card {% if pasajero.id in asistencia_ids %}is-active{% endif %}"
+                                           id="card-pasajero-{{ pasajero.id }}"
+                                           data-name="{{ pasajero.nombre|lower }}"
+                                           data-cedula="{{ pasajero.cedula|default:''|lower }}"
+                                           data-bus="{{ grupo.grouper.bus|default:'1' }}">
+                                        
+                                        <div class="passenger-left-wrap">
+                                            <div class="custom-checkbox-wrap">
+                                                <input type="checkbox"
+                                                       class="custom-checkbox"
+                                                       name="pasajeros"
+                                                       value="{{ pasajero.id }}"
+                                                       id="check-{{ pasajero.id }}"
+                                                       onchange="onPassengerToggle(this)"
+                                                       {% if pasajero.id in asistencia_ids %}checked{% endif %}>
+                                                <svg class="checkbox-check-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                            </div>
+
+                                            <div class="passenger-avatar">
+                                                {{ pasajero.nombre|slice:":1"|upper }}
+                                            </div>
+
+                                            <div class="passenger-details">
+                                                <div class="passenger-name-text">{{ pasajero.nombre }}</div>
+                                                <div class="passenger-doc-text">
+                                                    {% if pasajero.cedula %}
+                                                        {{ pasajero.cedula }}
+                                                    {% else %}
+                                                        Sin documento
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="passenger-right-badge">
+                                            <span class="status-badge {% if pasajero.id in asistencia_ids %}badge-asiste{% else %}badge-no-asiste{% endif %}"
+                                                  id="badge-{{ pasajero.id }}">
+                                                {% if pasajero.id in asistencia_ids %}
+                                                    <svg class="svg-icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                                    Asiste
+                                                {% else %}
+                                                    No Asiste
+                                                {% endif %}
+                                            </span>
+                                            <span class="fee-pill">+${{ precio }}</span>
+                                        </div>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </section>
+                            {% endfor %}
+                        </div>
+
+                        <!-- STICKY BOTTOM DOCK -->
+                        <div class="bottom-dock">
+                            <div class="dock-content">
+                                <div class="dock-left-summary">
+                                    <div class="dock-icon-chip">
+                                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    </div>
+                                    <div class="dock-numbers">
+                                        <div class="dock-count-title">
+                                            <span id="dockCount">0</span> de {{ stats.total }} personas confirmadas
+                                        </div>
+                                        <div class="dock-count-sub">
+                                            <span id="dockPct">0%</span> de ocupación del traslado
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="dock-center-amount">
+                                    <div class="dock-amount-box">
+                                        <span class="dock-amount-lbl">Total en Dólares</span>
+                                        <span class="dock-amount-usd">
+                                            <span class="usd-sign">$</span><span id="dockTotalUsd">0.00</span> USD
+                                        </span>
+                                    </div>
+                                    <div style="width:1px;height:32px;background:rgba(255,255,255,0.15);"></div>
+                                    <div class="dock-amount-box">
+                                        <span class="dock-amount-lbl">Total en Pesos</span>
+                                        <span class="dock-amount-cop" id="dockTotalCop">0 COP</span>
+                                    </div>
+                                </div>
+
+                                <div class="dock-right-actions">
+                                    <span class="unsaved-badge" id="unsavedBadge">
+                                        <span class="mini-live-dot" style="width:6px;height:6px;border-radius:50%;background:#fbbf24;"></span>
+                                        Cambios sin guardar
+                                    </span>
+
+                                    <button type="submit" class="btn-save-attendance" id="btnSaveAttendance">
+                                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                        <span id="btnSaveText">Guardar Asistencia</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                {% else %}
+                    <!-- SIN PASAJEROS -->
+                    <div class="empty-activity-card">
+                        <div class="empty-activity-icon">
+                            <svg class="svg-icon" style="width:30px;height:30px;" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        </div>
+                        <h2 style="font-size:20px;font-weight:850;color:var(--navy);margin-bottom:8px;">Sin Pasajeros Registrados</h2>
+                        <p style="color:var(--muted);max-width:500px;margin:0 auto 20px;">
+                            Este viaje no cuenta con pasajeros aún. Para gestionar la asistencia a Los Juanes, primero debes cargar el listín del viaje.
+                        </p>
+                        <a href="{% url 'home' %}" class="btn-action-tool" style="display:inline-flex;padding:10px 18px;font-size:13px;">
+                            Volver al Inicio
+                        </a>
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <!-- ACTIVIDAD NO CONFIGURADA -->
+                <div class="empty-activity-card">
+                    <div class="empty-activity-icon" style="background:var(--danger-light);color:var(--danger);">
+                        <svg class="svg-icon" style="width:30px;height:30px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <h2 style="font-size:20px;font-weight:850;color:var(--navy);margin-bottom:8px;">Actividad o Evento No Configurado</h2>
+                    <p style="color:var(--muted);max-width:520px;margin:0 auto 20px;">
+                        No se encontró el evento "Día 2" o la actividad "Los Juanes" para este viaje. Verifica los precios y eventos en la configuración del viaje.
+                    </p>
+                    <a href="{% url 'home' %}" class="btn-action-tool" style="display:inline-flex;padding:10px 18px;font-size:13px;">
+                        Volver al Inicio
+                    </a>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <!-- NO HAY VIAJE ACTIVO -->
+            <div class="empty-activity-card">
+                <div class="empty-activity-icon">
+                    <svg class="svg-icon" style="width:30px;height:30px;" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                </div>
+                <h2 style="font-size:20px;font-weight:850;color:var(--navy);margin-bottom:8px;">No Hay Ningún Viaje Seleccionado</h2>
+                <p style="color:var(--muted);max-width:480px;margin:0 auto 20px;">
+                    Inicia un viaje en el sistema para poder registrar la asistencia a las actividades de ruta.
+                </p>
+                <a href="{% url 'home' %}" class="btn-action-tool" style="display:inline-flex;padding:10px 18px;font-size:13px;">
+                    Volver al Inicio
+                </a>
+            </div>
+        {% endif %}
+
+    </main>
+
+    <!-- SCRIPTS DINÁMICOS -->
+    <script>
+        // DATOS CONFIGURADOS DESDE EL BACKEND
+        const PRECIO_USD = parseFloat("{{ precio|unlocalize }}".replace(',', '.')) || 0;
+        const TASA_COP = parseFloat("{{ viaje.tasa_usd_cop|unlocalize }}".replace(',', '.')) || 3200;
+        const TOTAL_PASAJEROS = {{ stats.total|default:0 }};
+
+        let hasUnsavedChanges = false;
+        let currentBusFilter = 'all';
+        let currentStatusFilter = 'all';
+        let currentSearchQuery = '';
+
+        // Formato con punto de miles
+        function formatoPuntoMiles(num) {
+            return Math.round(num).toLocaleString('es-CO').replace(/,/g, '.');
+        }
+
+        // 1. RECALCULAR TODOS LOS TOTALES Y ESTADÍSTICAS EN VIVO
+        function actualizarTotales() {
+            const allCheckboxes = document.querySelectorAll('input[name="pasajeros"]');
+            const checkedCheckboxes = document.querySelectorAll('input[name="pasajeros"]:checked');
+
+            const cantidad = checkedCheckboxes.length;
+            const pendientes = Math.max(0, TOTAL_PASAJEROS - cantidad);
+            const porcentaje = TOTAL_PASAJEROS > 0 ? ((cantidad / TOTAL_PASAJEROS) * 100).toFixed(1) : 0;
+            const totalUsd = cantidad * PRECIO_USD;
+            const totalCop = totalUsd * TASA_COP;
+
+            // Actualizar KPIs
+            const kpiConfirmados = document.getElementById('kpiConfirmados');
+            if (kpiConfirmados) kpiConfirmados.textContent = cantidad;
+
+            const kpiPendientes = document.getElementById('kpiPendientes');
+            if (kpiPendientes) kpiPendientes.textContent = pendientes;
+
+            const kpiPorcentaje = document.getElementById('kpiPorcentaje');
+            if (kpiPorcentaje) kpiPorcentaje.textContent = porcentaje + '%';
+
+            const kpiProgressBar = document.getElementById('kpiProgressBar');
+            if (kpiProgressBar) kpiProgressBar.style.width = porcentaje + '%';
+
+            const kpiTotalUsd = document.getElementById('kpiTotalUsd');
+            if (kpiTotalUsd) kpiTotalUsd.textContent = totalUsd.toFixed(2);
+
+            const kpiTotalCop = document.getElementById('kpiTotalCop');
+            if (kpiTotalCop) kpiTotalCop.textContent = formatoPuntoMiles(totalCop);
+
+            // Actualizar Dock Inferior
+            const dockCount = document.getElementById('dockCount');
+            if (dockCount) dockCount.textContent = cantidad;
+
+            const dockPct = document.getElementById('dockPct');
+            if (dockPct) dockPct.textContent = porcentaje + '%';
+
+            const dockTotalUsd = document.getElementById('dockTotalUsd');
+            if (dockTotalUsd) dockTotalUsd.textContent = totalUsd.toFixed(2);
+
+            const dockTotalCop = document.getElementById('dockTotalCop');
+            if (dockTotalCop) dockTotalCop.textContent = formatoPuntoMiles(totalCop) + ' COP';
+
+            // Actualizar contadores por grupo
+            document.querySelectorAll('.group-card').forEach(grp => {
+                const totalInGrp = grp.querySelectorAll('input[name="pasajeros"]').length;
+                const checkedInGrp = grp.querySelectorAll('input[name="pasajeros"]:checked').length;
+                const counterSpan = grp.querySelector('.group-asistentes-count');
+                if (counterSpan) counterSpan.textContent = checkedInGrp;
+            });
+
+            // Mostrar u ocultar indicador de cambios sin guardar
+            const unsavedBadge = document.getElementById('unsavedBadge');
+            if (unsavedBadge) {
+                unsavedBadge.style.display = hasUnsavedChanges ? 'inline-flex' : 'none';
+            }
+        }
+
+        // 2. TOGGLE INDIVIDUAL DE PASAJERO
+        function onPassengerToggle(checkbox) {
+            hasUnsavedChanges = true;
+            const card = document.getElementById('card-pasajero-' + checkbox.value);
+            const badge = document.getElementById('badge-' + checkbox.value);
+
+            if (checkbox.checked) {
+                if (card) card.classList.add('is-active');
+                if (badge) {
+                    badge.className = 'status-badge badge-asiste';
+                    badge.innerHTML = '<svg class="svg-icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Asiste';
+                }
+            } else {
+                if (card) card.classList.remove('is-active');
+                if (badge) {
+                    badge.className = 'status-badge badge-no-asiste';
+                    badge.textContent = 'No Asiste';
+                }
+            }
+
+            actualizarTotales();
+        }
+
+        // 3. TOGGLE COMPLETO DE UN GRUPO
+        function toggleGrupo(groupCardId) {
+            const grp = document.getElementById(groupCardId);
+            if (!grp) return;
+
+            const checkboxes = grp.querySelectorAll('input[name="pasajeros"]');
+            const anyUnchecked = Array.from(checkboxes).some(cb => !cb.checked);
+
+            checkboxes.forEach(cb => {
+                cb.checked = anyUnchecked;
+                onPassengerToggle(cb);
+            });
+
+            mostrarToast(anyUnchecked ? 'Grupo marcado completo' : 'Grupo desmarcado');
+        }
+
+        // 4. MARCAR O DESMARCAR TODOS LOS VISIBLES
+        function marcarTodos(estado) {
+            hasUnsavedChanges = true;
+            const visibleCards = document.querySelectorAll('.passenger-row-card:not([style*="display: none"])');
+            visibleCards.forEach(card => {
+                const cb = card.querySelector('input[name="pasajeros"]');
+                if (cb && cb.checked !== estado) {
+                    cb.checked = estado;
+                    onPassengerToggle(cb);
+                }
+            });
+            actualizarTotales();
+            mostrarToast(estado ? 'Todos los pasajeros visibles marcados' : 'Todos los pasajeros visibles desmarcados');
+        }
+
+        // 5. FILTRADO POR BUS
+        function filtrarBus(busNum, btnEl) {
+            currentBusFilter = busNum;
+            document.querySelectorAll('.toolbar-filters-left .filter-tab-pill').forEach(b => {
+                if (b.textContent.includes('Bus') || b.textContent.includes('Todos los')) {
+                    b.classList.remove('active');
+                }
+            });
+            if (btnEl) btnEl.classList.add('active');
+            aplicarFiltrosCombinados();
+        }
+
+        // 6. FILTRADO POR ESTADO (ASISTE / NO ASISTE)
+        function filtrarEstado(estado, btnEl) {
+            if (currentStatusFilter === estado) {
+                currentStatusFilter = 'all';
+                btnEl.classList.remove('active');
+            } else {
+                currentStatusFilter = estado;
+                document.getElementById('btnFilterAsisten').classList.remove('active');
+                document.getElementById('btnFilterNoAsisten').classList.remove('active');
+                btnEl.classList.add('active');
+            }
+            aplicarFiltrosCombinados();
+        }
+
+        // 7. BÚSQUEDA EN TIEMPO REAL
+        function buscarPasajero(query) {
+            currentSearchQuery = query.trim().toLowerCase();
+            const clearBtn = document.getElementById('searchClearBtn');
+            if (clearBtn) clearBtn.style.display = currentSearchQuery ? 'block' : 'none';
+            aplicarFiltrosCombinados();
+        }
+
+        function limpiarBusqueda() {
+            const input = document.getElementById('passengerSearch');
+            if (input) {
+                input.value = '';
+                buscarPasajero('');
+                input.focus();
+            }
+        }
+
+        // 8. COMBINACIÓN DE TODOS LOS FILTROS
+        function aplicarFiltrosCombinados() {
+            const cards = document.querySelectorAll('.passenger-row-card');
+
+            cards.forEach(card => {
+                const bus = card.getAttribute('data-bus');
+                const name = card.getAttribute('data-name') || '';
+                const doc = card.getAttribute('data-cedula') || '';
+                const cb = card.querySelector('input[name="pasajeros"]');
+                const isChecked = cb ? cb.checked : false;
+
+                // Match Bus
+                const matchBus = (currentBusFilter === 'all' || bus === currentBusFilter);
+
+                // Match Status
+                let matchStatus = true;
+                if (currentStatusFilter === 'asisten') matchStatus = isChecked;
+                if (currentStatusFilter === 'no_asisten') matchStatus = !isChecked;
+
+                // Match Search Query
+                let matchSearch = true;
+                if (currentSearchQuery) {
+                    matchSearch = name.includes(currentSearchQuery) || doc.includes(currentSearchQuery);
+                }
+
+                if (matchBus && matchStatus && matchSearch) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Ocultar tarjetas de grupo si todos sus pasajeros están ocultos
+            document.querySelectorAll('.group-card').forEach(grp => {
+                const visibleInGroup = grp.querySelectorAll('.passenger-row-card:not([style*="display: none"])');
+                grp.style.display = visibleInGroup.length > 0 ? 'block' : 'none';
+            });
+        }
+
+        // 9. ENVÍO DEL FORMULARIO CON FEEDBACK DINÁMICO
+        function handleFormSubmit(e) {
+            const btn = document.getElementById('btnSaveAttendance');
+            const text = document.getElementById('btnSaveText');
+
+            if (btn) {
+                btn.classList.add('is-saving');
+                if (text) text.textContent = 'Guardando cambios...';
+            }
+
+            hasUnsavedChanges = false;
+            return true; // Enviar formulario normalmente
+        }
+
+        // 10. MOSTRAR TOAST NOTIFICATION
+        let toastTimeout;
+        function mostrarToast(msg) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            if (!toast || !toastMsg) return;
+
+            toastMsg.textContent = msg;
+            toast.classList.add('show');
+
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 11. SHORTCUT CTRL + S PARA GUARDAR
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                const form = document.getElementById('formJuanes');
+                if (form) {
+                    const btn = document.getElementById('btnSaveAttendance');
+                    if (btn) btn.click();
+                }
+            }
+        });
+
+        // INICIALIZAR EN CARGA DE PÁGINA
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarTotales();
+        });
+    </script>
+</body>
+</html>

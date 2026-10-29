@@ -1,0 +1,55 @@
+# ==========================================
+# GITIGNORE • VIAJES NENA (KARMA STUDIO)
+# ==========================================
+
+# Entorno Virtual Python
+venv/
+env/
+.venv/
+ENV/
+
+# Archivos compilados y bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Base de datos local SQLite y archivos temporales
+*.sqlite3-journal
+db.sqlite3.backup*
+
+# Archivos estáticos recolectados (build de producción)
+staticfiles/
+
+# Archivos subidos por usuarios (Media)
+media/
+
+# Archivos de entorno y credenciales
+.env
+.env.local
+.env.*.local
+
+# Logs y diagnósticos
+*.log
+*.pot
+*.dump
+
+# Archivos del sistema operativo
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+.DS_Store
+
+# Carpetas de pruebas temporales de navegador
+edge_test*
+rendered_*.html
+
+# Configuración de editores / IDEs
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace

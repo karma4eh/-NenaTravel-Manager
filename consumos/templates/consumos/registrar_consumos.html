@@ -1,0 +1,1211 @@
+{% load moneda_tags %}
+{% load l10n %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumos | Viajes Nena</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;850;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-main: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+            --navy: #102b46;
+            --navy-dark: #0a1b2d;
+            --navy-light: #183b5e;
+            --turquoise: #16b8b0;
+            --turquoise-dark: #0e8f89;
+            --turquoise-light: #e6f8f7;
+            --background: #f4f7fb;
+            --white: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --border-dark: #cbd5e1;
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --warning: #d97706;
+            --warning-light: #fffbeb;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family: var(--font-main); -webkit-font-smoothing: antialiased;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            background: var(--navy);
+            color: white;
+            padding: 12px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid var(--turquoise);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: var(--turquoise);
+            color: var(--navy);
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .brand-name { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+        .brand-subtitle { font-size: 11px; color: #94b8d7; }
+
+        .top-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            color: #d1e2f2;
+            text-decoration: none;
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 7px;
+            background: rgba(255,255,255,0.06);
+            transition: all .15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.15); color: white; }
+
+        /* RATES HEADER STRIP */
+        .rates-banner {
+            background: linear-gradient(90deg, #0d2238 0%, #153454 100%);
+            color: #e2e8f0;
+            padding: 10px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 13px;
+            border-bottom: 1px solid #1e3a5a;
+        }
+
+        .rate-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .rate-badge strong { color: #38bdf8; }
+
+        .curr-tag {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .curr-tag-cop { background: #e0f2fe; color: #0284c7; }
+        .curr-tag-bs { background: #fef3c7; color: #b45309; }
+
+        /* CONTENEDOR PRINCIPAL */
+        .main-container {
+            max-width: 1380px;
+            margin: 0 auto;
+            padding: 20px 20px 100px;
+        }
+
+        /* MENSAJES */
+        .messages { margin-bottom: 16px; }
+        .alert {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+        .alert-success { background: var(--success-light); color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-error { background: var(--danger-light); color: #991b1b; border: 1px solid #fecaca; }
+        .alert-warning { background: var(--warning-light); color: #92400e; border: 1px solid #fde68a; }
+
+        /* SELECTOR DE DÍAS / EVENTOS (TABS HORIZONTALES) */
+        .events-nav-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .events-tabs-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            max-width: 100%;
+            padding-bottom: 2px;
+        }
+
+        .event-tab-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-dark);
+            background: white;
+            color: var(--navy);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 750;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all .15s ease;
+            white-space: nowrap;
+        }
+        .event-tab-btn:hover {
+            border-color: var(--turquoise);
+            background: #f8fafc;
+        }
+        .event-tab-btn.active {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+            box-shadow: 0 2px 6px rgba(16, 43, 70, 0.2);
+        }
+
+        /* GRID PRINCIPAL POS (2 COLUMNAS) */
+        .pos-grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 22px;
+            align-items: start;
+        }
+        @media (max-width: 960px) {
+            .pos-grid { grid-template-columns: 1fr; }
+        }
+
+        /* COLUMNA IZQUIERDA: LISTA Y FICHA DE PASAJERO */
+        .passenger-sidebar {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 3px 12px rgba(16,43,70,0.03);
+            overflow: hidden;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar-header {
+            padding: 16px 18px 12px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-title {
+            margin: 0 0 10px;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--navy);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-box-input {
+            width: 100%;
+            height: 38px;
+            padding: 8px 12px 8px 34px;
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .search-box-input:focus {
+            border-color: var(--turquoise);
+            box-shadow: 0 0 0 3px rgba(22, 184, 176, 0.15);
+        }
+
+        .search-icon-wrapper {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        /* FICHA DEL PASAJERO ACTIVO */
+        .active-passenger-card {
+            background: var(--turquoise-light);
+            border-bottom: 2px solid var(--turquoise);
+            padding: 14px 18px;
+        }
+
+        .active-p-badge {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: var(--turquoise-dark);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .active-p-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--navy);
+            line-height: 1.3;
+        }
+
+        .active-p-meta {
+            font-size: 12px;
+            color: #475569;
+            margin: 4px 0 10px;
+        }
+
+        .active-p-stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stat-chip {
+            background: var(--white);
+            border: 1px solid #cceee8;
+            border-radius: 7px;
+            padding: 6px 10px;
+        }
+        .stat-chip-lbl { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; }
+        .stat-chip-val { font-size: 13px; font-weight: 800; color: var(--navy); }
+
+        /* LISTA SCROLLABLE DE PASAJEROS */
+        .passenger-list-container {
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .passenger-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            text-decoration: none;
+            color: var(--text);
+            transition: background .12s;
+        }
+        .passenger-item-row:hover {
+            background: #f8fafc;
+        }
+        .passenger-item-row.selected {
+            background: #eff6ff;
+            border-left: 3px solid var(--turquoise);
+            font-weight: 700;
+        }
+
+        .p-row-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .p-row-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--navy);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .p-row-sub {
+            font-size: 11px;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* COLUMNA DERECHA: PRODUCTOS */
+        .products-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .pos-panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 3px 12px rgba(16,43,70,0.03);
+            padding: 22px;
+        }
+
+        .panel-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 14px;
+        }
+
+        .panel-heading-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--navy);
+        }
+
+        .product-search-input {
+            width: 240px;
+            height: 36px;
+            padding: 6px 12px 6px 30px;
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+        }
+        .product-search-input:focus {
+            border-color: var(--turquoise);
+        }
+
+        /* GRID DE PRODUCTOS POS */
+        .pos-products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .product-card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+            transition: all .15s ease;
+            position: relative;
+        }
+        .product-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+            transform: translateY(-2px);
+        }
+        .product-card.has-qty {
+            border-color: var(--turquoise);
+            background: #f0fdfc;
+            box-shadow: 0 0 0 2px rgba(22, 184, 176, 0.25);
+        }
+
+        .card-top-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .prod-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--navy);
+            line-height: 1.3;
+        }
+
+        .prod-price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-top: 2px;
+        }
+
+        .prod-price-cop {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0284c7;
+        }
+
+        .prod-price-usd {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .prod-prev-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .badge-prev-consumed {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-prev-none {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        /* STEPPER DE CANTIDAD */
+        .stepper-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f8fafc;
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .btn-stepper {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 6px;
+            background: var(--white);
+            color: var(--navy);
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            transition: all .12s;
+            user-select: none;
+        }
+        .btn-stepper:hover {
+            background: var(--navy);
+            color: white;
+        }
+        .btn-stepper:active {
+            transform: scale(0.92);
+        }
+
+        .input-qty {
+            width: 60px;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--navy);
+            outline: none;
+            font-family: inherit;
+        }
+
+        /* BOTONES DE TOQUE RÁPIDO */
+        .quick-add-pills {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-quick-add {
+            flex: 1;
+            padding: 4px 0;
+            border: 1px dashed var(--border-dark);
+            background: #ffffff;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .12s;
+        }
+        .btn-quick-add:hover {
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+            border-color: var(--turquoise);
+        }
+
+        .card-subtotal-badge {
+            font-size: 11px;
+            font-weight: 800;
+            color: #065f46;
+            text-align: right;
+            display: none;
+        }
+
+        /* HISTORIAL DE CONSUMOS REGISTRADOS */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .history-table th {
+            text-align: left;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            color: var(--navy);
+            font-weight: 700;
+        }
+        .history-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .history-table tr:last-child td { border-bottom: 0; }
+
+        /* CHECKOUT BAR FLOTANTE INFERIOR */
+        .checkout-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--navy);
+            color: white;
+            padding: 12px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 -4px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            flex-wrap: wrap;
+        }
+
+        .checkout-info {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .checkout-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-submit-consumos {
+            background: var(--turquoise);
+            color: #043834;
+            height: 44px;
+            padding: 0 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all .15s ease;
+        }
+        .btn-submit-consumos:hover {
+            background: #19d4cb;
+            transform: translateY(-1px);
+        }
+
+        .btn-reset-qty {
+            background: transparent;
+            color: #cbd5e1;
+            border: 1px solid rgba(255,255,255,0.3);
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .btn-reset-qty:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        /* ESTADO VACÍO INICIAL */
+        .empty-selection-placeholder {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--white);
+            border: 1px dashed #cbd5e1;
+            border-radius: 14px;
+        }
+
+        /* SVG ICONS HELPER */
+        .svg-icon {
+            display: inline-block;
+            vertical-align: middle;
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+    
+        [data-theme="dark"] {
+            --navy: #f8fafc;
+            --navy-dark: #080f18;
+            --navy-light: #162438;
+            --turquoise: #22d3ee;
+            --turquoise-dark: #06b6d4;
+            --turquoise-light: rgba(34, 211, 238, 0.15);
+            --turquoise-glow: rgba(34, 211, 238, 0.3);
+            --background: #090f19;
+            --white: #121c2d;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --muted: #94a3b8;
+            --border: #1e2c40;
+            --border-dark: #2a3d56;
+            --success: #34d399;
+            --success-light: rgba(52, 211, 153, 0.18);
+            --danger: #f87171;
+            --danger-light: rgba(248, 113, 113, 0.18);
+            --warning: #fbbf24;
+            --warning-light: rgba(251, 191, 36, 0.18);
+        }
+    
+    </style>
+{% include "core/includes/dark_mode_head.html" %}
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+    <a href="{% url 'home' %}" class="brand">
+        <div class="brand-icon">VN</div>
+        <div>
+            <div class="brand-name">Viajes Nena</div>
+            <div class="brand-subtitle">Punto de Venta y Registro de Consumos</div>
+        </div>
+    </a>
+
+    <div class="top-nav" style="display:flex;align-items:center;gap:10px;">
+{% include "core/includes/dark_mode_toggle.html" %}
+        <a href="{% url 'home' %}" class="nav-btn">
+            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Panel Principal
+        </a>
+        <a href="{% url 'cobros' %}" class="nav-btn">Cobros y Cuentas</a>
+        <a href="{% url 'gestion_precios' %}" class="nav-btn">Lista de Precios</a>
+        <a href="{% url 'logout' %}" class="nav-btn">Cerrar sesión</a>
+        </div>
+</header>
+
+<!-- BANNER DE TASAS DEL VIAJE -->
+{% if viaje %}
+<div class="rates-banner">
+    <div>
+        <strong>Viaje:</strong> {{ viaje.nombre }} · {{ viaje.destino }}
+        <span style="opacity:.8;">({{ viaje.fecha_inicio|date:"d/m/Y" }} al {{ viaje.fecha_fin|date:"d/m/Y" }})</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <span class="rate-badge">
+            <span class="curr-tag curr-tag-cop">COP</span> 1 USD = <strong>{{ viaje.tasa_usd_cop|punto_miles }} COP</strong>
+        </span>
+        <span class="rate-badge">
+            <span class="curr-tag curr-tag-bs">BS</span> 1 USD = <strong>{{ viaje.tasa_usd_bs|floatformat:2 }} Bs</strong> (BCV)
+        </span>
+    </div>
+</div>
+{% endif %}
+
+<main class="main-container">
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {% if 'success' in message.tags %}alert-success{% elif 'error' in message.tags %}alert-error{% else %}alert-warning{% endif %}">
+                {% if 'success' in message.tags %}
+                    <svg class="svg-icon" style="color:var(--success);width:18px;height:18px;" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                {% elif 'error' in message.tags %}
+                    <svg class="svg-icon" style="color:var(--danger);width:18px;height:18px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                {% else %}
+                    <svg class="svg-icon" style="color:#d97706;width:18px;height:18px;" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                {% endif %}
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if viaje %}
+
+    <!-- 1. PESTAÑAS RÁPIDAS DE EVENTO / DÍA -->
+    <div class="events-nav-card">
+        <div style="font-size:13px;font-weight:800;color:var(--navy);display:flex;align-items:center;gap:6px;">
+            <svg class="svg-icon" style="color:var(--turquoise-dark);width:18px;height:18px;" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Selecciona el Evento / Día:
+        </div>
+
+        <div class="events-tabs-group">
+            {% for e in eventos %}
+                <a
+                    href="{% url 'registrar_consumos' %}?viaje={{ viaje.id }}&evento={{ e.id }}{% if pasajero %}&pasajero={{ pasajero.id }}{% endif %}"
+                    class="event-tab-btn {% if evento and evento.id == e.id %}active{% endif %}"
+                >
+                    {{ e.nombre }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 2. LAYOUT POS (2 COLUMNAS) -->
+    <div class="pos-grid">
+
+        <!-- COLUMNA IZQUIERDA: LISTA Y BÚSQUEDA DE PASAJEROS -->
+        <aside class="passenger-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <span>Pasajeros ({{ todos_los_pasajeros|length }})</span>
+                </div>
+
+                <div style="position:relative;">
+                    <div class="search-icon-wrapper">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
+                    <input
+                        type="search"
+                        id="live-search-pasajeros"
+                        class="search-box-input"
+                        placeholder="Buscar nombre, cédula o grupo..."
+                        autocomplete="off"
+                    >
+                </div>
+            </div>
+
+            <!-- FICHA DEL PASAJERO ACTIVO SI ESTÁ SELECCIONADO -->
+            {% if pasajero %}
+            <div class="active-passenger-card">
+                <div class="active-p-badge">Pasajero Activo</div>
+                <div class="active-p-name">{{ pasajero.nombre }}</div>
+                <div class="active-p-meta">
+                    {{ pasajero.grupo.nombre }}{% if pasajero.grupo.bus %} · Bus {{ pasajero.grupo.bus }}{% endif %}
+                    {% if pasajero.cedula %} · C.I. {{ pasajero.cedula }}{% endif %}
+                </div>
+
+                <div class="active-p-stats-row">
+                    <div class="stat-chip">
+                        <div class="stat-chip-lbl">Hoy ({{ evento.nombre }})</div>
+                        <div class="stat-chip-val">{{ total_consumos_evento|punto_miles }} COP</div>
+                    </div>
+                    <div class="stat-chip">
+                        <div class="stat-chip-lbl">Total Viaje</div>
+                        <div class="stat-chip-val" style="color:#0891b2;">{{ total_cuenta_pasajero|punto_miles }} COP</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- LISTA SCROLLABLE DE TODOS LOS PASAJEROS -->
+            <div class="passenger-list-container" id="passengers-list">
+                {% for p in todos_los_pasajeros %}
+                <a
+                    href="{% url 'registrar_consumos' %}?viaje={{ viaje.id }}&evento={{ evento.id }}&pasajero={{ p.id }}"
+                    class="passenger-item-row {% if pasajero and pasajero.id == p.id %}selected{% endif %}"
+                    data-nombre="{{ p.nombre|lower }}"
+                    data-cedula="{{ p.cedula|lower }}"
+                    data-grupo="{{ p.grupo.nombre|lower }}"
+                >
+                    <div class="p-row-info">
+                        <span class="p-row-name">{{ p.nombre }}</span>
+                        <span class="p-row-sub">
+                            {{ p.grupo.nombre }}{% if p.grupo.bus %} (Bus {{ p.grupo.bus }}){% endif %}
+                            {% if p.cedula %} · {{ p.cedula }}{% endif %}
+                        </span>
+                    </div>
+
+                    <svg class="svg-icon" style="color:var(--muted);width:14px;height:14px;" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+                {% empty %}
+                <div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;">
+                    No hay pasajeros en este viaje.
+                </div>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <!-- COLUMNA DERECHA: PRODUCTOS Y CARGA -->
+        <section class="products-area">
+
+            {% if pasajero %}
+                <!-- FORMULARIO DE CARGA DE CONSUMOS -->
+                <form
+                    method="post"
+                    action="{% url 'registrar_consumos' %}"
+                    id="form-pos-consumos"
+                >
+                    {% csrf_token %}
+                    <input type="hidden" name="viaje" value="{{ viaje.id }}">
+                    <input type="hidden" name="evento" value="{{ evento.id }}">
+                    <input type="hidden" name="pasajero" value="{{ pasajero.id }}">
+                    <input type="hidden" name="accion" value="agregar">
+
+                    <div class="pos-panel">
+                        <div class="panel-header-row">
+                            <div>
+                                <h2 class="panel-heading-title">
+                                    Catálogo de Consumos · {{ evento.nombre }}
+                                </h2>
+                                <div style="font-size:13px;color:var(--muted);margin-top:2px;">
+                                    Agrega cantidades consumidas para <strong>{{ pasajero.nombre }}</strong>.
+                                </div>
+                            </div>
+
+                            <div style="position:relative;">
+                                <div class="search-icon-wrapper" style="left:8px;">
+                                    <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                </div>
+                                <input
+                                    type="search"
+                                    id="filter-products-input"
+                                    class="product-search-input"
+                                    placeholder="Filtrar productos..."
+                                    autocomplete="off"
+                                >
+                            </div>
+                        </div>
+
+                        <!-- GRID DE TARJETAS DE PRODUCTOS -->
+                        <div class="pos-products-grid" id="products-grid">
+                            {% for item in productos_formulario %}
+                            <div
+                                class="product-card"
+                                id="prod-card-{{ item.producto.id }}"
+                                data-nombre="{{ item.producto.nombre|lower }}"
+                                data-precio="{{ item.precio|unlocalize }}"
+                            >
+                                <div class="card-top-info">
+                                    <span class="prod-name">{{ item.producto.nombre }}</span>
+
+                                    <div class="prod-price-row">
+                                        <span class="prod-price-cop">{{ item.precio|punto_miles }} COP</span>
+                                        <span class="prod-price-usd">~${{ item.precio_usd }} USD</span>
+                                    </div>
+
+                                    {% if item.cantidad_actual > 0 %}
+                                        <span class="prod-prev-badge badge-prev-consumed">
+                                            Lleva: {{ item.cantidad_actual }} unid. ({{ item.total_actual|punto_miles }} COP)
+                                        </span>
+                                    {% else %}
+                                        <span class="prod-prev-badge badge-prev-none">
+                                            Sin consumos previos
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- STEPPER Y CONTROLES DE ADICIÓN -->
+                                <div style="display:flex;flex-direction:column;gap:8px;">
+                                    <div class="stepper-container">
+                                        <button
+                                            type="button"
+                                            class="btn-stepper btn-sub"
+                                            title="Restar 1"
+                                        >−</button>
+
+                                        <input
+                                            type="number"
+                                            id="producto_{{ item.producto.id }}"
+                                            name="producto_{{ item.producto.id }}"
+                                            class="input-qty pos-qty-input"
+                                            min="0"
+                                            step="1"
+                                            value="0"
+                                            data-precio="{{ item.precio|unlocalize }}"
+                                            data-nombre="{{ item.producto.nombre }}"
+                                        >
+
+                                        <button
+                                            type="button"
+                                            class="btn-stepper btn-add"
+                                            title="Sumar 1"
+                                        >+</button>
+                                    </div>
+
+                                    <!-- BOTONES RÁPIDOS (+1, +2, +5) -->
+                                    <div class="quick-add-pills">
+                                        <button type="button" class="btn-quick-add" data-add="1">+1</button>
+                                        <button type="button" class="btn-quick-add" data-add="2">+2</button>
+                                        <button type="button" class="btn-quick-add" data-add="5">+5</button>
+                                    </div>
+
+                                    <div class="card-subtotal-badge" id="subtotal-badge-{{ item.producto.id }}">
+                                        +0 COP
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div style="grid-column:1/-1;padding:30px;text-align:center;color:var(--muted);">
+                                No hay productos configurados para este viaje.
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- BARRA FLOTANTE DE CONFIRMACIÓN (CHECKOUT) -->
+                    <aside class="checkout-bar" id="checkout-strip">
+                        <div class="checkout-info">
+                            <div>
+                                <span style="font-size:12px;color:#c5d5e4;display:block;">Cargando a:</span>
+                                <strong>{{ pasajero.nombre }}</strong>
+                                <span style="opacity:.8;font-size:12px;">({{ evento.nombre }})</span>
+                            </div>
+
+                            <div style="display:flex;gap:14px;align-items:center;">
+                                <span>Ítems: <strong id="checkout-count" style="color:#2ee6dc;">0</strong></span>
+                                <span>Total adicional: <strong id="checkout-total" style="font-size:18px;color:#2ee6dc;">0 COP</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="checkout-actions">
+                            <button type="button" class="btn-reset-qty" id="btn-clear-all-qty">
+                                Limpiar
+                            </button>
+
+                            <button type="submit" class="btn-submit-consumos">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                Cargar a la Cuenta
+                            </button>
+                        </div>
+                    </aside>
+                </form>
+
+                <!-- 3. TABLA DE CONSUMOS YA REGISTRADOS EN ESTE EVENTO -->
+                <div class="pos-panel">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                        <h3 style="margin:0;font-size:16px;font-weight:800;color:var(--navy);">
+                            Consumos acumulados de {{ pasajero.nombre }} en {{ evento.nombre }}
+                        </h3>
+                        <span style="font-size:13px;font-weight:700;color:var(--navy);">
+                            Subtotal Día: <strong style="color:#0284c7;">{{ total_consumos_evento|punto_miles }} COP</strong>
+                        </span>
+                    </div>
+
+                    {% if consumos_existentes %}
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th style="text-align:center;">Cantidad acumulada</th>
+                                <th style="text-align:right;">Precio unitario</th>
+                                <th style="text-align:right;">Total acumulado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in consumos_existentes %}
+                            <tr>
+                                <td style="font-weight:700;color:var(--navy);">{{ c.producto.nombre }}</td>
+                                <td style="text-align:center;font-weight:700;">{{ c.cantidad }}</td>
+                                <td style="text-align:right;color:var(--muted);">{{ c.precio_unitario|punto_miles }} COP</td>
+                                <td style="text-align:right;font-weight:800;color:var(--navy);">{{ c.total|punto_miles }} COP</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div style="padding:20px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed #e2e8f0;border-radius:8px;">
+                        No hay consumos previos registrados para este pasajero en {{ evento.nombre }}.
+                    </div>
+                    {% endif %}
+                </div>
+
+            {% else %}
+                <!-- MENSAJE DE ESPERA / SELECCIÓN INICIAL -->
+                <div class="empty-selection-placeholder">
+                    <div style="width:52px;height:52px;border-radius:50%;background:var(--turquoise-light);color:var(--turquoise-dark);display:grid;place-items:center;margin:0 auto 16px;">
+                        <svg class="svg-icon" style="width:28px;height:28px;" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <h3 style="margin:0 0 8px;font-size:18px;font-weight:800;color:var(--navy);">
+                        Selecciona un Pasajero
+                    </h3>
+                    <p style="color:var(--muted);max-width:440px;margin:0 auto 20px;font-size:13px;line-height:1.6;">
+                        Elige un pasajero en la lista de la izquierda para abrir su cuenta y registrar los consumos de <strong>{{ evento.nombre }}</strong>.
+                    </p>
+                </div>
+            {% endif %}
+
+        </section>
+
+    </div>
+
+    {% else %}
+    <!-- NO HAY VIAJE ACTIVO -->
+    <div class="pos-panel" style="text-align:center;padding:60px 20px;">
+        <h3 style="margin:0 0 8px;color:var(--navy);font-size:20px;">No hay ningún viaje activo</h3>
+        <p style="color:var(--muted);margin-bottom:20px;">Crea o activa un viaje antes de registrar consumos.</p>
+        <a href="{% url 'crear_viaje' %}" class="btn-submit-consumos" style="text-decoration:none;display:inline-flex;">
+            Crear viaje
+        </a>
+    </div>
+    {% endif %}
+
+</main>
+
+<script>
+(function() {
+    // 1. FILTRO EN VIVO DE PASAJEROS (BÚSQUEDA INSTANTÁNEA EN JAVASCRIPT)
+    const searchPasajeros = document.getElementById("live-search-pasajeros");
+    const passengerRows = document.querySelectorAll(".passenger-item-row");
+
+    if (searchPasajeros) {
+        searchPasajeros.addEventListener("input", function() {
+            const query = this.value.trim().toLowerCase();
+            passengerRows.forEach(row => {
+                const nombre = row.dataset.nombre || "";
+                const cedula = row.dataset.cedula || "";
+                const grupo = row.dataset.grupo || "";
+
+                if (query === "" || nombre.includes(query) || cedula.includes(query) || grupo.includes(query)) {
+                    row.style.display = "flex";
+                } else {
+                    row.style.display = "none";
+                }
+            });
+        });
+    }
+
+    // 2. FILTRO EN VIVO DE PRODUCTOS
+    const filterProducts = document.getElementById("filter-products-input");
+    const productCards = document.querySelectorAll(".product-card");
+
+    if (filterProducts) {
+        filterProducts.addEventListener("input", function() {
+            const query = this.value.trim().toLowerCase();
+            productCards.forEach(card => {
+                const nombre = card.dataset.nombre || "";
+                if (query === "" || nombre.includes(query)) {
+                    card.style.display = "flex";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        });
+    }
+
+    // 3. CONTROL DE CANTIDADES Y RESUMEN EN VIVO (POS STEPPER)
+    const qtyInputs = document.querySelectorAll(".pos-qty-input");
+    const checkoutCount = document.getElementById("checkout-count");
+    const checkoutTotal = document.getElementById("checkout-total");
+    const btnClearAll = document.getElementById("btn-clear-all-qty");
+
+    function recalcularTotales() {
+        let totalItems = 0;
+        let totalCop = 0;
+
+        qtyInputs.forEach(input => {
+            const qty = Math.max(0, parseInt(input.value || "0") || 0);
+            const precio = parseFloat(input.dataset.precio || "0");
+            const card = input.closest(".product-card");
+            const subBadge = card ? card.querySelector(".card-subtotal-badge") : null;
+
+            if (qty > 0) {
+                totalItems += qty;
+                const subtotal = qty * precio;
+                totalCop += subtotal;
+
+                if (card) card.classList.add("has-qty");
+                if (subBadge) {
+                    subBadge.style.display = "block";
+                    subBadge.textContent = "+ " + Math.round(subtotal).toLocaleString("es-CO") + " COP";
+                }
+            } else {
+                if (card) card.classList.remove("has-qty");
+                if (subBadge) subBadge.style.display = "none";
+            }
+        });
+
+        if (checkoutCount) checkoutCount.textContent = totalItems;
+        if (checkoutTotal) checkoutTotal.textContent = Math.round(totalCop).toLocaleString("es-CO") + " COP";
+    }
+
+    // Stepper + y -
+    document.querySelectorAll(".btn-add").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const input = this.parentElement.querySelector(".pos-qty-input");
+            if (input) {
+                input.value = Math.max(0, parseInt(input.value || "0") || 0) + 1;
+                recalcularTotales();
+            }
+        });
+    });
+
+    document.querySelectorAll(".btn-sub").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const input = this.parentElement.querySelector(".pos-qty-input");
+            if (input) {
+                input.value = Math.max(0, (parseInt(input.value || "0") || 0) - 1);
+                recalcularTotales();
+            }
+        });
+    });
+
+    // Botones rápidos (+1, +2, +5)
+    document.querySelectorAll(".btn-quick-add").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const delta = parseInt(this.dataset.add || "1") || 1;
+            const card = this.closest(".product-card");
+            const input = card ? card.querySelector(".pos-qty-input") : null;
+            if (input) {
+                input.value = Math.max(0, parseInt(input.value || "0") || 0) + delta;
+                recalcularTotales();
+            }
+        });
+    });
+
+    qtyInputs.forEach(input => {
+        input.addEventListener("input", recalcularTotales);
+    });
+
+    if (btnClearAll) {
+        btnClearAll.addEventListener("click", function() {
+            qtyInputs.forEach(input => input.value = 0);
+            recalcularTotales();
+        });
+    }
+
+    // Inicializar totales
+    recalcularTotales();
+})();
+</script>
+
+</body>
+</html>

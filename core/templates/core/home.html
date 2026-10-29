@@ -1,0 +1,3228 @@
+{% load moneda_tags %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control | Viajes Nena</title>
+
+    <!-- Script anti-parpadeo para modo oscuro -->
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('viajes_nena_theme');
+                const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    <style>
+        :root {
+            --navy: #102b46;
+            --navy-deep: #0a1b2d;
+            --navy-light: #163657;
+            --turquoise: #16b8b0;
+            --turquoise-dark: #0e8f89;
+            --turquoise-light: #e6f8f7;
+            --turquoise-glow: rgba(22, 184, 176, 0.25);
+            --background: #f4f7fb;
+            --surface: #ffffff;
+            --surface-hover: #fcfdfe;
+            --surface-alt: #f8fafc;
+            --text: #1e293b;
+            --text-secondary: #334155;
+            --muted: #475569;
+            --border: #e2e8f0;
+            --border-light: #edf2f7;
+            --card-shadow: 0 4px 20px -2px rgba(16, 43, 70, 0.06);
+            --card-shadow-hover: 0 18px 36px -4px rgba(16, 43, 70, 0.12);
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --orange: #d97706;
+            --orange-light: #fffbeb;
+            --red: #dc2626;
+            --red-light: #fef2f2;
+            --blue-light: #eff6ff;
+            --blue: #2563eb;
+            --purple-light: #f5f3ff;
+            --purple: #7c3aed;
+        }
+
+        [data-theme="dark"] {
+            --navy: #e2e8f0;
+            --navy-deep: #080f18;
+            --navy-light: #162438;
+            --turquoise: #22d3ee;
+            --turquoise-dark: #06b6d4;
+            --turquoise-light: rgba(34, 211, 238, 0.14);
+            --turquoise-glow: rgba(34, 211, 238, 0.3);
+            --background: #09121f;
+            --surface: #121e30;
+            --surface-hover: #17263c;
+            --surface-alt: #0d1726;
+            --text: #f1f5f9;
+            --text-secondary: #f1f5f9;
+            --muted: #cbd5e1;
+            --border: #1e314b;
+            --border-light: #18283e;
+            --card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.5);
+            --card-shadow-hover: 0 18px 36px -4px rgba(0, 0, 0, 0.75);
+            --success: #34d399;
+            --success-light: rgba(52, 211, 153, 0.15);
+            --orange: #fbbf24;
+            --orange-light: rgba(251, 191, 36, 0.15);
+            --red: #f87171;
+            --red-light: rgba(248, 113, 113, 0.15);
+            --blue-light: rgba(59, 130, 246, 0.15);
+            --blue: #60a5fa;
+            --purple-light: rgba(168, 85, 247, 0.15);
+            --purple: #c084fc;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: var(--background);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        button, a { font: inherit; }
+
+        a:focus-visible, button:focus-visible {
+            outline: 3px solid var(--turquoise);
+            outline-offset: 3px;
+        }
+
+        /* SVG ICONS */
+        .svg-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            background: #102b46;
+            color: white;
+            padding: 14px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+            border-bottom: 2px solid var(--turquoise);
+        }
+
+        [data-theme="dark"] .topbar {
+            background: #091320;
+            border-bottom: 2px solid #22d3ee;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.45);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #16b8b0 0%, #0e8f89 100%);
+            color: #0a1b2d;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: 0 4px 12px rgba(22, 184, 176, 0.35);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .brand:hover .brand-icon {
+            transform: scale(1.08) rotate(-3deg);
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 850;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .brand-subtitle {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #b8d5ed;
+            margin-top: 1px;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* MARCA DE AGUA KARMA STUDIO */
+        .karma-topbar-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 750;
+            color: #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .karma-topbar-badge:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: rgba(34, 211, 238, 0.4);
+        }
+
+        .karma-icon {
+            width: 14px;
+            height: 14px;
+            stroke: #22d3ee;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .karma-v-tag {
+            background: #22d3ee;
+            color: #091320;
+            padding: 1px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.2px;
+        }
+
+        .user-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 13.5px;
+            font-weight: 750;
+            color: #ffffff;
+        }
+
+        .role-tag-pill {
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 10.5px;
+            font-weight: 850;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .role-tag-admin {
+            background: rgba(34, 211, 238, 0.2);
+            color: #22d3ee;
+            border: 1px solid rgba(34, 211, 238, 0.4);
+        }
+
+        .role-tag-vendedor {
+            background: rgba(52, 211, 153, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(52, 211, 153, 0.4);
+        }
+
+        .user-avatar-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--turquoise);
+            color: #0a1b2d;
+            display: grid;
+            place-items: center;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .btn-theme-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fed7aa;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: scale(1.08);
+            color: #fef08a;
+        }
+
+        .logout-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 750;
+            padding: 7px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(220, 38, 38, 0.2);
+            border-color: rgba(220, 38, 38, 0.4);
+            color: #fca5a5;
+            transform: translateY(-1px);
+        }
+
+        /* CONTAINER */
+        .container {
+            width: min(1200px, 94%);
+            margin: 28px auto 60px;
+            flex-grow: 1;
+        }
+
+        /* HERO GREETING SECTION */
+        .hero-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.45s ease-out both;
+        }
+
+        .hero-left {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--turquoise);
+            font-size: 12.5px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 6px;
+        }
+
+        .eyebrow-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--turquoise);
+            box-shadow: 0 0 10px var(--turquoise);
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.6; }
+        }
+
+        .hero-title {
+            color: var(--navy);
+            font-size: clamp(26px, 3.8vw, 34px);
+            font-weight: 850;
+            letter-spacing: -0.6px;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero-greeting-icon {
+            width: 32px;
+            height: 32px;
+            color: #f59e0b;
+        }
+
+        .hero-subtitle {
+            margin: 6px 0 0;
+            color: var(--text-secondary);
+            font-size: 14.5px;
+            font-weight: 600;
+            max-width: 640px;
+            line-height: 1.5;
+        }
+
+        /* LIVE DATETIME & BCV CARD */
+        .hero-right-cards {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .live-datetime-card {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 3px;
+            padding: 10px 18px;
+            border-radius: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+            transition: all 0.25s ease;
+        }
+
+        .live-datetime-card:hover {
+            border-color: var(--turquoise);
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .live-time-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: var(--navy);
+        }
+
+        .live-time-val {
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        .live-date-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13.5px;
+            font-weight: 750;
+            color: var(--text-secondary);
+        }
+
+        .live-time-icon { width: 17px; height: 17px; color: var(--turquoise); }
+        .live-date-icon { width: 14px; height: 14px; color: var(--muted); }
+
+        /* BCV QUICK TICKER PILL */
+        .bcv-ticker-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--card-shadow);
+            transition: all 0.25s ease;
+        }
+
+        .bcv-ticker-pill:hover {
+            border-color: var(--turquoise);
+            transform: translateY(-2px);
+        }
+
+        .bcv-ticker-label {
+            font-size: 11px;
+            font-weight: 850;
+            text-transform: uppercase;
+            color: var(--muted);
+            letter-spacing: 0.4px;
+        }
+
+        .bcv-ticker-rate {
+            font-size: 16px;
+            font-weight: 900;
+            color: var(--navy);
+            font-family: ui-monospace, SFMono-Regular, monospace;
+        }
+
+        .btn-quick-refresh-bcv {
+            display: grid;
+            place-items: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 1px solid rgba(22, 184, 176, 0.3);
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        [data-theme="dark"] .btn-quick-refresh-bcv {
+            color: #22d3ee;
+            border-color: rgba(34, 211, 238, 0.35);
+        }
+
+        .btn-quick-refresh-bcv:hover {
+            background: var(--turquoise);
+            color: #0a1b2d;
+            transform: rotate(180deg);
+        }
+
+        /* MESSAGES */
+        .messages { margin-bottom: 22px; animation: fadeInUp 0.4s ease-out both; }
+        .alert-msg {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 18px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-size: 13.5px;
+            font-weight: 650;
+        }
+        .alert-msg.success {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.25);
+        }
+        .alert-msg.error {
+            background: var(--red-light);
+            color: var(--red);
+            border: 1px solid rgba(220, 38, 38, 0.25);
+        }
+
+        /* ========================================================
+           TRIP CARD & EMPTY BANNER
+        ======================================================== */
+        .trip-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease-out 0.1s both;
+        }
+
+        .trip-card:hover {
+            box-shadow: var(--card-shadow-hover);
+            border-color: rgba(22, 184, 176, 0.35);
+        }
+
+        .trip-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .trip-main {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .trip-avatar-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(22, 184, 176, 0.2) 0%, rgba(14, 143, 137, 0.25) 100%);
+            color: var(--turquoise-dark);
+            border: 1.5px solid rgba(22, 184, 176, 0.4);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(22, 184, 176, 0.2);
+        }
+
+        [data-theme="dark"] .trip-avatar-icon {
+            color: #22d3ee;
+            border-color: rgba(34, 211, 238, 0.4);
+        }
+
+        .trip-heading-tag {
+            font-size: 12px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--turquoise-dark);
+            margin-bottom: 2px;
+        }
+
+        [data-theme="dark"] .trip-heading-tag {
+            color: #22d3ee;
+        }
+
+        .trip-title {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 850;
+            color: var(--navy);
+            letter-spacing: -0.3px;
+        }
+
+        .trip-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+
+        .trip-meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        .trip-badge-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: var(--success-light);
+            color: var(--success);
+            font-size: 12px;
+            font-weight: 850;
+            letter-spacing: 0.3px;
+            border: 1px solid rgba(5, 150, 105, 0.25);
+        }
+
+        .radar-dot {
+            position: relative;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .radar-dot::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            animation: radarPulse 1.8s infinite cubic-bezier(0, 0.2, 0.8, 1);
+        }
+
+        @keyframes radarPulse {
+            0% { transform: scale(0.6); opacity: 1; }
+            100% { transform: scale(2.4); opacity: 0; }
+        }
+
+        /* EMPTY BANNER */
+        .trip-card-empty {
+            padding: 20px 24px;
+            border: 1.5px dashed var(--border);
+            background: var(--surface-alt);
+        }
+
+        .trip-empty-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .trip-empty-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .trip-avatar-empty {
+            background: var(--orange-light);
+            color: var(--orange);
+            border-color: rgba(217, 119, 6, 0.3);
+        }
+
+        .trip-title-compact {
+            font-size: 18px;
+            font-weight: 850;
+            color: var(--navy);
+            margin-bottom: 2px;
+        }
+
+        .trip-desc-compact {
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            font-weight: 650;
+            line-height: 1.45;
+            max-width: 580px;
+        }
+
+        .trip-empty-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-create-trip-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 8px 22px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--turquoise) 0%, var(--turquoise-dark) 100%);
+            color: #052a28;
+            font-size: 14px;
+            font-weight: 850;
+            text-decoration: none;
+            box-shadow: 0 4px 18px var(--turquoise-glow);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 0;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-create-trip-hero:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--turquoise-glow);
+            filter: brightness(1.05);
+            color: #052a28;
+        }
+
+        [data-theme="dark"] .btn-create-trip-hero {
+            background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+            color: #082f49;
+            box-shadow: 0 4px 20px rgba(34, 211, 238, 0.35);
+        }
+
+        /* ========================================================
+           CIRCULAR COLLECTION PROGRESS PANEL
+        ======================================================== */
+        .collection-circle-panel {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-top: 14px;
+            margin-bottom: 14px;
+            transition: all 0.25s ease;
+        }
+
+        .circle-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .circle-header-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15.5px;
+            font-weight: 850;
+            color: var(--navy);
+        }
+
+        .circle-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 13px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 850;
+        }
+
+        .circle-status-pill.status-active {
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+            border: 1px solid rgba(22, 184, 176, 0.3);
+        }
+
+        [data-theme="dark"] .circle-status-pill.status-active {
+            color: #22d3ee;
+        }
+
+        .circle-status-pill.status-complete {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.3);
+        }
+
+        .mini-live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: radarPulse 1.5s infinite;
+        }
+
+        .circle-layout-grid {
+            display: grid;
+            grid-template-columns: 145px 1fr;
+            gap: 24px;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .circle-layout-grid {
+                grid-template-columns: 1fr;
+                justify-items: center;
+                text-align: center;
+                gap: 18px;
+            }
+        }
+
+        .donut-chart-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto;
+            flex-shrink: 0;
+        }
+
+        .donut-chart-svg {
+            transform: rotate(0deg);
+        }
+
+        .donut-track {
+            stroke: var(--border);
+            transition: stroke 0.3s ease;
+        }
+
+        [data-theme="dark"] .donut-track {
+            stroke: #1e2e42;
+        }
+
+        .donut-progress {
+            stroke: url(#recaudadoGrad);
+            transition: stroke-dashoffset 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        [data-theme="dark"] .donut-progress {
+            stroke: url(#recaudadoGradDark);
+        }
+
+        .donut-center-info {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .donut-pct-text {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--navy);
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+
+        .donut-lbl-text {
+            font-size: 11px;
+            font-weight: 750;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .circle-metrics-breakdown {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .circle-metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .circle-metric-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--turquoise);
+            box-shadow: var(--card-shadow);
+        }
+
+        .metric-top-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .dot-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dot-recaudado { background: var(--success); }
+        .dot-falta { background: var(--orange); }
+        .dot-total { background: var(--navy); }
+
+        .metric-kind-title {
+            font-size: 12.5px;
+            font-weight: 850;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            flex: 1;
+        }
+
+        .metric-pct-tag {
+            font-size: 11.5px;
+            font-weight: 850;
+            padding: 2.5px 8px;
+            border-radius: 20px;
+        }
+
+        .tag-recaudado { background: var(--success-light); color: var(--success); }
+        .tag-falta { background: var(--orange-light); color: var(--orange); }
+        .tag-total { background: var(--surface-alt); color: var(--text-secondary); border: 1px solid var(--border); }
+
+        .metric-main-amount {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--navy);
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .text-falta { color: var(--orange); }
+
+        .equiv-usd-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 13.5px;
+            font-weight: 850;
+            color: var(--navy);
+            background: rgba(5, 150, 105, 0.09);
+            border: 1px solid rgba(5, 150, 105, 0.25);
+            padding: 3px 9px;
+            border-radius: 7px;
+            line-height: 1.3;
+        }
+
+        [data-theme="dark"] .equiv-usd-pill {
+            background: rgba(52, 211, 153, 0.12);
+            border-color: rgba(52, 211, 153, 0.3);
+            color: #f1f5f9;
+        }
+
+        .usd-sign {
+            color: #059669;
+            font-weight: 900;
+            font-size: 15px;
+        }
+
+        [data-theme="dark"] .usd-sign {
+            color: #34d399;
+        }
+
+        /* RATES SHOWCASE BAR */
+        .rates-showcase-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 18px;
+        }
+
+        .rate-showcase-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rate-icon-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        [data-theme="dark"] .rate-icon-badge {
+            color: #22d3ee;
+        }
+
+        .rate-label-text {
+            font-size: 12.5px;
+            font-weight: 850;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rate-value-highlight {
+            font-size: 17px;
+            font-weight: 900;
+            color: var(--navy);
+            font-family: ui-monospace, SFMono-Regular, monospace;
+        }
+
+        /* ========================================================
+           STATS GRID (WHEN ACTIVE TRIP)
+        ======================================================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 18px 20px;
+            border-radius: 18px;
+            box-shadow: var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeInUp 0.5s ease-out both;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: rgba(22, 184, 176, 0.4);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stat-icon-wrap {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            transition: transform 0.25s ease;
+        }
+
+        .stat-card:hover .stat-icon-wrap {
+            transform: scale(1.1);
+        }
+
+        .icon-blue { background: var(--blue-light); color: var(--blue); }
+        .icon-purple { background: var(--purple-light); color: var(--purple); }
+        .icon-emerald { background: var(--success-light); color: var(--success); }
+        .icon-amber { background: var(--orange-light); color: var(--orange); }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 12.5px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            color: var(--navy);
+            font-size: 28px;
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value.currency { font-size: 21px; }
+        .stat-value.pending { color: var(--orange); }
+        .stat-value.paid { color: var(--success); }
+
+        .stat-note {
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            font-weight: 650;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 2px;
+        }
+
+        /* ========================================================
+           INTERACTIVE SEARCH & FILTER COMMAND BAR FOR MODULES
+        ======================================================== */
+        .modules-control-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .modules-filter-pills {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 30px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-tab-btn:hover {
+            border-color: var(--turquoise);
+            color: var(--navy);
+            transform: translateY(-1px);
+        }
+
+        .filter-tab-btn.active {
+            background: var(--turquoise);
+            color: #072e2b;
+            border-color: var(--turquoise);
+            box-shadow: 0 4px 14px var(--turquoise-glow);
+        }
+
+        [data-theme="dark"] .filter-tab-btn.active {
+            background: #22d3ee;
+            color: #082f49;
+            border-color: #22d3ee;
+        }
+
+        .filter-count-badge {
+            font-size: 11px;
+            font-weight: 900;
+            padding: 2px 7px;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] .filter-count-badge {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* SEARCH INPUT */
+        .modules-search-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-width: 260px;
+            flex: 1;
+            max-width: 360px;
+        }
+
+        .search-icon-left {
+            position: absolute;
+            left: 14px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .modules-search-input {
+            width: 100%;
+            padding: 9px 40px 9px 42px;
+            border-radius: 30px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 13.5px;
+            font-weight: 650;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .modules-search-input:focus {
+            border-color: var(--turquoise);
+            box-shadow: 0 0 0 3px var(--turquoise-glow);
+        }
+
+        .search-shortcut-hint {
+            position: absolute;
+            right: 12px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        /* ========================================================
+           MODULES GRID
+        ======================================================== */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .module-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+            padding: 24px;
+            color: var(--text);
+            text-decoration: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            animation: fadeInUp 0.5s ease-out both;
+        }
+
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        /* CARD ACCENT STYLES */
+        .card-theme-cobros:hover {
+            border-color: #059669;
+            box-shadow: 0 16px 36px -6px rgba(5, 150, 105, 0.2);
+        }
+        .card-theme-consumos:hover {
+            border-color: #d97706;
+            box-shadow: 0 16px 36px -6px rgba(217, 119, 6, 0.2);
+        }
+        .card-theme-juanes:hover {
+            border-color: #0284c7;
+            box-shadow: 0 16px 36px -6px rgba(2, 132, 199, 0.2);
+        }
+        .card-theme-comidas:hover {
+            border-color: #ea580c;
+            box-shadow: 0 16px 36px -6px rgba(234, 88, 12, 0.25);
+        }
+        .card-theme-precios:hover {
+            border-color: #7c3aed;
+            box-shadow: 0 16px 36px -6px rgba(124, 58, 237, 0.2);
+        }
+        .card-theme-tasas:hover {
+            border-color: var(--turquoise);
+            box-shadow: 0 16px 36px -6px var(--turquoise-glow);
+        }
+        .card-theme-finalizar:hover {
+            border-color: #dc2626;
+            box-shadow: 0 16px 36px -6px rgba(220, 38, 38, 0.25);
+        }
+        .card-theme-reportes:hover {
+            border-color: #2563eb;
+            box-shadow: 0 16px 36px -6px rgba(37, 99, 235, 0.2);
+        }
+        .card-theme-usuarios:hover {
+            border-color: #4f46e5;
+            box-shadow: 0 16px 36px -6px rgba(79, 70, 229, 0.25);
+        }
+
+        .module-top-indicator-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .module-card-icon {
+            display: grid;
+            place-items: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            transition: all 0.25s ease;
+        }
+
+        .module-card:hover .module-card-icon {
+            transform: scale(1.1) rotate(-3deg);
+        }
+
+        .icon-emerald-accent { background: var(--success-light); color: var(--success); }
+        .icon-orange-accent { background: rgba(234, 88, 12, 0.12); color: #ea580c; }
+        [data-theme="dark"] .icon-orange-accent { background: rgba(251, 146, 60, 0.18); color: #fb923c; }
+        .icon-amber-accent { background: var(--orange-light); color: var(--orange); }
+        .icon-cyan-accent { background: var(--turquoise-light); color: var(--turquoise-dark); }
+        .icon-purple-accent { background: var(--purple-light); color: var(--purple); }
+        .icon-blue-accent { background: var(--blue-light); color: var(--blue); }
+        .icon-red-accent { background: var(--red-light); color: var(--red); }
+        .icon-indigo-accent { background: rgba(79, 70, 229, 0.12); color: #4f46e5; }
+        [data-theme="dark"] .icon-indigo-accent { background: rgba(129, 140, 248, 0.18); color: #818cf8; }
+
+        [data-theme="dark"] .icon-cyan-accent { color: #22d3ee; }
+
+        .module-cat-tag {
+            font-size: 11px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: var(--surface-alt);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .module-card h3 {
+            margin: 0 0 6px;
+            color: var(--navy);
+            font-size: 17.5px;
+            font-weight: 850;
+            line-height: 1.3;
+            letter-spacing: -0.2px;
+        }
+
+        .module-card p {
+            margin: 0 0 16px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.55;
+            flex-grow: 1;
+        }
+
+        .module-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .badge-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 850;
+            letter-spacing: 0.2px;
+        }
+
+        .badge-status-pill.available {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.25);
+        }
+
+        .badge-status-pill.required {
+            background: var(--orange-light);
+            color: var(--orange);
+            border: 1px solid rgba(217, 119, 6, 0.25);
+        }
+
+        .badge-status-pill.soon {
+            background: var(--surface-alt);
+            color: var(--muted);
+            border: 1px solid var(--border);
+        }
+
+        .module-arrow-icon {
+            color: var(--turquoise);
+            display: flex;
+            align-items: center;
+            transition: transform 0.25s ease;
+        }
+
+        .module-card:hover .module-arrow-icon {
+            transform: translateX(5px);
+        }
+
+        /* EMPTY SEARCH STATE */
+        .empty-search-state {
+            display: none;
+            grid-column: 1 / -1;
+            padding: 40px 20px;
+            text-align: center;
+            background: var(--surface);
+            border: 1.5px dashed var(--border);
+            border-radius: 20px;
+        }
+
+        .empty-search-title {
+            font-size: 17px;
+            font-weight: 850;
+            color: var(--navy);
+            margin-top: 10px;
+        }
+
+        .empty-search-desc {
+            font-size: 14px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* FOOTER */
+        .footer {
+            margin-top: auto;
+            padding: 24px 5%;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            font-weight: 650;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .karma-footer-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            opacity: 0.95;
+        }
+
+        .karma-sep {
+            color: var(--muted);
+            opacity: 0.5;
+        }
+
+        
+        /* BOTÓN GUÍA DEL SISTEMA */
+        .btn-guide-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 13px;
+            border-radius: 20px;
+            background: rgba(22, 184, 176, 0.12);
+            border: 1px solid rgba(22, 184, 176, 0.35);
+            color: var(--turquoise);
+            font-size: 12.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-guide-pill:hover {
+            background: var(--turquoise);
+            color: #0b1a2c;
+            border-color: var(--turquoise);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(22, 184, 176, 0.25);
+        }
+
+        /* WELCOME MODAL STYLES */
+        .welcome-modal-card {
+            width: min(880px, 96%);
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
+            overflow: hidden;
+            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .welcome-modal-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 24px 28px 18px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .welcome-beta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(245, 158, 11, 0.14);
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            color: #d97706;
+            font-size: 11.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+        }
+
+        [data-theme="dark"] .welcome-beta-pill {
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #d97706;
+            box-shadow: 0 0 8px #d97706;
+            animation: pulseDotAnim 1.6s infinite;
+        }
+
+        [data-theme="dark"] .pulse-dot {
+            background: #fbbf24;
+            box-shadow: 0 0 8px #fbbf24;
+        }
+
+        @keyframes pulseDotAnim {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        .welcome-title {
+            margin: 0 0 4px;
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--navy);
+            letter-spacing: -0.4px;
+        }
+
+        [data-theme="dark"] .welcome-title {
+            color: #ffffff;
+        }
+
+        .welcome-subtitle {
+            margin: 0;
+            font-size: 13.5px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .btn-welcome-close {
+            display: grid;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--surface-subtle);
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-welcome-close:hover {
+            background: rgba(239, 68, 68, 0.12);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .welcome-modal-body {
+            padding: 24px 28px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .welcome-modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .welcome-modal-body::-webkit-scrollbar-thumb {
+            background: rgba(22, 184, 176, 0.3);
+            border-radius: 10px;
+        }
+
+        .beta-notice-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1.5px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .beta-notice-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: rgba(245, 158, 11, 0.2);
+            color: #d97706;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        [data-theme="dark"] .beta-notice-icon {
+            color: #fbbf24;
+        }
+
+        .beta-notice-icon .svg-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .beta-notice-text {
+            font-size: 13.5px;
+            line-height: 1.5;
+            color: var(--navy);
+        }
+
+        [data-theme="dark"] .beta-notice-text {
+            color: #e2e8f0;
+        }
+
+        .beta-notice-text strong {
+            display: block;
+            color: #b45309;
+            font-weight: 800;
+            margin-bottom: 2px;
+        }
+
+        [data-theme="dark"] .beta-notice-text strong {
+            color: #fbbf24;
+        }
+
+        .welcome-intro-card {
+            padding: 18px 22px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(22, 184, 176, 0.1) 0%, rgba(59, 130, 246, 0.08) 100%);
+            border: 1px solid rgba(22, 184, 176, 0.25);
+        }
+
+        .welcome-intro-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--turquoise);
+            margin-bottom: 8px;
+        }
+
+        .welcome-intro-title {
+            margin: 0 0 8px;
+            font-size: 18px;
+            font-weight: 850;
+            color: var(--navy);
+        }
+
+        [data-theme="dark"] .welcome-intro-title {
+            color: #ffffff;
+        }
+
+        .welcome-intro-p {
+            margin: 0;
+            font-size: 13.5px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .features-section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: var(--turquoise);
+            margin-top: 4px;
+        }
+
+        .features-section-title .svg-icon {
+            width: 17px;
+            height: 17px;
+        }
+
+        .welcome-features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .welcome-features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .welcome-feature-card {
+            padding: 16px 18px;
+            border-radius: 14px;
+            background: var(--surface-subtle);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .welcome-feature-card:hover {
+            border-color: var(--turquoise);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .w-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .w-card-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .w-card-icon .svg-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .icon-trip { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .icon-food { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+        .icon-consumos { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+        .icon-cobros { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .icon-juanes { background: rgba(6, 182, 212, 0.15); color: #06b6d4; }
+        .icon-stats { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+        .icon-users { background: rgba(236, 72, 153, 0.15); color: #ec4899; }
+        .icon-finish { background: rgba(14, 165, 233, 0.15); color: #0ea5e9; }
+
+        .w-card-tag {
+            display: inline-block;
+            font-size: 10.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--muted);
+        }
+
+        .w-card-title {
+            margin: 2px 0 0;
+            font-size: 14.5px;
+            font-weight: 800;
+            color: var(--navy);
+        }
+
+        [data-theme="dark"] .w-card-title {
+            color: #ffffff;
+        }
+
+        .w-card-list {
+            margin: 0;
+            padding-left: 18px;
+            font-size: 12.5px;
+            line-height: 1.55;
+            color: var(--text-secondary);
+        }
+
+        .w-card-list li {
+            margin-bottom: 5px;
+        }
+
+        .w-card-list li strong {
+            color: var(--navy);
+        }
+
+        [data-theme="dark"] .w-card-list li strong {
+            color: #f1f5f9;
+        }
+
+        .welcome-modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 16px 28px;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+            flex-wrap: wrap;
+        }
+
+        .welcome-footer-hint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .welcome-footer-hint .svg-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--turquoise);
+            flex-shrink: 0;
+        }
+
+        .btn-welcome-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 24px;
+            border-radius: 12px;
+            border: none;
+            background: #16b8b0;
+            color: #0b1a2c;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(22, 184, 176, 0.35);
+        }
+
+        .btn-welcome-action:hover {
+            background: #22d3ee;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(34, 211, 238, 0.45);
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+            background: rgba(10, 27, 45, 0.75);
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.25s ease-out;
+        }
+
+        .modal-overlay[hidden] { display: none; }
+
+        .modal-window {
+            width: min(520px, 98%);
+            padding: 34px 30px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+            animation: modalPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.92) translateY(12px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-icon-top {
+            display: grid; place-items: center;
+            width: 58px; height: 58px;
+            margin: 0 auto 18px;
+            border-radius: 18px;
+            background: var(--orange-light);
+            color: var(--orange);
+            box-shadow: 0 4px 18px rgba(217, 119, 6, 0.2);
+        }
+
+        .modal-window h2 {
+            margin: 0 0 10px;
+            color: var(--navy);
+            font-size: 23px;
+            font-weight: 850;
+        }
+
+        .modal-window p {
+            margin: 0 auto 24px;
+            max-width: 440px;
+            color: var(--text-secondary);
+            font-size: 14.5px;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-modal {
+            min-height: 44px;
+            padding: 11px 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 14px;
+            text-decoration: none;
+            cursor: pointer;
+            border: 0;
+            transition: all 0.2s ease;
+        }
+
+        .btn-modal-primary {
+            background: linear-gradient(135deg, var(--turquoise) 0%, var(--turquoise-dark) 100%);
+            color: #073a43;
+            box-shadow: 0 4px 16px var(--turquoise-glow);
+        }
+
+        .btn-modal-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--turquoise-glow);
+        }
+
+        .btn-modal-secondary {
+            background: var(--surface-alt);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-modal-secondary:hover {
+            border-color: var(--text-secondary);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 820px) {
+            .circle-layout-grid {
+                grid-template-columns: 1fr;
+            }
+            .circle-metrics-breakdown {
+                grid-template-columns: 1fr;
+            }
+            .modules-control-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .modules-search-box {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+    <a href="{% url 'home' %}" class="brand">
+        <div class="brand-icon">V</div>
+        <div>
+            <div class="brand-name">VIAJES NENA</div>
+            <div class="brand-subtitle">Sistema Operativo de Viajes</div>
+        </div>
+    </a>
+
+    <div class="top-right">
+        <!-- MARCA DE AGUA KARMA STUDIO -->
+        <div class="karma-topbar-badge" title="Desarrollado por Karma Studio — Programación y Marketing Digital">
+            <svg class="karma-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="7 6 2 12 7 18"/>
+                <polyline points="17 6 22 12 17 18"/>
+                <path d="M9 15l3-3.5 3 2.5 4-5"/>
+                <path d="M16 9h3v3"/>
+            </svg>
+            <span class="karma-name">Karma Studio</span>
+            <span class="karma-v-tag">v1.0.0</span>
+        </div>
+
+        <!-- BOTÓN GUÍA DEL SISTEMA (BETA) -->
+        <button type="button" class="btn-guide-pill" onclick="window.abrirModalBienvenida()" title="Ver guía e instrucciones del sistema">
+            <svg class="svg-icon" style="width:15px;height:15px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>Guía del Sistema</span>
+        </button>
+
+        <!-- BOTÓN MODO OSCURO -->
+        <button type="button" class="btn-theme-toggle" id="themeToggleBtn" title="Cambiar tema (Claro / Oscuro)" aria-label="Cambiar tema">
+            <svg class="svg-icon theme-icon-sun" id="iconSun" style="display:none;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg class="svg-icon theme-icon-moon" id="iconMoon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+
+        <div class="user-pill">
+            <span class="user-avatar-circle">{{ request.user.username|slice:":1"|upper }}</span>
+            <span class="user-label">{{ request.user.first_name|default:request.user.username }}</span>
+            <span class="role-tag-pill {% if es_admin %}role-tag-admin{% else %}role-tag-vendedor{% endif %}">
+                {% if es_admin %}Admin{% else %}Vendedor{% endif %}
+            </span>
+        </div>
+
+        <a href="{% url 'logout' %}" class="logout-btn" title="Cerrar sesión">
+            <svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Salir</span>
+        </a>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- HERO / SALUDO DINÁMICO & RELOJ -->
+    <section class="hero-banner">
+        <div class="hero-left">
+            <div class="hero-eyebrow">
+                <span class="eyebrow-dot"></span>
+                <span>Panel de Operaciones en Tiempo Real</span>
+            </div>
+            <h1 class="hero-title">
+                <span id="greetingIconWrap">
+                    <svg class="svg-icon hero-greeting-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                </span>
+                <span id="greetingTitle">Panel de Control</span>
+            </h1>
+            <p class="hero-subtitle">
+                Monitorea el viaje activo, controla consumos, gestiona cobros y administra tus operaciones en tiempo real.
+            </p>
+        </div>
+
+        <div class="hero-right-cards">
+            <!-- Tasa BCV Ticker con Refresh en vivo -->
+            <div class="bcv-ticker-pill" title="Tasa oficial BCV">
+                <div>
+                    <div class="bcv-ticker-label">Oficial BCV</div>
+                    <div class="bcv-ticker-rate" id="bcvTickerVal">{{ info_bcv.tasa|default:"887.30" }} Bs.</div>
+                </div>
+                <button type="button" class="btn-quick-refresh-bcv" id="btnQuickRefreshBcv" onclick="refrescarTasaBCV()" title="Actualizar tasa BCV en vivo">
+                    <svg class="svg-icon" style="width:15px;height:15px;" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                </button>
+            </div>
+
+            <!-- Reloj y fecha en vivo -->
+            <div class="live-datetime-card" id="liveDateTimeCard" title="Hora y fecha en vivo">
+                <div class="live-time-row">
+                    <svg class="svg-icon live-time-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span id="currentTimeStr" class="live-time-val">--:--:--</span>
+                </div>
+                <div class="live-date-row">
+                    <svg class="svg-icon live-date-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span id="currentDateStr">Cargando fecha...</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MENSAJES DJANGO -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert-msg {% if 'success' in message.tags %}success{% elif 'error' in message.tags %}error{% else %}success{% endif %}">
+                    {% if 'error' in message.tags %}
+                        <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    {% else %}
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- TARJETA DEL VIAJE ACTIVO -->
+    <section class="trip-card {% if not hay_viaje_activo %}trip-card-empty{% endif %}">
+        {% if hay_viaje_activo %}
+        <!-- CASO 1: HAY VIAJE ACTIVO -->
+        <div class="trip-top-row">
+            <div class="trip-main">
+                <div class="trip-avatar-icon">
+                    <svg class="svg-icon" style="width:24px;height:24px;" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                </div>
+
+                <div>
+                    <div class="trip-heading-tag">Viaje en curso</div>
+                    <h2 class="trip-title">{{ viaje_activo.nombre }} • {{ viaje_activo.destino }}</h2>
+                    <div class="trip-meta-row">
+                        <span class="trip-meta-item">
+                            <svg class="svg-icon" style="width:14px;height:14px;color:var(--turquoise);" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <strong>Salida:</strong> {{ viaje_activo.fecha_inicio|date:"d/m/Y" }}
+                        </span>
+                        <span class="trip-meta-item">
+                            <svg class="svg-icon" style="width:14px;height:14px;color:var(--turquoise);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <strong>Regreso:</strong> {{ viaje_activo.fecha_fin|date:"d/m/Y" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="trip-badge-live">
+                <span class="radar-dot"></span>
+                <span>Viaje Activo</span>
+            </div>
+        </div>
+
+        <!-- BALANCE Y PROGRESO DE RECAUDACIÓN (GRÁFICO CIRCULAR) -->
+        <div class="collection-circle-panel">
+            <div class="circle-panel-header">
+                <div class="circle-header-title">
+                    <svg class="svg-icon" style="width:18px;height:18px;color:var(--turquoise);" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Balance y Progreso de Recaudación</span>
+                </div>
+                <span class="circle-status-pill {% if stats.porcentaje_recaudado >= 100 %}status-complete{% else %}status-active{% endif %}">
+                    {% if stats.porcentaje_recaudado >= 100 %}
+                        <svg class="svg-icon" style="width:13px;height:13px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        100% Cobrado
+                    {% else %}
+                        <span class="mini-live-dot"></span>
+                        {{ stats.porcentaje_recaudado }}% Recaudado
+                    {% endif %}
+                </span>
+            </div>
+
+            <div class="circle-layout-grid">
+                <!-- GRÁFICO CIRCULAR SVG INTERACTIVO -->
+                <div class="donut-chart-container">
+                    <svg class="donut-chart-svg" viewBox="0 0 130 130" width="130" height="130">
+                        <defs>
+                            <linearGradient id="recaudadoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#16b8b0"/>
+                                <stop offset="100%" stop-color="#059669"/>
+                            </linearGradient>
+                            <linearGradient id="recaudadoGradDark" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#22d3ee"/>
+                                <stop offset="100%" stop-color="#34d399"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Círculo de fondo (track que representa lo que falta) -->
+                        <circle class="donut-track"
+                                cx="65" cy="65" r="54"
+                                fill="transparent"
+                                stroke-width="11"/>
+                        <!-- Círculo de progreso (recaudado) -->
+                        <circle class="donut-progress"
+                                id="donutProgressCircle"
+                                cx="65" cy="65" r="54"
+                                fill="transparent"
+                                stroke-width="11"
+                                stroke-dasharray="339.292"
+                                stroke-dashoffset="{{ stats.dash_offset }}"
+                                stroke-linecap="round"
+                                transform="rotate(-90 65 65)"/>
+                    </svg>
+
+                    <!-- CONTENIDO CENTRAL DEL CÍRCULO -->
+                    <div class="donut-center-info">
+                        <span class="donut-pct-text">{{ stats.porcentaje_recaudado }}%</span>
+                        <span class="donut-lbl-text">Recaudado</span>
+                    </div>
+                </div>
+
+                <!-- DESGLOSE COMPARATIVO: RECAUDADO VS FALTA -->
+                <div class="circle-metrics-breakdown">
+                    <!-- Recaudado -->
+                    <div class="circle-metric-card metric-recaudado">
+                        <div class="metric-top-indicator">
+                            <span class="dot-indicator dot-recaudado"></span>
+                            <span class="metric-kind-title">Ya Recaudado</span>
+                            <span class="metric-pct-tag tag-recaudado">{{ stats.porcentaje_recaudado }}%</span>
+                        </div>
+                        <div class="metric-main-amount">
+                            COP {{ stats.total_recaudado|punto_miles }}
+                        </div>
+                        <div class="metric-sub-equiv">
+                            <span class="equiv-usd-pill">
+                                <span class="usd-sign">$</span><span class="usd-amount">{{ stats.total_recaudado_usd }}</span> <span class="usd-currency">USD</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Falta por recaudar -->
+                    <div class="circle-metric-card metric-falta">
+                        <div class="metric-top-indicator">
+                            <span class="dot-indicator dot-falta"></span>
+                            <span class="metric-kind-title">Falta por Recaudar</span>
+                            <span class="metric-pct-tag tag-falta">{{ stats.porcentaje_pendiente }}%</span>
+                        </div>
+                        <div class="metric-main-amount text-falta">
+                            COP {{ stats.saldo_pendiente|punto_miles }}
+                        </div>
+                        <div class="metric-sub-equiv">
+                            <span class="equiv-usd-pill">
+                                <span class="usd-sign">$</span><span class="usd-amount">{{ stats.saldo_pendiente_usd }}</span> <span class="usd-currency">USD</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Total facturado -->
+                    <div class="circle-metric-card metric-total">
+                        <div class="metric-top-indicator">
+                            <span class="dot-indicator dot-total"></span>
+                            <span class="metric-kind-title">Total Facturado</span>
+                            <span class="metric-pct-tag tag-total">100%</span>
+                        </div>
+                        <div class="metric-main-amount">
+                            COP {{ stats.total_cargos|punto_miles }}
+                        </div>
+                        <div class="metric-sub-equiv">
+                            <span class="equiv-usd-pill">
+                                <span class="usd-sign">$</span><span class="usd-amount">{{ stats.total_cargos_usd }}</span> <span class="usd-currency">USD</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARRA DE TASAS DEL VIAJE -->
+        <div class="rates-showcase-bar">
+            <div class="rate-showcase-item">
+                <div class="rate-icon-badge">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg>
+                </div>
+                <div>
+                    <div class="rate-label-text">Tasa USD a Bolívares</div>
+                    <div class="rate-value-highlight">{{ viaje_activo.tasa_usd_bs }} Bs.</div>
+                </div>
+            </div>
+
+            <div class="rate-showcase-item">
+                <div class="rate-icon-badge">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div>
+                    <div class="rate-label-text">Tasa USD a Pesos (COP)</div>
+                    <div class="rate-value-highlight">{{ viaje_activo.tasa_usd_cop|punto_miles }} COP</div>
+                </div>
+            </div>
+
+            <div class="rate-showcase-item" style="justify-content: flex-end;">
+                <a href="{% url 'cambiar_tasas' %}" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--turquoise-dark);text-decoration:none;">
+                    <span>Ajustar Tasas</span>
+                    <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- CASO 2: NO HAY VIAJE ACTIVO -->
+        <div class="trip-empty-banner">
+            <div class="trip-empty-left">
+                <div class="trip-avatar-icon trip-avatar-empty">
+                    <svg class="svg-icon" style="width:24px;height:24px;" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                </div>
+                <div class="trip-empty-info">
+                    <div class="trip-heading-tag" style="color:var(--orange);">Estado Operativo</div>
+                    <h2 class="trip-title-compact">No hay ningún viaje activo</h2>
+                    <p class="trip-desc-compact">
+                        Crea un viaje con su listín de pasajeros para habilitar las funciones de consumos, cobros y asistencia.
+                    </p>
+                </div>
+            </div>
+
+            <div class="trip-empty-actions">
+                <a href="{% url 'crear_viaje' %}" class="btn-create-trip-hero">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Crear Viaje y Cargar Listín</span>
+                </a>
+            </div>
+        </div>
+
+        {% endif %}
+    </section>
+
+    <!-- ESTADÍSTICAS DEL VIAJE -->
+    {% if hay_viaje_activo %}
+    <section class="stats-grid">
+        <!-- 1. Pasajeros -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Pasajeros</span>
+                <div class="stat-icon-wrap icon-blue">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+            </div>
+            <div class="stat-value count-up-num" data-val="{{ stats.total_pasajeros }}">{{ stats.total_pasajeros }}</div>
+            <div class="stat-note">Registrados en el viaje</div>
+        </div>
+
+        <!-- 2. Grupos & Buses -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Grupos & Buses</span>
+                <div class="stat-icon-wrap icon-purple">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="15" rx="2"/><path d="M4 11h16M8 15h.01M16 15h.01M6 19v2M18 19v2"/></svg>
+                </div>
+            </div>
+            <div class="stat-value count-up-num" data-val="{{ stats.total_grupos }}">{{ stats.total_grupos }}</div>
+            <div class="stat-note">
+                {% if stats.total_buses > 0 %}
+                    Distribuidos en {{ stats.total_buses }} bus{{ stats.total_buses|pluralize:"es" }}
+                {% else %}
+                    Familias registradas
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 3. Cargos Totales -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Cargos Totales</span>
+                <div class="stat-icon-wrap icon-emerald">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+            </div>
+            <div class="stat-value currency">COP {{ stats.total_cargos|punto_miles }}</div>
+            <div>
+                <span class="stat-badge-equiv">
+                    <span class="usd-sign">$</span><span class="usd-amount">{{ stats.total_cargos_usd }}</span> <span class="usd-currency">USD</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- 4. Saldo Pendiente -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-label">Saldo Pendiente</span>
+                <div class="stat-icon-wrap icon-amber">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                </div>
+            </div>
+            <div class="stat-value currency {% if stats.saldo_pendiente > 0 %}pending{% else %}paid{% endif %}">
+                COP {{ stats.saldo_pendiente|punto_miles }}
+            </div>
+            <div>
+                <span class="stat-badge-equiv">
+                    <span class="usd-sign">$</span><span class="usd-amount">{{ stats.saldo_pendiente_usd }}</span> <span class="usd-currency">USD</span>
+                </span>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- SECCIÓN DE MÓDULOS -->
+    <section>
+        <!-- BARRA DINÁMICA DE FILTRADO Y BÚSQUEDA -->
+        <div class="modules-control-bar">
+            <div class="modules-filter-pills">
+                <button type="button" class="filter-tab-btn active" data-filter="all" onclick="filtrarModulos('all', this)">
+                    <span>Todos</span>
+                    <span class="filter-count-badge" id="badgeCountAll">9</span>
+                </button>
+                <button type="button" class="filter-tab-btn" data-filter="operativo" onclick="filtrarModulos('operativo', this)">
+                    <span>Operaciones en Ruta</span>
+                    <span class="filter-count-badge">4</span>
+                </button>
+                <button type="button" class="filter-tab-btn" data-filter="configuracion" onclick="filtrarModulos('configuracion', this)">
+                    <span>Configuración & Tasas</span>
+                    <span class="filter-count-badge">3</span>
+                </button>
+                <button type="button" class="filter-tab-btn" data-filter="reportes" onclick="filtrarModulos('reportes', this)">
+                    <span>Cierre & Reportes</span>
+                    <span class="filter-count-badge">2</span>
+                </button>
+            </div>
+
+            <div class="modules-search-box">
+                <svg class="svg-icon search-icon-left" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="modulesSearchInput" class="modules-search-input" placeholder="Buscar módulo o función..." onkeyup="buscarModulos(this.value)">
+                <span class="search-shortcut-hint">/</span>
+            </div>
+        </div>
+
+        <!-- GRID DE MÓDULOS -->
+        <div class="modules-grid" id="modulesGrid">
+
+            <!-- 1. COBROS Y LIQUIDACIÓN -->
+            <a class="module-card card-theme-cobros"
+               data-category="operativo"
+               data-keywords="cobros liquidacion abonos pagos usd cop bs deudas"
+               href="{% if hay_viaje_activo %}{% url 'cobros' %}{% else %}#{% endif %}"
+               {% if not hay_viaje_activo %}onclick="return mostrarAlertaViaje(event);"{% endif %}>
+                <div class="module-top-indicator-row">
+                    <div class="module-card-icon icon-emerald-accent">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>
+                    </div>
+                    <span class="module-cat-tag">Operaciones</span>
+                </div>
+                <h3>Cobros y Liquidación</h3>
+                <p>Gestiona cuentas pendientes, registra abonos en USD, COP o Bs y liquida deudas por grupo o pasajero.</p>
+                <div class="module-card-footer">
+                    {% if hay_viaje_activo %}
+                        <span class="badge-status-pill available">
+                            <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            Disponible
+                        </span>
+                    {% else %}
+                        <span class="badge-status-pill required">Requiere viaje</span>
+                    {% endif %}
+                    <span class="module-arrow-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 2. REGISTRO DE CONSUMOS -->
+            <a class="module-card card-theme-consumos"
+               data-category="operativo"
+               data-keywords="consumos bebidas licores productos bar gastos viaje"
+               href="{% if hay_viaje_activo %}{% url 'registrar_consumos' %}?viaje={{ viaje_activo.id }}{% else %}#{% endif %}"
+               {% if not hay_viaje_activo %}onclick="return mostrarAlertaViaje(event);"{% endif %}>
+                <div class="module-top-indicator-row">
+                    <div class="module-card-icon icon-amber-accent">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                    </div>
+                    <span class="module-cat-tag">Operaciones</span>
+                </div>
+                <h3>Registro de Consumos</h3>
+                <p>Carga bebidas, licores y productos consumidos por los pasajeros durante cada día del viaje.</p>
+                <div class="module-card-footer">
+                    {% if hay_viaje_activo %}
+                        <span class="badge-status-pill available">
+                            <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            Disponible
+                        </span>
+                    {% else %}
+                        <span class="badge-status-pill required">Requiere viaje</span>
+                    {% endif %}
+                    <span class="module-arrow-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 3. ASISTENCIA A LOS JUANES -->
+            <a class="module-card card-theme-juanes"
+               data-category="operativo"
+               data-keywords="juanes cayo lancha paseo playa asistencia actividad"
+               href="{% if hay_viaje_activo %}{% url 'los_juanes' %}?viaje={{ viaje_activo.id }}{% else %}#{% endif %}"
+               {% if not hay_viaje_activo %}onclick="return mostrarAlertaViaje(event);"{% endif %}>
+                <div class="module-top-indicator-row">
+                    <div class="module-card-icon icon-cyan-accent">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M2 12h20M20 12l-4-4M20 12l-4 4M4 12l4-4M4 12l4 4"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                    <span class="module-cat-tag">Paseo Náutico</span>
+                </div>
+                <h3>Asistencia a Los Juanes</h3>
+                <p>Control de pasajeros que asistirán al cayo Los Juanes con cargo automático al listín.</p>
+                <div class="module-card-footer">
+                    {% if hay_viaje_activo %}
+                        <span class="badge-status-pill available">
+                            <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            Disponible
+                        </span>
+                    {% else %}
+                        <span class="badge-status-pill required">Requiere viaje</span>
+                    {% endif %}
+                    <span class="module-arrow-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 4. CONTROL Y REPARTICIÓN DE COMIDAS -->
+            <a class="module-card card-theme-comidas"
+               data-category="operativo"
+               data-keywords="comida comidas alimentos desayuno almuerzo cena reparticion platos refrigerio control"
+               href="{% if hay_viaje_activo %}{% url 'control_comidas' %}?viaje={{ viaje_activo.id }}{% else %}#{% endif %}"
+               {% if not hay_viaje_activo %}onclick="return mostrarAlertaViaje(event);"{% endif %}>
+                <div class="module-top-indicator-row">
+                    <div class="module-card-icon icon-orange-accent">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/></svg>
+                    </div>
+                    <span class="module-cat-tag">Logística & Alimentos</span>
+                </div>
+                <h3>Repartición de Comidas</h3>
+                <p>Control por bus y en tiempo real de quiénes ya comieron y quiénes faltan por Desayuno, Almuerzo o Cena.</p>
+                <div class="module-card-footer">
+                    {% if hay_viaje_activo %}
+                        <span class="badge-status-pill available">
+                            <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            Disponible
+                        </span>
+                    {% else %}
+                        <span class="badge-status-pill required">Requiere viaje</span>
+                    {% endif %}
+                    <span class="module-arrow-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 4. LISTA DE PRECIOS -->
+            <a class="module-card card-theme-precios"
+               data-category="configuracion"
+               data-keywords="precios productos lista catalogo cop inventario costo"
+               href="{% url 'gestion_precios' %}">
+                <div class="module-top-indicator-row">
+                    <div class="module-card-icon icon-purple-accent">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    </div>
+                    <span class="module-cat-tag">Configuración</span>
+                </div>
+                <h3>Lista de Precios</h3>
+                <p>Configura el catálogo de productos con precios oficiales en Pesos (COP) sincronizados al viaje.</p>
+                <div class="module-card-footer">
+                    {% if es_admin %}
+                        <span class="badge-status-pill available">
+                            <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            Disponible
+                        </span>
+                    {% else %}
+                        <span class="badge-status-pill" style="background:rgba(217,119,6,0.12);color:var(--orange);border:1px solid rgba(217,119,6,0.3);">
+                            <svg class="svg-icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Solo Admin
+                        </span>
+                    {% endif %}
+                    <span class="module-arrow-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 5. TASAS DE CAMBIO -->
+            <a class="module-card card-theme-tasas"
+               data-category="configuracion"
+               data-keywords="tasas cambio bcv bolivares pesos cop dolar divisas moneda"
+               href="{% if es_admin %}{% if hay_viaje_activo %}{% url 'cambiar_tasas' %}{% else %}#{% endif %}{% else %}{% url 'cambiar_tasas' %}{% endif %}"
+               {% if es_admin and not hay_viaje_activo %}onclick="return mostrarAlertaViaje(event);"{% endif %}>
+                <div class="module-top-indicator-row">
+                    <div class="module-card-icon icon-cyan-accent">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg>
+                    </div>
+                    <span class="module-cat-tag">Finanzas</span>
+                </div>
+                <h3>Tasas de Cambio</h3>
+                <p>Ajusta manualmente o consulta en tiempo real las tasas de Bolívares y Pesos respecto al Dólar.</p>
+                <div class="module-card-footer">
+                    {% if es_admin %}
+                        {% if hay_viaje_activo %}
+                            <span class="badge-status-pill available">
+                                <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                Disponible
+                            </span>
+                        {% else %}
+                            <span class="badge-status-pill required">Requiere viaje</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge-status-pill" style="background:rgba(217,119,6,0.12);color:var(--orange);border:1px solid rgba(217,119,6,0.3);">
+                            <svg class="svg-icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Solo Admin
+                        </span>
+                    {% endif %}
+                    <span class="module-arrow-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 6. FINALIZAR VIAJE -->
+            <a class="module-card card-theme-finalizar"
+               data-category="reportes"
+               data-keywords="finalizar viaje cerrar fin reporte archivo culminar bloqueo deudas"
+               href="{% if es_admin %}{% if hay_viaje_activo %}{% url 'finalizar_viaje' %}{% else %}#{% endif %}{% else %}{% url 'finalizar_viaje' %}{% endif %}"
+               {% if es_admin and not hay_viaje_activo %}onclick="return mostrarAlertaViaje(event);"{% endif %}>
+                <div class="module-top-indicator-row">
+                    <div class="module-card-icon icon-red-accent">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="9 16 12 19 16 14"/></svg>
+                    </div>
+                    <span class="module-cat-tag" style="color:var(--red);border-color:rgba(220,38,38,0.3);">Cierre</span>
+                </div>
+                <h3 style="color:var(--red);">Finalizar Viaje</h3>
+                <p>Cierra el ciclo operativo del viaje actual. Bloqueado automáticamente si existen deudas pendientes.</p>
+                <div class="module-card-footer">
+                    {% if es_admin %}
+                        {% if hay_viaje_activo %}
+                            {% if stats.saldo_pendiente > 0 %}
+                                <span class="badge-status-pill" style="background:rgba(220,38,38,0.12);color:var(--red);border:1px solid rgba(220,38,38,0.3);">
+                                    <svg class="svg-icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    Cuentas pendientes
+                                </span>
+                            {% else %}
+                                <span class="badge-status-pill available">
+                                    <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                    Listo para finalizar
+                                </span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge-status-pill required">Requiere viaje</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge-status-pill" style="background:rgba(217,119,6,0.12);color:var(--orange);border:1px solid rgba(217,119,6,0.3);">
+                            <svg class="svg-icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Solo Admin
+                        </span>
+                    {% endif %}
+                    <span class="module-arrow-icon" style="color:var(--red);">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 7. REPORTES Y MÉTRICAS -->
+            <a class="module-card card-theme-reportes"
+               data-category="reportes"
+               data-keywords="reportes metricas graficos estadisticas flujo caja rentabilidad balance recaudado bs cop usd"
+               href="{% if es_admin %}{% if hay_viaje_activo %}{% url 'estadisticas' %}{% else %}#{% endif %}{% else %}{% url 'estadisticas' %}{% endif %}"
+               {% if es_admin and not hay_viaje_activo %}onclick="return mostrarAlertaViaje(event);"{% endif %}>
+                <div class="module-top-indicator-row">
+                    <div class="module-card-icon icon-blue-accent">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    </div>
+                    <span class="module-cat-tag">Analítica</span>
+                </div>
+                <h3>Estadísticas & Reportes Financieros</h3>
+                <p>Métricas dinámicas, gráficos de recaudo en COP, USD y Bs, top de productos más vendidos y balance del viaje.</p>
+                <div class="module-card-footer">
+                    {% if es_admin %}
+                        {% if hay_viaje_activo %}
+                            <span class="badge-status-pill available">
+                                <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                Disponible
+                            </span>
+                        {% else %}
+                            <span class="badge-status-pill required">Requiere viaje</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge-status-pill" style="background:rgba(217,119,6,0.12);color:var(--orange);border:1px solid rgba(217,119,6,0.3);">
+                            <svg class="svg-icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Solo Admin
+                        </span>
+                    {% endif %}
+                    <span class="module-arrow-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- 8. GESTIÓN DE USUARIOS Y ROLES -->
+            <a class="module-card card-theme-usuarios"
+               data-category="configuracion"
+               data-keywords="usuarios roles permisos accesos vendedores admin administradores contraseñas seguridad personal"
+               href="{% url 'gestion_usuarios' %}">
+                <div class="module-top-indicator-row">
+                    <div class="module-card-icon icon-indigo-accent">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <span class="module-cat-tag">Seguridad</span>
+                </div>
+                <h3>Gestión de Usuarios & Roles</h3>
+                <p>Administra cuentas de acceso, asigna roles de Administrador o Vendedor y gestiona credenciales y permisos del personal.</p>
+                <div class="module-card-footer">
+                    {% if es_admin %}
+                        <span class="badge-status-pill available">
+                            <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            Disponible
+                        </span>
+                    {% else %}
+                        <span class="badge-status-pill" style="background:rgba(217,119,6,0.12);color:var(--orange);border:1px solid rgba(217,119,6,0.3);">
+                            <svg class="svg-icon" style="width:11px;height:11px;" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Solo Admin
+                        </span>
+                    {% endif %}
+                    <span class="module-arrow-icon">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </span>
+                </div>
+            </a>
+
+            <!-- MENSAJE CUANDO NINGÚN MÓDULO COINCIDE CON LA BÚSQUEDA -->
+            <div class="empty-search-state" id="emptySearchState">
+                <svg class="svg-icon" style="width:36px;height:36px;color:var(--muted);" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <div class="empty-search-title">No se encontraron módulos</div>
+                <div class="empty-search-desc">Intenta buscar con otros términos como 'cobros', 'tasas', 'consumos' o 'precios'.</div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div>Viajes Nena • Sistema Integral de Gestión de Viajes Turísticos</div>
+        <div class="karma-footer-brand">
+            <svg class="karma-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="7 6 2 12 7 18"/>
+                <polyline points="17 6 22 12 17 18"/>
+                <path d="M9 15l3-3.5 3 2.5 4-5"/>
+                <path d="M16 9h3v3"/>
+            </svg>
+            <span>Desarrollado por <strong>Karma Studio</strong></span>
+            <span class="karma-sep">•</span>
+            <span>Programación & Marketing Digital</span>
+            <span class="karma-sep">•</span>
+            <span class="karma-v-tag">v1.0.0</span>
+        </div>
+    </footer>
+
+</main>
+
+<!-- MODAL DE BIENVENIDA E INSTRUCCIONES DEL SISTEMA (BETA) -->
+<div class="modal-overlay" id="modalBienvenida" hidden role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+    <div class="welcome-modal-card">
+        <!-- HEADER DEL MODAL -->
+        <div class="welcome-modal-header">
+            <div class="welcome-header-left">
+                <div class="welcome-beta-pill">
+                    <span class="pulse-dot"></span>
+                    <span>Versión Beta 1.0 • Karma Studio</span>
+                </div>
+                <h2 class="welcome-title" id="welcomeTitle">¡Bienvenido a Viajes Nena!</h2>
+                <p class="welcome-subtitle">Sistema Operativo Integral de Gestión Turística y Logística</p>
+            </div>
+            <button type="button" class="btn-welcome-close" onclick="window.cerrarModalBienvenida()" aria-label="Cerrar modal" title="Cerrar">
+                <svg class="svg-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <!-- CUERPO SCROLLEABLE -->
+        <div class="welcome-modal-body">
+            <!-- ALERTA BETA -->
+            <div class="beta-notice-banner">
+                <div class="beta-notice-icon">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="beta-notice-text">
+                    <strong>Aviso de Versión Beta en Desarrollo:</strong>
+                    <span>Cualquier error, comportamiento inesperado o sugerencia de mejora, por favor infórmalo de inmediato al equipo técnico para resolverlo con máxima prioridad. ¡Gracias por ser parte de esta evolución!</span>
+                </div>
+            </div>
+
+            <!-- MENSAJE DE BIENVENIDA KARMA STUDIO -->
+            <div class="welcome-intro-card">
+                <div class="welcome-intro-badge">
+                    <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <span>Karma Studio • Software Engineering</span>
+                </div>
+                <h3 class="welcome-intro-title">Bienvenido usuario y disfruta el sistema hecho por Karma Studio</h3>
+                <p class="welcome-intro-p">
+                    Esta plataforma fue desarrollada a medida para <strong>Viajes Nena</strong>, centralizando el control de pasajeros, cobros multimoneda, logística de alimentos, paseos y métricas operativas en una sola interfaz rápida, blindada y moderna.
+                </p>
+            </div>
+
+            <!-- SECCIÓN DE FUNCIONALIDADES (GRID DE CARDS) -->
+            <div class="features-section-title">
+                <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                <span>¿Qué puedes hacer con este software? • Módulos y Funcionalidades</span>
+            </div>
+
+            <div class="welcome-features-grid">
+                <!-- Card 1: Creación de Viajes y Listines -->
+                <div class="welcome-feature-card">
+                    <div class="w-card-header">
+                        <div class="w-card-icon icon-trip">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                        </div>
+                        <div>
+                            <span class="w-card-tag">Operaciones Base</span>
+                            <h4 class="w-card-title">1. Gestión de Viajes y Listín</h4>
+                        </div>
+                    </div>
+                    <ul class="w-card-list">
+                        <li><strong>3 Destinos Oficiales:</strong> Mochima edo Sucre, Chichiriviche edo falcon y Margarita edo nueva esparta.</li>
+                        <li><strong>Importación Excel:</strong> Carga obligatoria del listín para 1 a 3 autobuses con lectura instantánea.</li>
+                        <li><strong>Detección de Duplicados:</strong> Alerta y bloquea si el mismo pasajero o archivo se sube en más de una unidad.</li>
+                        <li><strong>Duración Operativa:</strong> Validación estricta de 3 o 4 días operativos (el día de salida no cuenta).</li>
+                    </ul>
+                </div>
+
+                <!-- Card 2: Control Secuencial de Comidas -->
+                <div class="welcome-feature-card">
+                    <div class="w-card-header">
+                        <div class="w-card-icon icon-food">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                        </div>
+                        <div>
+                            <span class="w-card-tag">Logística de Alimentos</span>
+                            <h4 class="w-card-title">2. Repartición de Comidas</h4>
+                        </div>
+                    </div>
+                    <ul class="w-card-list">
+                        <li><strong>Flujo Diario Secuencial:</strong> Desayuno ➔ Almuerzo ➔ Cena por cada día operativo.</li>
+                        <li><strong>Control Individual por Bus:</strong> Marcaje de pasajeros que ya comieron y lista de pendientes.</li>
+                        <li><strong>Bloqueo de Servicio:</strong> Impide volver a repartir un servicio ya finalizado para evitar doble ración.</li>
+                        <li><strong>Alerta de Éxito:</strong> Confirmación visual inmediata cuando el 100% de los clientes han comido.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 3: Registro de Consumos -->
+                <div class="welcome-feature-card">
+                    <div class="w-card-header">
+                        <div class="w-card-icon icon-consumos">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                        </div>
+                        <div>
+                            <span class="w-card-tag">Ventas en Ruta</span>
+                            <h4 class="w-card-title">3. Registro de Consumos</h4>
+                        </div>
+                    </div>
+                    <ul class="w-card-list">
+                        <li><strong>Catálogo Oficial de Productos:</strong> Carga ágil de cervezas, refrescos, aguas, snacks y licores.</li>
+                        <li><strong>Organización por Día:</strong> Registro específico para cada día de estancia en el destino.</li>
+                        <li><strong>Cálculo Automático:</strong> Importe en USD y liquidación en Pesos (COP) al instante.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 4: Cobros y Liquidación Multimoneda -->
+                <div class="welcome-feature-card">
+                    <div class="w-card-header">
+                        <div class="w-card-icon icon-cobros">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        </div>
+                        <div>
+                            <span class="w-card-tag">Finanzas & Caja</span>
+                            <h4 class="w-card-title">4. Cobros y Liquidación</h4>
+                        </div>
+                    </div>
+                    <ul class="w-card-list">
+                        <li><strong>Cuentas por Familia o Pasajero:</strong> Consolidación automática de cargos por grupo o titular.</li>
+                        <li><strong>Cobros Multimoneda:</strong> Registro de pagos en Dólares (USD), Pesos (COP) y Bolívares (Bs.).</li>
+                        <li><strong>Tasa Oficial BCV en Vivo:</strong> Consulta directa de la tasa oficial con conversión en tiempo real.</li>
+                        <li><strong>Control de Diferencias:</strong> Historial detallado de abonos y prevención contra duplicidad de pagos.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 5: Cayo Los Juanes -->
+                <div class="welcome-feature-card">
+                    <div class="w-card-header">
+                        <div class="w-card-icon icon-juanes">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        </div>
+                        <div>
+                            <span class="w-card-tag">Paseo Náutico</span>
+                            <h4 class="w-card-title">5. Asistencia a Los Juanes</h4>
+                        </div>
+                    </div>
+                    <ul class="w-card-list">
+                        <li><strong>Confirmación con un Toque:</strong> Marcaje individual o grupal de quiénes van al paseo.</li>
+                        <li><strong>Cargo Automático al Listín:</strong> Suma directa de la tarifa configurada a la cuenta familiar.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 6: Estadísticas y Métricas -->
+                <div class="welcome-feature-card">
+                    <div class="w-card-header">
+                        <div class="w-card-icon icon-stats">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        </div>
+                        <div>
+                            <span class="w-card-tag">Métricas Gerenciales</span>
+                            <h4 class="w-card-title">6. Estadísticas Dinámicas</h4>
+                        </div>
+                    </div>
+                    <ul class="w-card-list">
+                        <li><strong>Gráficos Interactivos:</strong> Visualización de recaudación total en Bs., Pesos (COP) y USD.</li>
+                        <li><strong>Ranking de Productos:</strong> Gráficos de barras con los artículos más vendidos.</li>
+                        <li><strong>Progreso de Cobranza:</strong> Porcentaje cobrado vs. saldo pendiente en tiempo real.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 7: Seguridad y Roles -->
+                <div class="welcome-feature-card">
+                    <div class="w-card-header">
+                        <div class="w-card-icon icon-users">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div>
+                            <span class="w-card-tag">Seguridad & Usuarios</span>
+                            <h4 class="w-card-title">7. Roles de Acceso</h4>
+                        </div>
+                    </div>
+                    <ul class="w-card-list">
+                        <li><strong>Rol ADMIN:</strong> Acceso ilimitado a crear/finalizar viajes, gestionar precios, tasas y usuarios.</li>
+                        <li><strong>Rol VENDEDOR:</strong> Acceso operativo para guías en ruta (consumos, cobros y asistencia).</li>
+                        <li><strong>Protección de Inactividad:</strong> Cierre de sesión automático tras 10 minutos sin uso.</li>
+                    </ul>
+                </div>
+
+                <!-- Card 8: Finalizar Viaje -->
+                <div class="welcome-feature-card">
+                    <div class="w-card-header">
+                        <div class="w-card-icon icon-finish">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                        </div>
+                        <div>
+                            <span class="w-card-tag">Cierre Operativo</span>
+                            <h4 class="w-card-title">8. Finalizar Viaje</h4>
+                        </div>
+                    </div>
+                    <ul class="w-card-list">
+                        <li><strong>Cero Deudas Pendientes:</strong> El sistema bloquea el cierre si hay saldos pendientes por cobrar.</li>
+                        <li><strong>Arqueo y Cierre Blindado:</strong> Garantiza que el viaje concluya con todas las cuentas al día.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER DEL MODAL -->
+        <div class="welcome-modal-footer">
+            <div class="welcome-footer-hint">
+                <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>Puedes volver a consultar esta guía en cualquier momento desde el botón <strong>"Guía del Sistema"</strong> en la barra superior.</span>
+            </div>
+            <button type="button" class="btn-welcome-action" onclick="window.cerrarModalBienvenida()">
+                <span>¡Entendido, Comenzar a Operar!</span>
+                <svg class="svg-icon" style="width:17px;height:17px;" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: REQUIERE VIAJE -->
+<div class="modal-overlay" id="modalViaje" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <div class="modal-window">
+        <div class="modal-icon-top">
+            <svg class="svg-icon" style="width:28px;height:28px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h2 id="modalTitulo">No hay ningún viaje activo</h2>
+        <p>Para utilizar esta funcionalidad operativa, primero debes crear y activar un viaje con su listín de pasajeros.</p>
+        <div class="modal-actions">
+            <a class="btn-modal btn-modal-primary" href="{% url 'crear_viaje' %}">Crear Nuevo Viaje</a>
+            <button class="btn-modal btn-modal-secondary" type="button" onclick="cerrarModal()" id="cerrarModalBtn">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: PRÓXIMAMENTE -->
+<div class="modal-overlay" id="modalProximamente" hidden role="dialog" aria-modal="true" aria-labelledby="proximamenteTitulo">
+    <div class="modal-window">
+        <div class="modal-icon-top">
+            <svg class="svg-icon" style="width:28px;height:28px;" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <h2 id="proximamenteTitulo">Módulo en Desarrollo</h2>
+        <p id="proximamenteMensaje">Estamos preparando esta sección para incorporarla en la próxima actualización de Viajes Nena.</p>
+        <div class="modal-actions">
+            <button class="btn-modal btn-modal-primary" type="button" onclick="cerrarProximamente()">Entendido</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // 1. MODO OSCURO / MODO CLARO
+    const themeBtn = document.getElementById("themeToggleBtn");
+    const iconSun = document.getElementById("iconSun");
+    const iconMoon = document.getElementById("iconMoon");
+
+    function updateThemeIcons(isDark) {
+        if (isDark) {
+            iconSun.style.display = "inline-block";
+            iconMoon.style.display = "none";
+            themeBtn.setAttribute("title", "Cambiar a modo claro");
+        } else {
+            iconSun.style.display = "none";
+            iconMoon.style.display = "inline-block";
+            themeBtn.setAttribute("title", "Cambiar a modo oscuro");
+        }
+    }
+
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    updateThemeIcons(currentTheme === "dark");
+
+    themeBtn.addEventListener("click", function() {
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        if (isDark) {
+            document.documentElement.removeAttribute("data-theme");
+            localStorage.setItem("viajes_nena_theme", "light");
+            updateThemeIcons(false);
+        } else {
+            document.documentElement.setAttribute("data-theme", "dark");
+            localStorage.setItem("viajes_nena_theme", "dark");
+            updateThemeIcons(true);
+        }
+    });
+
+    // 2. SALUDO DINÁMICO CON ICONO ADAPTATIVO & RELOJ EN VIVO
+    function updateLiveDateTime() {
+        const now = new Date();
+        const hour = now.getHours();
+        let greeting = "¡Buenos días!";
+        let iconSvg = `<svg class="svg-icon hero-greeting-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+
+        if (hour >= 12 && hour < 19) {
+            greeting = "¡Buenas tardes!";
+            iconSvg = `<svg class="svg-icon hero-greeting-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+        } else if (hour >= 19 || hour < 6) {
+            greeting = "¡Buenas noches!";
+            iconSvg = `<svg class="svg-icon hero-greeting-icon" style="color:#a78bfa;" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+        }
+
+        const userName = "{{ request.user.first_name|default:request.user.username }}";
+        const greetingTitleEl = document.getElementById("greetingTitle");
+        const greetingIconWrap = document.getElementById("greetingIconWrap");
+
+        if (greetingTitleEl) {
+            greetingTitleEl.textContent = `${greeting} ${userName}`;
+        }
+        if (greetingIconWrap) {
+            greetingIconWrap.innerHTML = iconSvg;
+        }
+
+        // Hora exacta en vivo
+        const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+        const timeFormatted = now.toLocaleTimeString('es-ES', timeOptions);
+        const timeStrEl = document.getElementById("currentTimeStr");
+        if (timeStrEl) {
+            timeStrEl.textContent = timeFormatted.toUpperCase();
+        }
+
+        // Fecha completa
+        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const dateFormatted = now.toLocaleDateString('es-ES', dateOptions);
+        const dateStrEl = document.getElementById("currentDateStr");
+        if (dateStrEl) {
+            dateStrEl.textContent = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
+        }
+    }
+
+    updateLiveDateTime();
+    setInterval(updateLiveDateTime, 1000);
+
+    // 3. ACTUALIZACIÓN EN VIVO DE TASA BCV
+    window.refrescarTasaBCV = function() {
+        const btn = document.getElementById("btnQuickRefreshBcv");
+        const valEl = document.getElementById("bcvTickerVal");
+        btn.disabled = true;
+        valEl.textContent = "Cargando...";
+
+        fetch("/api/tasa-bcv/?forzar=1")
+            .then(r => r.json())
+            .then(data => {
+                btn.disabled = false;
+                if (data.tasa) {
+                    valEl.textContent = data.tasa + " Bs.";
+                    valEl.style.color = "var(--success)";
+                    setTimeout(() => { valEl.style.color = ""; }, 2500);
+                } else {
+                    valEl.textContent = "Error";
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                valEl.textContent = "Error";
+            });
+    };
+
+    // 4. ANIMACIÓN COUNT-UP PARA NÚMEROS EN ESTADÍSTICAS
+    function animateCountUp() {
+        document.querySelectorAll(".count-up-num").forEach(function(el) {
+            const target = parseInt(el.getAttribute("data-val") || "0", 10);
+            if (isNaN(target) || target <= 0) return;
+
+            let current = 0;
+            const step = Math.ceil(target / 25);
+            const timer = setInterval(function() {
+                current += step;
+                if (current >= target) {
+                    el.textContent = target;
+                    clearInterval(timer);
+                } else {
+                    el.textContent = current;
+                }
+            }, 30);
+        });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", animateCountUp);
+    } else {
+        animateCountUp();
+    }
+
+    // 5. FILTRO DE CATEGORÍAS Y BÚSQUEDA EN TIEMPO REAL
+    let currentFilter = "all";
+    let currentSearch = "";
+
+    window.filtrarModulos = function(category, btn) {
+        currentFilter = category;
+        document.querySelectorAll(".filter-tab-btn").forEach(b => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
+        aplicarFiltros();
+    };
+
+    window.buscarModulos = function(query) {
+        currentSearch = query.trim().toLowerCase();
+        aplicarFiltros();
+    };
+
+    function aplicarFiltros() {
+        const cards = document.querySelectorAll(".modules-grid .module-card");
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const cat = card.getAttribute("data-category") || "";
+            const keywords = (card.getAttribute("data-keywords") || "").toLowerCase();
+            const text = card.textContent.toLowerCase();
+
+            const matchesCategory = (currentFilter === "all" || cat === currentFilter);
+            const matchesSearch = (!currentSearch || keywords.includes(currentSearch) || text.includes(currentSearch));
+
+            if (matchesCategory && matchesSearch) {
+                card.style.display = "flex";
+                visibleCount++;
+            } else {
+                card.style.display = "none";
+            }
+        });
+
+        const emptyState = document.getElementById("emptySearchState");
+        if (emptyState) {
+            emptyState.style.display = visibleCount === 0 ? "block" : "none";
+        }
+    }
+
+    // Atajo de teclado: presionar '/' para enfocar la búsqueda
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+            e.preventDefault();
+            const input = document.getElementById("modulesSearchInput");
+            if (input) input.focus();
+        }
+    });
+
+    // 7. CONTROL DE MODALES
+    const modalViaje = document.getElementById("modalViaje");
+    const modalProximamente = document.getElementById("modalProximamente");
+
+    window.accionModulo = function(modulo, viajeActivo) {
+        if (viajeActivo === "true") {
+            window.mostrarProximamente(modulo);
+        } else {
+            window.mostrarAlertaViaje();
+        }
+    };
+
+    window.mostrarAlertaViaje = function(event) {
+        if (event) event.preventDefault();
+        modalViaje.hidden = false;
+        const cerrar = document.getElementById("cerrarModalBtn");
+        if (cerrar) cerrar.focus();
+        return false;
+    };
+
+    window.cerrarModal = function() {
+        modalViaje.hidden = true;
+    };
+
+    window.mostrarProximamente = function(modulo) {
+        document.getElementById("proximamenteTitulo").textContent = modulo;
+        document.getElementById("proximamenteMensaje").textContent = "Estamos preparando este módulo para incorporarlo a las operaciones de Viajes Nena.";
+        modalProximamente.hidden = false;
+    };
+
+    window.cerrarProximamente = function() {
+        modalProximamente.hidden = true;
+    };
+
+    const modalBienvenida = document.getElementById("modalBienvenida");
+
+    window.abrirModalBienvenida = function() {
+        if (modalBienvenida) {
+            modalBienvenida.hidden = false;
+            document.body.style.overflow = "hidden";
+        }
+    };
+
+    window.cerrarModalBienvenida = function() {
+        if (modalBienvenida) {
+            modalBienvenida.hidden = true;
+            document.body.style.overflow = "";
+            try { sessionStorage.setItem("viajes_nena_welcome_dismissed", "1"); } catch(e) {}
+        }
+    };
+
+    // Auto-apertura en el inicio de la aplicación
+    try {
+        if (!sessionStorage.getItem("viajes_nena_welcome_dismissed")) {
+            window.abrirModalBienvenida();
+        }
+    } catch(e) {
+        window.abrirModalBienvenida();
+    }
+
+    [modalViaje, modalProximamente, modalBienvenida].forEach(function(modal) {
+        modal.addEventListener("click", function(event) {
+            if (event.target === modal) modal.hidden = true;
+        });
+    });
+
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "Escape") {
+            window.cerrarModal();
+            window.cerrarProximamente();
+            window.cerrarModalBienvenida();
+        }
+    });
+})();
+</script>
+
+    {% include "core/includes/inactivity_timeout.html" %}
+</body>
+</html>

@@ -1,0 +1,2621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Repartición de Comidas | Viajes Nena</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;850;900&display=swap" rel="stylesheet">
+
+    <!-- Anti-flicker theme script -->
+    <script>
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('viajes_nena_theme');
+                const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+            } catch (e) {}
+        })();
+    </script>
+
+    <style>
+        :root {
+            --font-main: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+            --navy: #102b46;
+            --navy-deep: #0a1b2d;
+            --navy-light: #163657;
+            --turquoise: #16b8b0;
+            --turquoise-dark: #0e8f89;
+            --turquoise-light: #e6f8f7;
+            --background: #f4f7fb;
+            --surface: #ffffff;
+            --surface-hover: #f8fafc;
+            --surface-alt: #f1f5f9;
+            --text: #1e293b;
+            --text-secondary: #475569;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --border-light: #edf2f7;
+            --card-shadow: 0 4px 20px -2px rgba(16, 43, 70, 0.06);
+            --card-shadow-hover: 0 12px 30px -4px rgba(16, 43, 70, 0.12);
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --warning: #d97706;
+            --warning-light: #fffbeb;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --indigo: #4f46e5;
+            --indigo-light: #eef2ff;
+            --purple: #7c3aed;
+            --purple-light: #f5f3ff;
+            --amber: #f59e0b;
+            --amber-light: #fef3c7;
+        }
+
+        [data-theme="dark"] {
+            --navy: #e2e8f0;
+            --navy-deep: #080f18;
+            --navy-light: #162438;
+            --turquoise: #22d3ee;
+            --turquoise-dark: #06b6d4;
+            --turquoise-light: rgba(34, 211, 238, 0.14);
+            --background: #09121f;
+            --surface: #121e30;
+            --surface-hover: #17263c;
+            --surface-alt: #0d1726;
+            --text: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --muted: #94a3b8;
+            --border: #1e314b;
+            --border-light: #18283e;
+            --card-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.5);
+            --card-shadow-hover: 0 12px 30px -4px rgba(0, 0, 0, 0.75);
+            --success: #34d399;
+            --success-light: rgba(52, 211, 153, 0.15);
+            --warning: #fbbf24;
+            --warning-light: rgba(251, 191, 36, 0.15);
+            --danger: #f87171;
+            --danger-light: rgba(248, 113, 113, 0.15);
+            --indigo: #818cf8;
+            --indigo-light: rgba(129, 140, 248, 0.15);
+            --purple: #c084fc;
+            --purple-light: rgba(168, 85, 247, 0.15);
+            --amber: #fcd34d;
+            --amber-light: rgba(251, 191, 36, 0.18);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: var(--font-main);
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .svg-icon {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            display: inline-block;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        /* TOP NAVIGATION */
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .brand-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--turquoise), var(--turquoise-dark));
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 900;
+            font-size: 17px;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-text-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-title {
+            color: var(--navy);
+            font-weight: 850;
+            font-size: 15px;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .brand-subtitle {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .studio-watermark-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 750;
+            color: var(--navy);
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            letter-spacing: 0.3px;
+        }
+
+        .version-badge {
+            background: rgba(22, 184, 176, 0.15);
+            color: var(--turquoise-dark);
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 850;
+        }
+        [data-theme="dark"] .version-badge {
+            color: var(--turquoise);
+        }
+
+        .btn-theme-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-secondary);
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-theme-toggle:hover {
+            border-color: var(--turquoise);
+            color: var(--navy);
+        }
+
+        .btn-topbar-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .btn-topbar-link:hover {
+            border-color: var(--turquoise);
+            color: var(--navy);
+            background: var(--surface-alt);
+        }
+
+        /* CONTAINER */
+        .container {
+            width: min(1200px, 94%);
+            margin: 28px auto 60px;
+            flex-grow: 1;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .eyebrow {
+            color: var(--amber);
+            font-size: 11.5px;
+            font-weight: 850;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        h1 {
+            color: var(--navy);
+            font-size: clamp(24px, 3.5vw, 32px);
+            font-weight: 850;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .page-desc {
+            color: var(--text-secondary);
+            font-size: 14px;
+            max-width: 680px;
+            line-height: 1.6;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 750;
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25);
+            transition: all 0.2s ease;
+        }
+        .btn-action-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(234, 88, 12, 0.35);
+        }
+
+        .btn-action-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 750;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--navy);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-action-outline:hover {
+            border-color: var(--turquoise);
+            background: var(--surface-alt);
+        }
+
+        /* SESSION SELECTORS BAR (DÍA + COMIDA) */
+        .session-selector-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .selector-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .selector-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .selector-label {
+            font-size: 11.5px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--muted);
+        }
+
+        .btn-quick-switch {
+            background: none;
+            border: none;
+            color: var(--turquoise-dark);
+            font-size: 11.5px;
+            font-weight: 750;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0;
+            transition: opacity 0.2s;
+        }
+        .btn-quick-switch:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+        [data-theme="dark"] .btn-quick-switch {
+            color: var(--turquoise);
+        }
+
+        .pills-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .day-pill {
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 750;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .day-pill:hover {
+            border-color: var(--turquoise);
+            color: var(--navy);
+        }
+
+        .day-pill.active {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+            box-shadow: 0 4px 12px rgba(16, 43, 70, 0.2);
+        }
+        [data-theme="dark"] .day-pill.active {
+            background: var(--turquoise);
+            color: var(--navy-deep);
+            border-color: var(--turquoise);
+            box-shadow: 0 4px 12px rgba(34, 211, 238, 0.3);
+        }
+
+        .day-pill-sub {
+            font-size: 11px;
+            font-weight: 600;
+            opacity: 0.75;
+        }
+
+        /* MEAL TABS */
+        .meal-tabs-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface-alt);
+            padding: 4px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+        }
+
+        .meal-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 750;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            position: relative;
+        }
+
+        .meal-tab-btn:hover {
+            color: var(--navy);
+            background: var(--surface);
+        }
+
+        .meal-tab-btn.active.desayuno {
+            background: var(--surface);
+            color: #b45309;
+            border-color: #fde68a;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+        }
+        [data-theme="dark"] .meal-tab-btn.active.desayuno {
+            background: #1e2a3a;
+            color: #fbbf24;
+            border-color: rgba(251, 191, 36, 0.3);
+        }
+
+        .meal-tab-btn.active.almuerzo {
+            background: var(--surface);
+            color: #c2410c;
+            border-color: #fed7aa;
+            box-shadow: 0 2px 8px rgba(234, 88, 12, 0.15);
+        }
+        [data-theme="dark"] .meal-tab-btn.active.almuerzo {
+            background: #1e2a3a;
+            color: #fb923c;
+            border-color: rgba(251, 146, 60, 0.3);
+        }
+
+        .meal-tab-btn.active.cena {
+            background: var(--surface);
+            color: #6d28d9;
+            border-color: #ddd6fe;
+            box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
+        }
+        [data-theme="dark"] .meal-tab-btn.active.cena {
+            background: #1e2a3a;
+            color: #c084fc;
+            border-color: rgba(192, 132, 252, 0.3);
+        }
+
+        .tab-closed-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            margin-left: 2px;
+        }
+
+        /* BANNER DE SERVICIO CERRADO (BLOQUEADO PARA REPARTIR DE NUEVO) */
+        .banner-servicio-cerrado {
+            background: linear-gradient(135deg, rgba(16, 43, 70, 0.06), rgba(5, 150, 105, 0.08));
+            border: 2px solid var(--border);
+            border-left: 5px solid var(--success);
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        [data-theme="dark"] .banner-servicio-cerrado {
+            background: linear-gradient(135deg, rgba(22, 36, 56, 0.8), rgba(5, 150, 105, 0.15));
+            border-color: var(--border);
+            border-left-color: var(--success);
+        }
+
+        .banner-cerrado-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .banner-cerrado-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            color: var(--success);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .banner-cerrado-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .banner-cerrado-tag {
+            font-size: 11px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--success);
+        }
+
+        .banner-cerrado-title {
+            font-size: 16px;
+            font-weight: 850;
+            color: var(--navy);
+            letter-spacing: -0.3px;
+        }
+
+        .banner-cerrado-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .btn-siguiente-servicio {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 11px 20px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 850;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .btn-siguiente-servicio:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+            color: white;
+        }
+
+        /* LIVE PROGRESS & KPI DOCK */
+        .progress-dock {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px 24px;
+            margin-bottom: 22px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .dock-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .dock-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dock-badge-title {
+            font-size: 15px;
+            font-weight: 850;
+            color: var(--navy);
+        }
+
+        .status-session-badge {
+            font-size: 11px;
+            font-weight: 850;
+            padding: 3px 9px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-session-badge.closed {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+        }
+
+        .status-session-badge.active-now {
+            background: rgba(249, 115, 22, 0.12);
+            color: #ea580c;
+            border: 1px solid rgba(234, 88, 12, 0.2);
+        }
+
+        .dock-stats-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .dock-stat-item {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .dock-stat-num {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--navy);
+            line-height: 1;
+        }
+
+        .dock-stat-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        /* PROGRESS BAR */
+        .progress-bar-container {
+            width: 100%;
+            height: 12px;
+            border-radius: 20px;
+            background: var(--surface-alt);
+            overflow: hidden;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--turquoise), var(--success));
+            border-radius: 20px;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* BUS SUMMARY PILLS */
+        .buses-stats-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .bus-summary-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            color: var(--navy);
+        }
+
+        .bus-summary-pill.completed {
+            border-color: var(--success);
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        /* TOOLBAR: FILTERS & ACTIONS */
+        .toolbar-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 18px;
+            margin-bottom: 22px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .search-box-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 240px;
+            max-width: 380px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 9px 14px 9px 36px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--surface-alt);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--turquoise);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(22, 184, 176, 0.15);
+        }
+
+        .search-icon-pos {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            pointer-events: none;
+            width: 16px;
+            height: 16px;
+        }
+
+        .filter-chips-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .chip-label {
+            font-size: 11.5px;
+            font-weight: 850;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-right: 2px;
+        }
+
+        .filter-chip {
+            padding: 5px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 700;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--turquoise);
+            color: var(--navy);
+        }
+
+        .filter-chip.active {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+        }
+        [data-theme="dark"] .filter-chip.active {
+            background: var(--turquoise);
+            color: var(--navy-deep);
+            border-color: var(--turquoise);
+        }
+
+        .bulk-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-bulk {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 13px;
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 750;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            color: var(--navy);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-bulk:hover:not(:disabled) {
+            border-color: var(--turquoise);
+            background: var(--surface);
+        }
+
+        .btn-bulk:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-bulk-success:hover:not(:disabled) {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .badge-locked-toolbar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: rgba(100, 116, 139, 0.1);
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 750;
+            border: 1px solid var(--border);
+        }
+
+        /* GROUPS & PASSENGERS CARDS */
+        .groups-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .group-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .group-header {
+            background: var(--surface-alt);
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .group-title-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .group-name {
+            font-size: 14px;
+            font-weight: 850;
+            color: var(--navy);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-bus {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+        }
+        [data-theme="dark"] .badge-bus {
+            color: var(--turquoise);
+        }
+
+        .group-counter-tag {
+            font-size: 11.5px;
+            font-weight: 750;
+            color: var(--muted);
+        }
+
+        .group-counter-tag.all-done {
+            color: var(--success);
+            font-weight: 850;
+        }
+
+        .btn-group-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 750;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-group-toggle:hover:not(:disabled) {
+            border-color: var(--turquoise);
+            color: var(--navy);
+        }
+        .btn-group-toggle:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* PASSENGERS LIST */
+        .passengers-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .passenger-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border-light);
+            transition: background 0.15s ease;
+        }
+
+        .passenger-item-row:last-child {
+            border-bottom: none;
+        }
+
+        .passenger-item-row:hover {
+            background: var(--surface-hover);
+        }
+
+        .passenger-item-row.comio {
+            background: rgba(5, 150, 105, 0.03);
+        }
+        [data-theme="dark"] .passenger-item-row.comio {
+            background: rgba(52, 211, 153, 0.05);
+        }
+
+        .passenger-identity {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .passenger-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            display: grid;
+            place-items: center;
+            font-size: 13px;
+            font-weight: 850;
+            color: var(--navy);
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+
+        .passenger-avatar.comio {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .passenger-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .passenger-name {
+            font-weight: 750;
+            font-size: 13.5px;
+            color: var(--navy);
+            line-height: 1.25;
+        }
+
+        .passenger-cedula {
+            font-size: 11.5px;
+            color: var(--muted);
+            font-weight: 550;
+        }
+
+        .passenger-action-col {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .passenger-delivery-meta {
+            text-align: right;
+            font-size: 11.5px;
+        }
+
+        .delivery-time {
+            font-weight: 750;
+            color: var(--success);
+        }
+
+        .delivery-user {
+            font-size: 10.5px;
+            color: var(--muted);
+        }
+
+        /* 1-CLICK TACTILE TOGGLE BUTTON */
+        .btn-toggle-meal {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-width: 120px;
+            height: 36px;
+            padding: 0 14px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            border: 1px solid transparent;
+        }
+
+        .btn-toggle-meal.btn-pending {
+            background: var(--surface-alt);
+            border-color: var(--border);
+            color: var(--navy);
+        }
+
+        .btn-toggle-meal.btn-pending:hover {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(16, 43, 70, 0.15);
+        }
+        [data-theme="dark"] .btn-toggle-meal.btn-pending:hover {
+            background: var(--turquoise);
+            color: var(--navy-deep);
+            border-color: var(--turquoise);
+        }
+
+        .btn-toggle-meal.btn-eaten {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+        }
+
+        .btn-toggle-meal.btn-eaten:hover {
+            background: #047857;
+            border-color: #047857;
+        }
+
+        /* BOTÓN DE SERVICIO CERRADO (DISABLED) */
+        .btn-toggle-meal.btn-closed-eaten {
+            background: var(--surface-alt);
+            border-color: var(--border);
+            color: var(--success);
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        /* MODAL OVERLAY & BASE STYLES */
+        .modal-overlay[hidden] {
+            display: none !important;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 27, 45, 0.75);
+            backdrop-filter: blur(8px);
+            display: grid;
+            place-items: center;
+            z-index: 1000;
+            padding: 20px;
+            animation: modalFadeIn 0.2s ease-out;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4);
+            animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            max-width: 100%;
+        }
+        @keyframes modalPopIn {
+            from { transform: scale(0.92) translateY(10px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        /* 1. MODAL DE PREGUNTA: ¿QUÉ COMIDA ES? */
+        .modal-comida-picker {
+            width: min(720px, 96%);
+            padding: 28px 30px;
+        }
+
+        .modal-picker-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            background: rgba(249, 115, 22, 0.12);
+            color: #ea580c;
+            margin-bottom: 12px;
+        }
+        [data-theme="dark"] .modal-picker-badge {
+            background: rgba(251, 146, 60, 0.18);
+            color: #fb923c;
+        }
+
+        .modal-picker-title {
+            color: var(--navy);
+            font-size: 24px;
+            font-weight: 850;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .modal-picker-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-dia-section {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .modal-dia-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-dia-pills {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .modal-dia-btn {
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 750;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .modal-dia-btn:hover {
+            border-color: var(--turquoise);
+            color: var(--navy);
+        }
+        .modal-dia-btn.active {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+        }
+        [data-theme="dark"] .modal-dia-btn.active {
+            background: var(--turquoise);
+            color: var(--navy-deep);
+            border-color: var(--turquoise);
+        }
+
+        .modal-dia-sub {
+            font-size: 11px;
+            opacity: 0.75;
+        }
+
+        /* MEAL CARDS PICKER GRID */
+        .meal-cards-picker-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .meal-picker-card {
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 18px;
+            padding: 20px 18px;
+            cursor: pointer;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            position: relative;
+        }
+
+        .meal-picker-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 28px -4px rgba(16, 43, 70, 0.15);
+        }
+
+        .meal-picker-card.card-turno-actual {
+            border-color: #f97316;
+            box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.25);
+        }
+
+        .meal-picker-card.card-finalizado {
+            border-color: var(--border);
+            background: var(--surface-alt);
+        }
+
+        .meal-picker-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .meal-picker-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+        }
+
+        .icon-desayuno {
+            background: rgba(245, 158, 11, 0.14);
+            color: #d97706;
+        }
+        [data-theme="dark"] .icon-desayuno {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .icon-almuerzo {
+            background: rgba(234, 88, 12, 0.14);
+            color: #ea580c;
+        }
+        [data-theme="dark"] .icon-almuerzo {
+            background: rgba(251, 146, 60, 0.2);
+            color: #fb923c;
+        }
+
+        .icon-cena {
+            background: rgba(124, 58, 237, 0.14);
+            color: #7c3aed;
+        }
+        [data-theme="dark"] .icon-cena {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+        }
+
+        .meal-picker-badge-status {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 8px;
+        }
+
+        .meal-picker-badge-status.completed {
+            background: var(--success-light);
+            color: var(--success);
+        }
+
+        .meal-picker-badge-status.active-turn {
+            background: rgba(249, 115, 22, 0.16);
+            color: #ea580c;
+            font-weight: 850;
+        }
+
+        .meal-picker-badge-status.upcoming {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .meal-picker-title {
+            font-size: 18px;
+            font-weight: 850;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+
+        .meal-picker-hours {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        .meal-picker-progress-track {
+            height: 6px;
+            background: var(--surface-alt);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 14px;
+            border: 1px solid var(--border-light);
+        }
+
+        .meal-picker-progress-fill {
+            height: 100%;
+            background: var(--turquoise);
+            border-radius: 10px;
+        }
+
+        .btn-picker-action {
+            margin-top: auto;
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 800;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            color: var(--navy);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.18s ease;
+        }
+
+        .meal-picker-card:hover .btn-picker-action {
+            background: var(--navy);
+            color: white;
+            border-color: var(--navy);
+        }
+        [data-theme="dark"] .meal-picker-card:hover .btn-picker-action {
+            background: var(--turquoise);
+            color: var(--navy-deep);
+            border-color: var(--turquoise);
+        }
+
+        .modal-picker-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-modal-dismiss {
+            padding: 8px 18px;
+            border-radius: 10px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-modal-dismiss:hover {
+            color: var(--navy);
+            border-color: var(--muted);
+        }
+
+        /* 2. MODAL DE CELEBRACIÓN / ALERTA: TODOS LOS CLIENTES YA COMIERON */
+        .modal-celebracion {
+            width: min(540px, 94%);
+            padding: 34px 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .celeb-halo-ring {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(5, 150, 105, 0.2) 0%, rgba(5, 150, 105, 0.04) 70%);
+            display: grid;
+            place-items: center;
+            margin-bottom: 16px;
+            animation: ringPulse 2s infinite ease-in-out;
+        }
+        @keyframes ringPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .celeb-icon-circle {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            display: grid;
+            place-items: center;
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+        }
+
+        .celeb-svg-check {
+            width: 32px;
+            height: 32px;
+            stroke-width: 2.5;
+        }
+
+        .celeb-badge-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: var(--success-light);
+            color: var(--success);
+            font-size: 11.5px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+
+        .celeb-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .celeb-title {
+            color: var(--navy);
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin-bottom: 10px;
+        }
+
+        .celeb-banner-quote {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(16, 184, 176, 0.12));
+            border: 1px solid var(--success);
+            border-radius: 14px;
+            padding: 14px 18px;
+            font-size: 16px;
+            font-weight: 850;
+            color: var(--navy);
+            line-height: 1.45;
+            margin-bottom: 14px;
+            width: 100%;
+        }
+
+        .celeb-description {
+            color: var(--text-secondary);
+            font-size: 13.5px;
+            line-height: 1.55;
+            margin-bottom: 20px;
+            max-width: 440px;
+        }
+
+        .celeb-stats-strip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 20px;
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .celeb-kpi {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .celeb-kpi-val {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--navy);
+            line-height: 1.1;
+        }
+
+        .celeb-kpi-lbl {
+            font-size: 11px;
+            font-weight: 750;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .celeb-kpi-sep {
+            width: 1px;
+            height: 30px;
+            background: var(--border);
+        }
+
+        .celeb-actions-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-celeb-siguiente {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-size: 14.5px;
+            font-weight: 850;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 4px 16px rgba(5, 150, 105, 0.35);
+            transition: all 0.2s ease;
+        }
+        .btn-celeb-siguiente:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 22px rgba(5, 150, 105, 0.45);
+            color: white;
+        }
+
+        .btn-celeb-secondary {
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 20px;
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 750;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-celeb-secondary:hover {
+            border-color: var(--turquoise);
+            background: var(--surface);
+            color: var(--navy);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 18px;
+        }
+
+        /* WATERMARK FOOTER */
+        .page-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .footer-left-meta {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* MEDIA QUERIES RESPONSIVE */
+        @media (max-width: 900px) {
+            .meal-cards-picker-grid {
+                grid-template-columns: 1fr;
+            }
+            .session-selector-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .toolbar-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box-wrapper {
+                max-width: 100%;
+            }
+            .banner-servicio-cerrado {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .btn-siguiente-servicio {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .passenger-item-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .passenger-action-col {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .dock-header-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .dock-stats-row {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media print {
+            .topbar, .session-selector-card, .toolbar-card, .btn-action-primary, .btn-action-outline,
+            .btn-toggle-meal, .btn-group-toggle, .btn-bulk, .page-footer, .modal-overlay {
+                display: none !important;
+            }
+            body { background: white; color: black; }
+            .container { width: 100%; margin: 0; }
+            .group-card { border: 1px solid #ccc; break-inside: avoid; margin-bottom: 12px; }
+            .passenger-item-row { padding: 6px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <a href="{% url 'home' %}" class="brand-logo-pill">
+                <div class="brand-icon-box">V</div>
+                <div class="brand-text-col">
+                    <span class="brand-title">VIAJES NENA</span>
+                    <span class="brand-subtitle">Control y Repartición de Comidas</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="topbar-right">
+            <div class="studio-watermark-pill">
+                <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                <span>Karma Studio</span>
+                <span class="version-badge">v1.0.0</span>
+            </div>
+
+            <button type="button" class="btn-theme-toggle" id="themeToggleBtn" aria-label="Cambiar tema" onclick="toggleTheme()">
+                <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            </button>
+
+            <a href="{% url 'home' %}" class="btn-topbar-link">
+                <svg class="svg-icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                <span>Volver al inicio</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- PAGE HEADER -->
+        <div class="page-header">
+            <div>
+                <div class="eyebrow">
+                    <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                    Logística Operativa &bull; Alimentación Secuencial
+                </div>
+                <h1>Control y Repartición de Comidas</h1>
+                <p class="page-desc">
+                    Viaje activo: <strong>{{ viaje.nombre }}</strong> &bull; Control diario estricto: Desayuno &rarr; Almuerzo &rarr; Cena.
+                    {% if turno_actual %}
+                        &bull; Turno en curso: <strong style="color:var(--amber);">{{ turno_actual.nombre }} ({{ turno_actual.evento_nombre }})</strong>
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="header-actions">
+                <button type="button" class="btn-action-primary" onclick="abrirModalSeleccionComida()">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/></svg>
+                    <span>¿Qué comida vas a repartir?</span>
+                </button>
+                <button type="button" class="btn-action-outline" onclick="window.print()">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    <span>Imprimir Lista</span>
+                </button>
+            </div>
+        </div>
+
+        {% if not viaje %}
+            <div class="empty-state">
+                <svg class="svg-icon" style="width:48px;height:48px;color:var(--muted);margin-bottom:12px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <h3 style="color:var(--navy);margin-bottom:6px;">No hay ningún viaje activo</h3>
+                <p style="color:var(--text-secondary);margin-bottom:16px;">Para gestionar la repartición de comidas debes tener un viaje en estado ACTIVO.</p>
+                <a href="{% url 'home' %}" class="btn-action-primary" style="text-decoration:none;">Ir al Inicio</a>
+            </div>
+        {% else %}
+
+            <!-- BANNER DE SERVICIO CERRADO (SI YA TODOS COMIERON) -->
+            {% if servicio_cerrado %}
+                <div class="banner-servicio-cerrado" id="bannerServicioCerrado">
+                    <div class="banner-cerrado-left">
+                        <div class="banner-cerrado-icon">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
+                        <div class="banner-cerrado-info">
+                            <div class="banner-cerrado-tag">Servicio Finalizado &bull; Turno Cerrado</div>
+                            <div class="banner-cerrado-title">
+                                ¡Todos los clientes ya comieron! {{ tipo_articulo }} {{ tipo_nombre }} del {{ evento_sel.nombre }} está {{ tipo_terminado }}.
+                            </div>
+                            <div class="banner-cerrado-subtitle">
+                                Este servicio ya fue repartido en su totalidad ({{ stats.total }}/{{ stats.total }} pasajeros atendidos). No se puede volver a repartir.
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if siguiente_turno %}
+                        <a href="?viaje={{ viaje.id }}&evento={{ siguiente_turno.evento_id }}&tipo={{ siguiente_turno.tipo }}" class="btn-siguiente-servicio">
+                            <span>Pasar a {{ siguiente_turno.nombre }} ({{ siguiente_turno.evento_nombre }})</span>
+                            <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <!-- SESSION SELECTOR CARD: DÍA Y TIPO DE COMIDA -->
+            <div class="session-selector-card">
+                <!-- 1. DÍA OPERATIVO -->
+                <div class="selector-section">
+                    <div class="selector-label-row">
+                        <span class="selector-label">1. Selecciona el Día del Viaje:</span>
+                    </div>
+                    <div class="pills-group">
+                        {% for ev in eventos %}
+                            <a href="?viaje={{ viaje.id }}&evento={{ ev.id }}&tipo={{ tipo_sel }}&bus={{ bus_filtro }}"
+                               class="day-pill {% if ev.id == evento_sel.id %}active{% endif %}">
+                                <span>{{ ev.nombre }}</span>
+                                <span class="day-pill-sub">({{ ev.fecha|date:"d/m" }})</span>
+                            </a>
+                        {% empty %}
+                            <span style="color:var(--muted);font-size:13px;">No hay días configurados.</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 2. TIPO DE COMIDA -->
+                <div class="selector-section">
+                    <div class="selector-label-row">
+                        <span class="selector-label">2. Servicio de Comida:</span>
+                        <button type="button" class="btn-quick-switch" onclick="abrirModalSeleccionComida()">
+                            <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><path d="M18 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/></svg>
+                            <span>Cambiar</span>
+                        </button>
+                    </div>
+                    <div class="meal-tabs-wrapper">
+                        <a href="?viaje={{ viaje.id }}&evento={{ evento_sel.id }}&tipo=DESAYUNO&bus={{ bus_filtro }}"
+                           class="meal-tab-btn desayuno {% if tipo_sel == 'DESAYUNO' %}active{% endif %}">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                            <span>Desayuno</span>
+                            {% if comidas_resumen.DESAYUNO.finalizado %}
+                                <span class="tab-closed-dot" title="Desayuno cerrado"></span>
+                            {% endif %}
+                        </a>
+
+                        <a href="?viaje={{ viaje.id }}&evento={{ evento_sel.id }}&tipo=ALMUERZO&bus={{ bus_filtro }}"
+                           class="meal-tab-btn almuerzo {% if tipo_sel == 'ALMUERZO' %}active{% endif %}">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/></svg>
+                            <span>Almuerzo</span>
+                            {% if comidas_resumen.ALMUERZO.finalizado %}
+                                <span class="tab-closed-dot" title="Almuerzo cerrado"></span>
+                            {% endif %}
+                        </a>
+
+                        <a href="?viaje={{ viaje.id }}&evento={{ evento_sel.id }}&tipo=CENA&bus={{ bus_filtro }}"
+                           class="meal-tab-btn cena {% if tipo_sel == 'CENA' %}active{% endif %}">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                            <span>Cena</span>
+                            {% if comidas_resumen.CENA.finalizado %}
+                                <span class="tab-closed-dot" title="Cena cerrada"></span>
+                            {% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIVE PROGRESS & KPI DOCK -->
+            <div class="progress-dock">
+                <div class="dock-header-row">
+                    <div class="dock-title-group">
+                        <div class="dock-badge-title">
+                            Progreso de Entrega &bull; {{ evento_sel.nombre }} ({{ tipo_nombre }})
+                        </div>
+                        {% if servicio_cerrado %}
+                            <span class="status-session-badge closed">
+                                &bull; Servicio Cerrado
+                            </span>
+                        {% else %}
+                            <span class="status-session-badge active-now">
+                                &bull; Repartiendo Ahora
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="dock-stats-row">
+                        <div class="dock-stat-item">
+                            <span class="dock-stat-num" id="statTotal">{{ stats.total }}</span>
+                            <span class="dock-stat-label">Total</span>
+                        </div>
+                        <div class="dock-stat-item">
+                            <span class="dock-stat-num" style="color:var(--success);" id="statComieron">{{ stats.comieron }}</span>
+                            <span class="dock-stat-label" style="color:var(--success);">Comieron</span>
+                        </div>
+                        <div class="dock-stat-item">
+                            <span class="dock-stat-num" style="color:var(--warning);" id="statPendientes">{{ stats.pendientes }}</span>
+                            <span class="dock-stat-label" style="color:var(--warning);">Faltan</span>
+                        </div>
+                        <div class="dock-stat-item">
+                            <span class="dock-stat-num" style="color:var(--turquoise-dark);" id="statPorcentaje">{{ stats.porcentaje }}%</span>
+                            <span class="dock-stat-label">Avance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROGRESS BAR -->
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progressBarFill" style="width: {{ stats.porcentaje }}%;"></div>
+                </div>
+
+                <!-- BUS STATS SUMMARY -->
+                {% if buses_stats %}
+                    <div class="buses-stats-row">
+                        <span style="font-size:11.5px;font-weight:750;color:var(--muted);text-transform:uppercase;">Por Bus:</span>
+                        {% for b in buses_stats %}
+                            <div class="bus-summary-pill {% if b.pendientes == 0 and b.total > 0 %}completed{% endif %}" id="pillBus_{{ b.bus }}">
+                                <span>Bus {{ b.bus }}:</span>
+                                <strong>{{ b.comieron }}/{{ b.total }}</strong>
+                                <span style="font-size:11px;opacity:0.8;">({{ b.pct }}%)</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- TOOLBAR: FILTERS, SEARCH AND BULK ACTIONS -->
+            <div class="toolbar-card">
+                <div class="search-box-wrapper">
+                    <svg class="svg-icon search-icon-pos" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text"
+                           id="searchInput"
+                           class="search-input"
+                           placeholder="Buscar pasajero por nombre, cédula o grupo..."
+                           value="{{ busqueda }}"
+                           onkeyup="filtrarPasajerosLocal()">
+                </div>
+
+                <div class="filter-chips-group">
+                    <span class="chip-label">Bus:</span>
+                    <a href="?viaje={{ viaje.id }}&evento={{ evento_sel.id }}&tipo={{ tipo_sel }}&bus=todos{% if estado_filtro %}&estado_filtro={{ estado_filtro }}{% endif %}"
+                       class="filter-chip {% if bus_filtro == 'todos' %}active{% endif %}">Todos</a>
+                    {% for b in buses_nums %}
+                        <a href="?viaje={{ viaje.id }}&evento={{ evento_sel.id }}&tipo={{ tipo_sel }}&bus={{ b }}{% if estado_filtro %}&estado_filtro={{ estado_filtro }}{% endif %}"
+                           class="filter-chip {% if bus_filtro == b|stringformat:'s' %}active{% endif %}">Bus {{ b }}</a>
+                    {% endfor %}
+
+                    <span class="chip-label" style="margin-left:8px;">Estado:</span>
+                    <a href="?viaje={{ viaje.id }}&evento={{ evento_sel.id }}&tipo={{ tipo_sel }}&bus={{ bus_filtro }}&estado_filtro=todos"
+                       class="filter-chip {% if estado_filtro == 'todos' %}active{% endif %}">Todos</a>
+                    <a href="?viaje={{ viaje.id }}&evento={{ evento_sel.id }}&tipo={{ tipo_sel }}&bus={{ bus_filtro }}&estado_filtro=comieron"
+                       class="filter-chip {% if estado_filtro == 'comieron' %}active{% endif %}">Comieron ({{ stats.comieron }})</a>
+                    <a href="?viaje={{ viaje.id }}&evento={{ evento_sel.id }}&tipo={{ tipo_sel }}&bus={{ bus_filtro }}&estado_filtro=pendientes"
+                       class="filter-chip {% if estado_filtro == 'pendientes' %}active{% endif %}">Faltan ({{ stats.pendientes }})</a>
+                </div>
+
+                <div class="bulk-actions-group">
+                    {% if servicio_cerrado %}
+                        <div class="badge-locked-toolbar">
+                            <svg class="svg-icon" style="width:13px;height:13px;" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <span>Servicio Cerrado</span>
+                        </div>
+                    {% else %}
+                        <button type="button" class="btn-bulk btn-bulk-success" onclick="marcarTodos(true)" title="Marcar todos los pasajeros de este listado como entregados">
+                            <svg class="svg-icon" style="width:14px;height:14px;color:var(--success);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            Marcar Todos
+                        </button>
+                        <button type="button" class="btn-bulk" onclick="marcarTodos(false)" title="Desmarcar todos los pasajeros de este listado">
+                            <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            Desmarcar
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- PASSENGERS LIST GROUPED BY GRUPO -->
+            <div class="groups-container" id="groupsContainer">
+                {% for g in grupos_lista %}
+                    <div class="group-card" data-grupo-id="{{ g.grupo_id }}" data-grupo-nombre="{{ g.nombre|lower }}">
+                        <div class="group-header">
+                            <div class="group-title-left">
+                                <span class="group-name">{{ g.nombre }}</span>
+                                {% if g.bus %}
+                                    <span class="badge-bus">Bus {{ g.bus }}</span>
+                                {% endif %}
+                                <span class="group-counter-tag {% if g.comieron == g.total and g.total > 0 %}all-done{% endif %}" id="groupCounter_{{ g.grupo_id }}">
+                                    {{ g.comieron }} de {{ g.total }} comieron
+                                </span>
+                            </div>
+
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                {% if not servicio_cerrado %}
+                                    <button type="button" class="btn-group-toggle" onclick="marcarGrupo('{{ g.grupo_id }}', true)">
+                                        <svg class="svg-icon" style="width:12px;height:12px;color:var(--success);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                        Marcar Grupo
+                                    </button>
+                                    <button type="button" class="btn-group-toggle" onclick="marcarGrupo('{{ g.grupo_id }}', false)">
+                                        <svg class="svg-icon" style="width:12px;height:12px;" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        Desmarcar
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="passengers-list">
+                            {% for p in g.pasajeros %}
+                                <div class="passenger-item-row {% if p.comio %}comio{% endif %}"
+                                     id="rowPassenger_{{ p.id }}"
+                                     data-passenger-id="{{ p.id }}"
+                                     data-nombre="{{ p.nombre|lower }}"
+                                     data-cedula="{{ p.cedula|lower }}"
+                                     data-comio="{{ p.comio|yesno:'true,false' }}">
+                                    <div class="passenger-identity">
+                                        <div class="passenger-avatar {% if p.comio %}comio{% endif %}" id="avatar_{{ p.id }}">
+                                            {{ p.nombre|slice:":1"|upper }}
+                                        </div>
+                                        <div class="passenger-info">
+                                            <span class="passenger-name">{{ p.nombre }}</span>
+                                            <span class="passenger-cedula">
+                                                {% if p.cedula %}C.I: {{ p.cedula }}{% else %}Sin cédula registrada{% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="passenger-action-col">
+                                        <div class="passenger-delivery-meta" id="meta_{{ p.id }}">
+                                            {% if p.comio %}
+                                                <div class="delivery-time">
+                                                    ✓ Comió {% if p.hora_entrega %}({{ p.hora_entrega }}){% endif %}
+                                                </div>
+                                                {% if p.entregado_por %}
+                                                    <div class="delivery-user">por @{{ p.entregado_por }}</div>
+                                                {% endif %}
+                                            {% else %}
+                                                <div style="color:var(--warning);font-weight:700;">Falta por comer</div>
+                                            {% endif %}
+                                        </div>
+
+                                        {% if servicio_cerrado %}
+                                            <button type="button"
+                                                    class="btn-toggle-meal btn-closed-eaten"
+                                                    disabled
+                                                    title="Este servicio ya fue finalizado y cerrado. No se puede volver a repartir.">
+                                                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                                <span>Entregado</span>
+                                            </button>
+                                        {% else %}
+                                            <button type="button"
+                                                    id="btnToggle_{{ p.id }}"
+                                                    class="btn-toggle-meal {% if p.comio %}btn-eaten{% else %}btn-pending{% endif %}"
+                                                    onclick="toggleComida('{{ p.id }}')">
+                                                {% if p.comio %}
+                                                    <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                                                    <span>Entregado</span>
+                                                {% else %}
+                                                    <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+                                                    <span>Entregar</span>
+                                                {% endif %}
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="empty-state">
+                        <svg class="svg-icon" style="width:40px;height:40px;color:var(--muted);margin-bottom:10px;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <h4 style="color:var(--navy);margin-bottom:4px;">No se encontraron pasajeros</h4>
+                        <p style="color:var(--text-secondary);font-size:13px;">No hay pasajeros que coincidan con los filtros aplicados en este servicio de comida.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+        {% endif %}
+    </main>
+
+    <!-- MODAL DE PREGUNTA: ¿QUÉ COMIDA ES? -->
+    <div id="modalSeleccionComida" class="modal-overlay" {% if not preguntar_comida %}hidden{% endif %}>
+        <div class="modal-card modal-comida-picker">
+            <div class="modal-picker-badge">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/></svg>
+                <span>Logística Secuencial</span>
+            </div>
+
+            <h2 class="modal-picker-title">¿Qué comida vas a repartir?</h2>
+            <p class="modal-picker-subtitle">
+                El control de comidas es diario y secuencial. Al finalizar una comida, se cierra y se habilita la siguiente:
+            </p>
+
+            <!-- Selector de Día dentro del Modal -->
+            {% if eventos %}
+            <div class="modal-dia-section">
+                <span class="modal-dia-label">Día Operativo del Viaje:</span>
+                <div class="modal-dia-pills" id="modalDiaPills">
+                    {% for ev in eventos %}
+                        <button type="button" 
+                                class="modal-dia-btn {% if ev.id == evento_sel.id %}active{% endif %}"
+                                data-evento-id="{{ ev.id }}"
+                                onclick="seleccionarDiaEnModal('{{ ev.id }}', this)">
+                            {{ ev.nombre }}
+                            <span class="modal-dia-sub">({{ ev.fecha|date:"d/m" }})</span>
+                        </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Grid de 3 Tarjetas Grandes: Desayuno, Almuerzo, Cena -->
+            <div class="meal-cards-picker-grid">
+                <!-- 1. DESAYUNO -->
+                <div class="meal-picker-card card-desayuno {% if comidas_resumen.DESAYUNO.es_turno_actual %}card-turno-actual{% elif comidas_resumen.DESAYUNO.finalizado %}card-finalizado{% endif %}"
+                     onclick="confirmarComidaModal('DESAYUNO')">
+                    <div class="meal-picker-top">
+                        <div class="meal-picker-icon-wrap icon-desayuno">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                        </div>
+                        <div class="meal-picker-badge-status {% if comidas_resumen.DESAYUNO.finalizado %}completed{% elif comidas_resumen.DESAYUNO.es_turno_actual %}active-turn{% else %}upcoming{% endif %}">
+                            {% if comidas_resumen.DESAYUNO.finalizado %}
+                                🔒 Cerrado ({{ comidas_resumen.DESAYUNO.comieron }}/{{ comidas_resumen.DESAYUNO.total }})
+                            {% elif comidas_resumen.DESAYUNO.es_turno_actual %}
+                                ⚡ TURNO ACTUAL
+                            {% else %}
+                                ⏳ Próximo Turno
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="meal-picker-title">Desayuno</div>
+                    <div class="meal-picker-hours">Mañana &bull; 7:00 AM - 10:30 AM</div>
+                    <div class="meal-picker-progress-track">
+                        <div class="meal-picker-progress-fill" style="width: {{ comidas_resumen.DESAYUNO.pct }}%;"></div>
+                    </div>
+                    <button type="button" class="btn-picker-action">
+                        {% if comidas_resumen.DESAYUNO.finalizado %}
+                            <span>Ver listado cerrado</span>
+                        {% elif comidas_resumen.DESAYUNO.es_turno_actual %}
+                            <span>Repartir Desayuno Ahora</span>
+                        {% else %}
+                            <span>Ver este turno</span>
+                        {% endif %}
+                        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+
+                <!-- 2. ALMUERZO -->
+                <div class="meal-picker-card card-almuerzo {% if comidas_resumen.ALMUERZO.es_turno_actual %}card-turno-actual{% elif comidas_resumen.ALMUERZO.finalizado %}card-finalizado{% endif %}"
+                     onclick="confirmarComidaModal('ALMUERZO')">
+                    <div class="meal-picker-top">
+                        <div class="meal-picker-icon-wrap icon-almuerzo">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M18 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/></svg>
+                        </div>
+                        <div class="meal-picker-badge-status {% if comidas_resumen.ALMUERZO.finalizado %}completed{% elif comidas_resumen.ALMUERZO.es_turno_actual %}active-turn{% else %}upcoming{% endif %}">
+                            {% if comidas_resumen.ALMUERZO.finalizado %}
+                                🔒 Cerrado ({{ comidas_resumen.ALMUERZO.comieron }}/{{ comidas_resumen.ALMUERZO.total }})
+                            {% elif comidas_resumen.ALMUERZO.es_turno_actual %}
+                                ⚡ TURNO ACTUAL
+                            {% else %}
+                                ⏳ Próximo Turno
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="meal-picker-title">Almuerzo</div>
+                    <div class="meal-picker-hours">Mediodía &bull; 12:00 PM - 3:30 PM</div>
+                    <div class="meal-picker-progress-track">
+                        <div class="meal-picker-progress-fill" style="width: {{ comidas_resumen.ALMUERZO.pct }}%;"></div>
+                    </div>
+                    <button type="button" class="btn-picker-action">
+                        {% if comidas_resumen.ALMUERZO.finalizado %}
+                            <span>Ver listado cerrado</span>
+                        {% elif comidas_resumen.ALMUERZO.es_turno_actual %}
+                            <span>Repartir Almuerzo Ahora</span>
+                        {% else %}
+                            <span>Ver este turno</span>
+                        {% endif %}
+                        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+
+                <!-- 3. CENA -->
+                <div class="meal-picker-card card-cena {% if comidas_resumen.CENA.es_turno_actual %}card-turno-actual{% elif comidas_resumen.CENA.finalizado %}card-finalizado{% endif %}"
+                     onclick="confirmarComidaModal('CENA')">
+                    <div class="meal-picker-top">
+                        <div class="meal-picker-icon-wrap icon-cena">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        </div>
+                        <div class="meal-picker-badge-status {% if comidas_resumen.CENA.finalizado %}completed{% elif comidas_resumen.CENA.es_turno_actual %}active-turn{% else %}upcoming{% endif %}">
+                            {% if comidas_resumen.CENA.finalizado %}
+                                🔒 Cerrado ({{ comidas_resumen.CENA.comieron }}/{{ comidas_resumen.CENA.total }})
+                            {% elif comidas_resumen.CENA.es_turno_actual %}
+                                ⚡ TURNO ACTUAL
+                            {% else %}
+                                ⏳ Próximo Turno
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="meal-picker-title">Cena</div>
+                    <div class="meal-picker-hours">Noche &bull; 7:00 PM - 10:00 PM</div>
+                    <div class="meal-picker-progress-track">
+                        <div class="meal-picker-progress-fill" style="width: {{ comidas_resumen.CENA.pct }}%;"></div>
+                    </div>
+                    <button type="button" class="btn-picker-action">
+                        {% if comidas_resumen.CENA.finalizado %}
+                            <span>Ver listado cerrado</span>
+                        {% elif comidas_resumen.CENA.es_turno_actual %}
+                            <span>Repartir Cena Ahora</span>
+                        {% else %}
+                            <span>Ver este turno</span>
+                        {% endif %}
+                        <svg class="svg-icon" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-picker-footer">
+                <button type="button" class="btn-modal-dismiss" onclick="cerrarModalSeleccionComida()">
+                    Cerrar ventana
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CELEBRACIÓN: TODOS LOS CLIENTES YA COMIERON -->
+    <div id="modalFinalizado" class="modal-overlay" hidden>
+        <div class="modal-card modal-celebracion">
+            <div class="celeb-halo-ring">
+                <div class="celeb-icon-circle">
+                    <svg class="svg-icon celeb-svg-check" viewBox="0 0 24 24">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="celeb-badge-chip">
+                <span class="celeb-dot"></span>
+                <span>Servicio 100% Completado y Cerrado</span>
+            </div>
+
+            <h2 class="celeb-title">¡Servicio Finalizado!</h2>
+            
+            <div class="celeb-banner-quote" id="celebBannerQuote">
+                {{ mensaje_finalizado }}
+            </div>
+
+            <p class="celeb-description">
+                Todos los <strong id="celebPasajerosTotal">{{ stats.total }}</strong> clientes del viaje ya recibieron su ración.
+                Este servicio ha quedado <strong>CERRADO</strong> para no duplicar entregas.
+            </p>
+
+            <div class="celeb-stats-strip">
+                <div class="celeb-kpi">
+                    <span class="celeb-kpi-val" id="celebStatAtendidos">{{ stats.total }}</span>
+                    <span class="celeb-kpi-lbl">Atendidos</span>
+                </div>
+                <div class="celeb-kpi-sep"></div>
+                <div class="celeb-kpi">
+                    <span class="celeb-kpi-val" style="color:var(--success);">100%</span>
+                    <span class="celeb-kpi-lbl">Entregados</span>
+                </div>
+                <div class="celeb-kpi-sep"></div>
+                <div class="celeb-kpi">
+                    <span class="celeb-kpi-val" style="color:var(--turquoise-dark);">0</span>
+                    <span class="celeb-kpi-lbl">Pendientes</span>
+                </div>
+            </div>
+
+            <div class="celeb-actions-row">
+                <a href="#" class="btn-celeb-siguiente" id="btnCelebSiguiente" style="display:none;">
+                    <span>Continuar con <strong id="celebSigNombre">Siguiente Comida</strong> (<span id="celebSigDia">Día</span>)</span>
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+                <button type="button" class="btn-celeb-secondary" onclick="cerrarModalFinalizado(); window.location.reload();">
+                    <span>Aceptar y ver listado cerrado</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WATERMARK FOOTER -->
+    <footer class="page-footer">
+        <div class="footer-left-meta">
+            &copy; {% now "Y" %} Viajes Nena &bull; Módulo de Control de Repartición de Comidas
+        </div>
+
+        <div class="studio-watermark-pill">
+            <svg class="svg-icon" style="width:13px;height:13px;" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <span>Karma Studio</span>
+            <span class="version-badge">v1.0.0</span>
+        </div>
+    </footer>
+
+    <script>
+        // ESTADO GLOBAL
+        const CURRENT_VIAJE_ID = "{{ viaje.id }}";
+        const CURRENT_EVENTO_ID = "{{ evento_sel.id }}";
+        const CURRENT_TIPO_COMIDA = "{{ tipo_sel }}";
+        const CURRENT_TIPO_NOMBRE = "{{ tipo_nombre }}";
+        const SERVICIO_CERRADO = {{ servicio_cerrado|yesno:"true,false" }};
+        const CSRF_TOKEN = "{{ csrf_token }}";
+
+        let modalDiaSeleccionado = CURRENT_EVENTO_ID;
+
+        // TEMA OSCURO / CLARO
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute("data-theme");
+            if (current === "dark") {
+                html.removeAttribute("data-theme");
+                localStorage.setItem("viajes_nena_theme", "light");
+            } else {
+                html.setAttribute("data-theme", "dark");
+                localStorage.setItem("viajes_nena_theme", "dark");
+            }
+        }
+
+        // CONTROL DE MODAL PREGUNTA: ¿QUÉ COMIDA ES?
+        function abrirModalSeleccionComida() {
+            const modal = document.getElementById("modalSeleccionComida");
+            if (modal) modal.hidden = false;
+        }
+
+        function cerrarModalSeleccionComida() {
+            const modal = document.getElementById("modalSeleccionComida");
+            if (modal) modal.hidden = true;
+        }
+
+        function seleccionarDiaEnModal(eventoId, btn) {
+            modalDiaSeleccionado = eventoId;
+            document.querySelectorAll(".modal-dia-btn").forEach(b => b.classList.remove("active"));
+            if (btn) btn.classList.add("active");
+        }
+
+        function confirmarComidaModal(tipoComida) {
+            const dia = modalDiaSeleccionado || CURRENT_EVENTO_ID;
+            window.location.href = `?viaje=${CURRENT_VIAJE_ID}&evento=${dia}&tipo=${tipoComida}`;
+        }
+
+        // CONTROL DE ALERTA DE SERVICIO FINALIZADO
+        function mostrarAlertaFinalizado(data) {
+            const tipoComida = data.tipo_comida || CURRENT_TIPO_COMIDA;
+            const t = tipoComida.toUpperCase();
+            let msg = data.mensaje_finalizado || "";
+            if (!msg) {
+                if (t === "CENA") msg = "¡Todos los clientes ya comieron! La Cena está finalizada.";
+                else if (t === "DESAYUNO") msg = "¡Todos los clientes ya comieron! El Desayuno está finalizado.";
+                else msg = "¡Todos los clientes ya comieron! El Almuerzo está finalizado.";
+            }
+
+            const quote = document.getElementById("celebBannerQuote");
+            if (quote) quote.textContent = msg;
+
+            if (data.total) {
+                const spanTot = document.getElementById("celebPasajerosTotal");
+                if (spanTot) spanTot.textContent = data.total;
+                const spanAt = document.getElementById("celebStatAtendidos");
+                if (spanAt) spanAt.textContent = data.total;
+            }
+
+            // Siguiente turno en secuencia
+            const btnSig = document.getElementById("btnCelebSiguiente");
+            if (btnSig && data.siguiente_url) {
+                btnSig.href = data.siguiente_url;
+                btnSig.style.display = "inline-flex";
+                const sigNom = document.getElementById("celebSigNombre");
+                const sigDia = document.getElementById("celebSigDia");
+                if (sigNom) sigNom.textContent = data.siguiente_nombre || "Siguiente Comida";
+                if (sigDia) sigDia.textContent = data.siguiente_dia || "";
+            } else if (btnSig) {
+                btnSig.style.display = "none";
+            }
+
+            const modal = document.getElementById("modalFinalizado");
+            if (modal) {
+                modal.hidden = false;
+                reproducirChimeExito();
+            }
+        }
+
+        function cerrarModalFinalizado() {
+            const modal = document.getElementById("modalFinalizado");
+            if (modal) modal.hidden = true;
+        }
+
+        // SUTIL CHIME ARMÓNICO AL COMPLETAR EL SERVICIO
+        function reproducirChimeExito() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc1.type = "sine";
+                osc1.frequency.setValueAtTime(523.25, now);
+                osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.15);
+
+                osc2.type = "triangle";
+                osc2.frequency.setValueAtTime(659.25, now + 0.15);
+                osc2.frequency.exponentialRampToValueAtTime(783.99, now + 0.35);
+
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+
+                osc1.connect(gain);
+                osc2.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc1.start(now);
+                osc2.start(now + 0.15);
+                osc1.stop(now + 0.55);
+                osc2.stop(now + 0.55);
+            } catch (e) {}
+        }
+
+        // TOGGLE AJAX DE PASAJERO
+        async function toggleComida(pasajeroId) {
+            if (SERVICIO_CERRADO) {
+                alert("Este servicio ya fue finalizado y cerrado. No se puede volver a repartir.");
+                return;
+            }
+
+            const btn = document.getElementById("btnToggle_" + pasajeroId);
+            if (!btn) return;
+
+            btn.style.opacity = "0.6";
+
+            try {
+                const formData = new FormData();
+                formData.append("action", "toggle");
+                formData.append("viaje", CURRENT_VIAJE_ID);
+                formData.append("evento", CURRENT_EVENTO_ID);
+                formData.append("tipo", CURRENT_TIPO_COMIDA);
+                formData.append("pasajero_id", pasajeroId);
+                formData.append("is_ajax", "1");
+
+                const response = await fetch(window.location.href, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": CSRF_TOKEN,
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (data.status === "success") {
+                    btn.style.opacity = "1";
+                    actualizarFilaPasajero(pasajeroId, data.nuevo_estado, data.hora_entrega);
+                    actualizarMetricas(data);
+                } else {
+                    alert(data.mensaje || "Error al actualizar estado de la comida.");
+                    btn.style.opacity = "1";
+                }
+            } catch (err) {
+                console.error("Error en toggle comida:", err);
+                btn.style.opacity = "1";
+            }
+        }
+
+        function actualizarFilaPasajero(pasajeroId, comio, horaEntrega) {
+            const btn = document.getElementById("btnToggle_" + pasajeroId);
+            const row = document.getElementById("rowPassenger_" + pasajeroId);
+            const avatar = document.getElementById("avatar_" + pasajeroId);
+            const meta = document.getElementById("meta_" + pasajeroId);
+
+            if (row) row.setAttribute("data-comio", comio ? "true" : "false");
+
+            if (comio) {
+                if (row) row.classList.add("comio");
+                if (avatar) avatar.classList.add("comio");
+                if (btn) {
+                    btn.className = "btn-toggle-meal btn-eaten";
+                    btn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>Entregado</span>`;
+                }
+                if (meta) {
+                    meta.innerHTML = `<div class="delivery-time">✓ Comió ${horaEntrega ? '(' + horaEntrega + ')' : ''}</div><div class="delivery-user">hace un momento</div>`;
+                }
+            } else {
+                if (row) row.classList.remove("comio");
+                if (avatar) avatar.classList.remove("comio");
+                if (btn) {
+                    btn.className = "btn-toggle-meal btn-pending";
+                    btn.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg><span>Entregar</span>`;
+                }
+                if (meta) {
+                    meta.innerHTML = `<div style="color:var(--warning);font-weight:700;">Falta por comer</div>`;
+                }
+            }
+
+            // Actualizar contador del grupo visual
+            if (row) {
+                const groupCard = row.closest(".group-card");
+                if (groupCard) {
+                    const comieronEnGrupo = groupCard.querySelectorAll(".passenger-item-row[data-comio='true']").length;
+                    const totalEnGrupo = groupCard.querySelectorAll(".passenger-item-row").length;
+                    const counterSpan = groupCard.querySelector(".group-counter-tag");
+                    if (counterSpan) {
+                        counterSpan.textContent = `${comieronEnGrupo} de ${totalEnGrupo} comieron`;
+                        if (comieronEnGrupo === totalEnGrupo && totalEnGrupo > 0) {
+                            counterSpan.classList.add("all-done");
+                        } else {
+                            counterSpan.classList.remove("all-done");
+                        }
+                    }
+                }
+            }
+        }
+
+        function actualizarMetricas(data) {
+            if (data.total !== undefined) {
+                const statTotal = document.getElementById("statTotal");
+                const statComieron = document.getElementById("statComieron");
+                const statPendientes = document.getElementById("statPendientes");
+                const statPorcentaje = document.getElementById("statPorcentaje");
+                const progressBarFill = document.getElementById("progressBarFill");
+
+                if (statTotal) statTotal.textContent = data.total;
+                if (statComieron) statComieron.textContent = data.comieron;
+                if (statPendientes) statPendientes.textContent = data.pendientes;
+                if (statPorcentaje) statPorcentaje.textContent = data.porcentaje + "%";
+                if (progressBarFill) progressBarFill.style.width = data.porcentaje + "%";
+
+                const todosComieron = (data.pendientes === 0 && data.total > 0);
+
+                if (todosComieron) {
+                    mostrarAlertaFinalizado(data);
+                }
+            }
+        }
+
+        async function marcarGrupo(grupoId, marcar) {
+            if (SERVICIO_CERRADO) {
+                alert("Este servicio ya fue finalizado y cerrado. No se puede volver a repartir.");
+                return;
+            }
+            const accionTexto = marcar ? "marcar como entregada la comida a todo este grupo" : "desmarcar a todos los pasajeros de este grupo";
+            if (!confirm(`¿Deseas ${accionTexto}?`)) return;
+
+            const formData = new FormData();
+            formData.append("action", marcar ? "marcar_grupo" : "desmarcar_grupo");
+            formData.append("viaje", CURRENT_VIAJE_ID);
+            formData.append("evento", CURRENT_EVENTO_ID);
+            formData.append("tipo", CURRENT_TIPO_COMIDA);
+            formData.append("grupo_id", grupoId);
+            formData.append("is_ajax", "1");
+
+            try {
+                const resp = await fetch(window.location.href, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": CSRF_TOKEN, "X-Requested-With": "XMLHttpRequest" },
+                    body: formData,
+                });
+                const data = await resp.json();
+                if (data.finalizado) {
+                    mostrarAlertaFinalizado(data);
+                } else {
+                    window.location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+                window.location.reload();
+            }
+        }
+
+        async function marcarTodos(marcar) {
+            if (SERVICIO_CERRADO) {
+                alert("Este servicio ya fue finalizado y cerrado. No se puede volver a repartir.");
+                return;
+            }
+            const msg = marcar 
+                ? "¿Marcar a TODOS los clientes del viaje como que ya comieron?"
+                : "¿Deseas DESMARCAR a todos los pasajeros para este servicio de comida?";
+            if (!confirm(msg)) return;
+
+            const formData = new FormData();
+            formData.append("action", marcar ? "marcar_todos" : "desmarcar_todos");
+            formData.append("viaje", CURRENT_VIAJE_ID);
+            formData.append("evento", CURRENT_EVENTO_ID);
+            formData.append("tipo", CURRENT_TIPO_COMIDA);
+            formData.append("is_ajax", "1");
+
+            try {
+                const resp = await fetch(window.location.href, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": CSRF_TOKEN, "X-Requested-With": "XMLHttpRequest" },
+                    body: formData,
+                });
+                const data = await resp.json();
+                if (data.finalizado) {
+                    mostrarAlertaFinalizado(data);
+                } else {
+                    window.location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+                window.location.reload();
+            }
+        }
+
+        function filtrarPasajerosLocal() {
+            const term = document.getElementById("searchInput").value.toLowerCase().trim();
+            const groupCards = document.querySelectorAll(".group-card");
+
+            groupCards.forEach(card => {
+                const rows = card.querySelectorAll(".passenger-item-row");
+                let visiblesEnGrupo = 0;
+
+                rows.forEach(row => {
+                    const nombre = row.getAttribute("data-nombre") || "";
+                    const cedula = row.getAttribute("data-cedula") || "";
+                    const grupoNombre = card.getAttribute("data-grupo-nombre") || "";
+
+                    if (!term || nombre.includes(term) || cedula.includes(term) || grupoNombre.includes(term)) {
+                        row.style.display = "flex";
+                        visiblesEnGrupo++;
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+
+                if (visiblesEnGrupo > 0 || !term) {
+                    card.style.display = "block";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        }
+    </script>
+
+    {% include "core/includes/inactivity_timeout.html" %}
+</body>
+</html>

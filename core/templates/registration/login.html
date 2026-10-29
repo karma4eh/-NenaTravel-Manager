@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión | Viajes Nena</title>
+    <style>
+        :root {
+            --navy: #102b46;
+            --turquoise: #16b8b0;
+            --turquoise-light: #e7f9f7;
+            --background: #f3f7fb;
+            --white: #ffffff;
+            --text: #24364b;
+            --muted: #748397;
+            --border: #e2eaf1;
+            --red: #bd3030;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #0d2236 0%, #163a5c 40%, #1a4568 100%);
+            font-family: "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .login-card {
+            width: min(420px, 100%);
+            background: var(--white);
+            border-radius: 22px;
+            padding: 40px 32px 34px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, .25);
+            text-align: center;
+        }
+
+        .brand-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 16px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: var(--turquoise);
+            color: var(--navy);
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--navy);
+            letter-spacing: .5px;
+        }
+
+        .brand-subtitle {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .login-heading {
+            margin: 28px 0 6px;
+            font-size: 22px;
+            font-weight: 750;
+            color: var(--navy);
+        }
+
+        .login-description {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 0 0 26px;
+            line-height: 1.6;
+        }
+
+        .error-box {
+            background: #fff0f0;
+            border: 1px solid #f1cece;
+            color: var(--red);
+            border-radius: 10px;
+            padding: 13px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        [data-theme="dark"] .inactivity-alert-card {
+            background: rgba(245, 158, 11, 0.16) !important;
+            border-color: rgba(245, 158, 11, 0.5) !important;
+            color: #fbbf24 !important;
+        }
+
+        [data-theme="dark"] .inactivity-alert-card strong {
+            color: #fef3c7 !important;
+        }
+
+        [data-theme="dark"] .inactivity-alert-card svg {
+            color: #fbbf24 !important;
+        }
+
+        .field {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--navy);
+            font-size: 13px;
+        }
+
+        .field input {
+            width: 100%;
+            min-height: 48px;
+            border: 1px solid #d8e2ec;
+            background: #f9fbfd;
+            color: var(--text);
+            border-radius: 10px;
+            padding: 12px 14px;
+            font: inherit;
+            font-size: 15px;
+            transition: border-color .2s, outline .2s;
+        }
+
+        .field input:focus {
+            outline: 2px solid rgba(22, 184, 176, .3);
+            border-color: var(--turquoise);
+            background: var(--white);
+        }
+
+        .submit-btn {
+            width: 100%;
+            min-height: 48px;
+            margin-top: 6px;
+            border: 0;
+            border-radius: 10px;
+            padding: 13px 20px;
+            background: var(--turquoise);
+            color: #073a43;
+            font: inherit;
+            font-size: 15px;
+            font-weight: 750;
+            cursor: pointer;
+            transition: filter .2s, transform .2s;
+        }
+
+        .submit-btn:hover {
+            filter: brightness(.94);
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .footer {
+            margin-top: 28px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 30px 22px 26px;
+                border-radius: 18px;
+            }
+        }
+    
+        .karma-watermark-login {
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        .karma-watermark-card {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            font-size: 12px;
+            color: var(--text);
+            flex-wrap: wrap;
+        }
+        .karma-watermark-card .karma-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--turquoise);
+        }
+        .karma-watermark-card strong {
+            color: var(--navy);
+            font-weight: 800;
+        }
+        .karma-sep {
+            color: var(--muted);
+            opacity: 0.6;
+        }
+        .karma-watermark-card .karma-v-tag {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 5px;
+            background: var(--turquoise-light);
+            color: var(--turquoise);
+            border: 1px solid rgba(22, 184, 176, 0.3);
+            filter: contrast(1.2);
+        }
+        [data-theme="dark"] .karma-watermark-card strong {
+            color: #ffffff;
+        }
+        [data-theme="dark"] .karma-watermark-card .karma-v-tag {
+            background: rgba(34, 211, 238, 0.15);
+            color: #22d3ee;
+            border-color: rgba(34, 211, 238, 0.35);
+        }
+        .karma-desc {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+
+    </style>
+{% include "core/includes/dark_mode_head.html" %}
+</head>
+<body>
+    <div style="position:fixed;top:20px;right:20px;z-index:100;">
+        {% include "core/includes/dark_mode_toggle.html" %}
+    </div>
+    <div class="login-card">
+        <div class="brand-icon">V</div>
+        <div class="brand-name">VIAJES NENA</div>
+        <div class="brand-subtitle">Sistema de gestión de viajes</div>
+
+        <h1 class="login-heading">Iniciar sesión</h1>
+        <p class="login-description">
+            Ingresa tus credenciales para acceder al panel de control.
+        </p>
+
+        {% if request.GET.inactividad == '1' %}
+            <div class="inactivity-alert-card" id="inactivityAlertBox" style="background:rgba(245, 158, 11, 0.12); border: 1.5px solid rgba(245, 158, 11, 0.4); color: #d97706; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; text-align: left; display: flex; align-items: flex-start; gap: 12px; line-height: 1.45;">
+                <svg class="svg-icon" style="width: 22px; height: 22px; flex-shrink: 0; margin-top: 1px; color: #d97706;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <div>
+                    <strong style="display: block; font-size: 14px; font-weight: 800; margin-bottom: 3px; color: #b45309;">Sesión cerrada por inactividad</strong>
+                    <span>Estuviste 10 minutos sin actividad en el sistema. Por seguridad de las operaciones y cobros, introduce tu usuario y contraseña de nuevo.</span>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if form.errors %}
+            <div class="error-box">
+                {% if form.non_field_errors %}
+                    {% for error in form.non_field_errors %}
+                        {{ error }}<br>
+                    {% endfor %}
+                {% else %}
+                    Usuario o contraseña incorrectos. Intenta de nuevo.
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <div class="field">
+                <label for="id_username">Usuario</label>
+                <input type="text"
+                       name="username"
+                       id="id_username"
+                       autocomplete="username"
+                       autofocus
+                       required
+                       placeholder="Tu nombre de usuario">
+            </div>
+
+            <div class="field">
+                <label for="id_password">Contraseña</label>
+                <input type="password"
+                       name="password"
+                       id="id_password"
+                       autocomplete="current-password"
+                       required
+                       placeholder="Tu contraseña">
+            </div>
+
+            <button type="submit" class="submit-btn">
+                Ingresar al sistema
+            </button>
+        </form>
+
+                <div class="karma-watermark-login">
+            <div class="karma-watermark-card">
+                <svg class="karma-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <polyline points="7 6 2 12 7 18"/>
+                    <polyline points="17 6 22 12 17 18"/>
+                    <path d="M9 15l3-3.5 3 2.5 4-5"/>
+                    <path d="M16 9h3v3"/>
+                </svg>
+                <span class="karma-txt">Desarrollado por <strong>Karma Studio</strong></span>
+                <span class="karma-sep">•</span>
+                <span class="karma-v-tag">v1.0.0</span>
+            </div>
+            <div class="karma-desc">Programación & Marketing Digital</div>
+        </div>
+
+        <div class="footer">
+            Viajes Nena • El placer de viajar
+        </div>
+    </div>
+</body>
+</html>

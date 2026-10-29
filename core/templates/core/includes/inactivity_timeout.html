@@ -1,0 +1,277 @@
+{% if request.user.is_authenticated %}
+<!-- MODAL DE INACTIVIDAD (10 MINUTOS) • VIAJES NENA -->
+<div class="inactivity-modal-overlay" id="inactivityModalOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="inactivityModalTitle">
+    <div class="inactivity-modal-card">
+        <div class="inactivity-icon-wrap">
+            <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="inactivity-badge-pill">Alerta de Seguridad</div>
+        <h3 class="inactivity-title" id="inactivityModalTitle">¿Deseas extender tu sesión?</h3>
+        <p class="inactivity-desc">
+            Has estado inactivo durante casi 10 minutos. Por protección y seguridad en las operaciones y cobros de Viajes Nena, tu sesión se cerrará automáticamente en:
+        </p>
+
+        <div class="inactivity-countdown-box">
+            <span class="inactivity-countdown-num" id="inactivityCountdownSeconds">60</span>
+            <span class="inactivity-countdown-lbl">segundos restantes</span>
+        </div>
+
+        <div class="inactivity-actions">
+            <button type="button" class="btn-inactivity-extend" id="btnExtendSession" onclick="window.extenderSesionInactividad()">
+                <svg class="svg-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><path d="M23 4v6h-6"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                <span>Extender Sesión</span>
+            </button>
+            <a href="{% url 'logout' %}" class="btn-inactivity-logout">
+                <svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>Cerrar Sesión Ahora</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.inactivity-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(10, 25, 47, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: fadeInOverlay 0.25s ease-out;
+}
+.inactivity-modal-overlay[hidden] {
+    display: none !important;
+}
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.inactivity-modal-card {
+    width: min(440px, 94%);
+    background: #0f2238;
+    border: 1.5px solid rgba(245, 158, 11, 0.5);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 40px rgba(245, 158, 11, 0.22);
+    border-radius: 22px;
+    padding: 32px 28px;
+    text-align: center;
+    animation: popInCard 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+[data-theme="light"] .inactivity-modal-card,
+html:not([data-theme="dark"]) .inactivity-modal-card {
+    background: #ffffff;
+    border-color: rgba(245, 158, 11, 0.6);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25), 0 0 35px rgba(245, 158, 11, 0.15);
+}
+@keyframes popInCard {
+    from { transform: scale(0.92) translateY(12px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+}
+.inactivity-icon-wrap {
+    width: 62px;
+    height: 62px;
+    margin: 0 auto 14px;
+    border-radius: 18px;
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    display: grid;
+    place-items: center;
+}
+.inactivity-icon-wrap .svg-icon {
+    width: 32px;
+    height: 32px;
+    animation: pulseWarn 2s infinite ease-in-out;
+}
+@keyframes pulseWarn {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+.inactivity-badge-pill {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+}
+.inactivity-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 10px;
+}
+[data-theme="light"] .inactivity-title,
+html:not([data-theme="dark"]) .inactivity-title {
+    color: #0f172a;
+}
+.inactivity-desc {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #94a3b8;
+    margin: 0 0 20px;
+}
+[data-theme="light"] .inactivity-desc,
+html:not([data-theme="dark"]) .inactivity-desc {
+    color: #475569;
+}
+.inactivity-countdown-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px dashed rgba(245, 158, 11, 0.45);
+    border-radius: 14px;
+    margin-bottom: 24px;
+}
+.inactivity-countdown-num {
+    font-size: 44px;
+    font-weight: 900;
+    color: #f59e0b;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+.inactivity-countdown-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    color: #f59e0b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+.inactivity-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.btn-inactivity-extend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 20px;
+    border-radius: 12px;
+    border: none;
+    background: #16b8b0;
+    color: #0b1a2c;
+    font-size: 14.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 16px rgba(22, 184, 176, 0.35);
+}
+.btn-inactivity-extend:hover {
+    background: #22d3ee;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(34, 211, 238, 0.4);
+}
+.btn-inactivity-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: transparent;
+    color: #94a3b8;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-inactivity-logout:hover {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+}
+</style>
+
+<script>
+(function() {
+    // 10 minutos = 600.000 ms. Alerta en el minuto 9 (últimos 60 segundos)
+    const TIEMPO_TOTAL_MS = 10 * 60 * 1000;
+    const TIEMPO_ALERTA_MS = 60 * 1000;
+    const UMBRAL_ALERTA_MS = TIEMPO_TOTAL_MS - TIEMPO_ALERTA_MS; // 540.000 ms
+
+    let ultimoMovimiento = Date.now();
+    let modalAbierto = false;
+    let intervaloChequeo = null;
+    let ultimoRegistro = 0;
+
+    const eventosActividad = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'];
+
+    function registrarActividad() {
+        if (modalAbierto) {
+            // Cuando la pregunta está abierta, el usuario debe pulsar explícitamente "Extender Sesión"
+            return;
+        }
+        const ahora = Date.now();
+        if (ahora - ultimoRegistro > 1000) {
+            ultimoMovimiento = ahora;
+            ultimoRegistro = ahora;
+        }
+    }
+
+    eventosActividad.forEach(function(evt) {
+        window.addEventListener(evt, registrarActividad, { passive: true });
+    });
+
+    window.extenderSesionInactividad = function() {
+        ultimoMovimiento = Date.now();
+        modalAbierto = false;
+        const overlay = document.getElementById("inactivityModalOverlay");
+        if (overlay) overlay.hidden = true;
+
+        fetch("{% url 'api_ping_session' %}", {
+            method: "GET",
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        }).catch(function() {});
+    };
+
+    window.__simularInactividad = function() {
+        ultimoMovimiento = Date.now() - UMBRAL_ALERTA_MS - 5000;
+    };
+
+    intervaloChequeo = setInterval(function() {
+        const transcurrido = Date.now() - ultimoMovimiento;
+
+        if (transcurrido >= TIEMPO_TOTAL_MS) {
+            clearInterval(intervaloChequeo);
+            window.location.href = "{% url 'logout' %}?inactividad=1";
+            return;
+        }
+
+        if (transcurrido >= UMBRAL_ALERTA_MS) {
+            if (!modalAbierto) {
+                modalAbierto = true;
+                const overlay = document.getElementById("inactivityModalOverlay");
+                if (overlay) overlay.hidden = false;
+            }
+            const segundosRestantes = Math.max(0, Math.ceil((TIEMPO_TOTAL_MS - transcurrido) / 1000));
+            const timerEl = document.getElementById("inactivityCountdownSeconds");
+            if (timerEl) {
+                timerEl.textContent = segundosRestantes;
+            }
+        } else {
+            if (modalAbierto) {
+                modalAbierto = false;
+                const overlay = document.getElementById("inactivityModalOverlay");
+                if (overlay) overlay.hidden = true;
+            }
+        }
+    }, 1000);
+})();
+</script>
+{% endif %}

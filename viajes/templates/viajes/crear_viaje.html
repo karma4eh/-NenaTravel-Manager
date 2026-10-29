@@ -1,0 +1,2227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Viaje y Cargar Listín | Viajes Nena</title>
+
+    <style>
+        :root {
+            --navy: #102b46;
+            --navy-light: #16385a;
+            --turquoise: #16b8b0;
+            --turquoise-dark: #0f938c;
+            --turquoise-light: #e6f9f7;
+            --background: #f4f7fb;
+            --surface: #ffffff;
+            --surface-subtle: #f8fafc;
+            --border: #e2e8f0;
+            --border-focus: #16b8b0;
+            --text: #1e293b;
+            --text-secondary: #334155;
+            --muted: #475569;
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --warning: #d97706;
+            --warning-light: #fffbeb;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --card-shadow: 0 10px 30px -5px rgba(16, 43, 70, 0.08);
+            --card-shadow-hover: 0 20px 35px -5px rgba(16, 43, 70, 0.14);
+        }
+
+        [data-theme="dark"] {
+            --navy: #0b1523;
+            --navy-light: #122135;
+            --turquoise: #22d3ee;
+            --turquoise-dark: #06b6d4;
+            --turquoise-light: rgba(34, 211, 238, 0.12);
+            --background: #060c14;
+            --surface: #0f1c2d;
+            --surface-subtle: #142337;
+            --border: #1e334d;
+            --border-focus: #22d3ee;
+            --text: #f8fafc;
+            --text-secondary: #f1f5f9;
+            --muted: #cbd5e1;
+            --success: #10b981;
+            --success-light: rgba(16, 185, 129, 0.15);
+            --warning: #f59e0b;
+            --warning-light: rgba(245, 158, 11, 0.15);
+            --danger: #ef4444;
+            --danger-light: rgba(239, 68, 68, 0.15);
+            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+            --card-shadow-hover: 0 20px 35px -5px rgba(0, 0, 0, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .svg-icon {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+            stroke: currentColor;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            vertical-align: middle;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        /* TOPBAR */
+        .topbar {
+            background: #102b46;
+            color: white;
+            padding: 14px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-bottom: 2px solid var(--turquoise);
+        }
+
+        [data-theme="dark"] .topbar {
+            background: #091320;
+            border-bottom: 2px solid #22d3ee;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #16b8b0 0%, #0e8f89 100%);
+            color: #0a1b2d;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: 0 4px 12px rgba(22, 184, 176, 0.35);
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 850;
+            letter-spacing: -0.3px;
+            line-height: 1.2;
+        }
+
+        .brand-subtitle {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #b8d5ed;
+            margin-top: 1px;
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .karma-topbar-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #e2e8f0;
+        }
+
+        .karma-icon {
+            width: 14px;
+            height: 14px;
+            stroke: #22d3ee;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .karma-v-tag {
+            background: #22d3ee;
+            color: #091320;
+            padding: 1px 5px;
+            border-radius: 6px;
+            font-size: 9.5px;
+            font-weight: 900;
+        }
+
+        .btn-back-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: #e2e8f0;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 750;
+            padding: 7px 14px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            transition: all 0.2s ease;
+        }
+
+        .btn-back-home:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            transform: translateX(-2px);
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            width: min(1120px, 94%);
+            margin: 32px auto 60px;
+            flex-grow: 1;
+        }
+
+        /* PAGE HEADING */
+        .page-heading {
+            margin-bottom: 26px;
+        }
+
+        .eyebrow-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+            border: 1px solid rgba(22, 184, 176, 0.3);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+        }
+
+        [data-theme="dark"] .eyebrow-pill {
+            color: #22d3ee;
+            border-color: rgba(34, 211, 238, 0.35);
+        }
+
+        .eyebrow-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--turquoise);
+            box-shadow: 0 0 8px var(--turquoise);
+        }
+
+        .page-title {
+            color: var(--navy);
+            font-size: clamp(26px, 3.8vw, 34px);
+            font-weight: 850;
+            letter-spacing: -0.6px;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        [data-theme="dark"] .page-title {
+            color: #f8fafc;
+        }
+
+        .page-desc {
+            color: var(--text-secondary);
+            font-size: 14.5px;
+            font-weight: 600;
+            max-width: 780px;
+            line-height: 1.6;
+        }
+
+        /* STEPPER WIZARD INDICATOR */
+        .stepper-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px 20px;
+            margin-bottom: 28px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 12px;
+            transition: all 0.25s ease;
+        }
+
+        .step-number {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 14px;
+            font-weight: 850;
+            background: var(--surface-subtle);
+            color: var(--muted);
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .step-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-title {
+            font-size: 13.5px;
+            font-weight: 750;
+            color: var(--muted);
+            transition: color 0.2s ease;
+        }
+
+        .step-sub {
+            font-size: 11.5px;
+            font-weight: 650;
+            color: var(--muted);
+            opacity: 0.8;
+        }
+
+        .step-item.active .step-number {
+            background: var(--turquoise);
+            color: #0a1b2d;
+            border-color: var(--turquoise);
+            box-shadow: 0 0 14px rgba(22, 184, 176, 0.45);
+        }
+
+        .step-item.active .step-title {
+            color: var(--navy);
+            font-weight: 850;
+        }
+
+        [data-theme="dark"] .step-item.active .step-title {
+            color: #ffffff;
+        }
+
+        .step-item.completed .step-number {
+            background: var(--success);
+            color: white;
+            border-color: var(--success);
+        }
+
+        .step-item.completed .step-title {
+            color: var(--success);
+        }
+
+        .step-divider {
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            margin: 0 10px;
+        }
+
+        /* MESSAGES */
+        .messages {
+            margin-bottom: 22px;
+        }
+
+        .alert-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 650;
+            line-height: 1.5;
+        }
+
+        .alert-box.success {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid rgba(5, 150, 105, 0.3);
+        }
+
+        .alert-box.error {
+            background: var(--danger-light);
+            color: var(--danger);
+            border: 1px solid rgba(220, 38, 38, 0.3);
+        }
+
+        /* MAIN WIZARD CARD */
+        .wizard-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .wizard-section {
+            padding: 30px;
+            display: none;
+        }
+
+        .wizard-section.active {
+            display: block;
+            animation: fadeIn 0.35s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .section-header h2 {
+            font-size: 21px;
+            font-weight: 850;
+            color: var(--navy);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        [data-theme="dark"] .section-header h2 {
+            color: #ffffff;
+        }
+
+        .section-header-tag {
+            font-size: 12px;
+            font-weight: 850;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+            border: 1px solid rgba(22, 184, 176, 0.25);
+        }
+
+        /* FORM ELEMENTS */
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .col-span-full {
+            grid-column: 1 / -1;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-label {
+            font-size: 13.5px;
+            font-weight: 750;
+            color: var(--navy);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        [data-theme="dark"] .form-label {
+            color: #f1f5f9;
+        }
+
+        .form-label-hint {
+            font-size: 11.5px;
+            font-weight: 650;
+            color: var(--muted);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon-lead {
+            position: absolute;
+            left: 14px;
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            background: var(--surface-subtle);
+            color: var(--text);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 650;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .form-input.has-icon {
+            padding-left: 42px;
+        }
+
+        .form-input:focus {
+            border-color: var(--turquoise);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(22, 184, 176, 0.2);
+        }
+
+        /* DESTINATION CHIPS */
+        .dest-chips-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .dest-chip-label {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            background: var(--surface-subtle);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dest-chip-label input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .dest-chip-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(22, 184, 176, 0.15);
+            color: var(--turquoise-dark);
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+        }
+
+        [data-theme="dark"] .dest-chip-icon {
+            color: #22d3ee;
+        }
+
+        .dest-chip-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dest-chip-name {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: var(--navy);
+        }
+
+        [data-theme="dark"] .dest-chip-name {
+            color: #ffffff;
+        }
+
+        .dest-chip-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--muted);
+        }
+
+        .dest-chip-label:hover {
+            border-color: var(--turquoise);
+            transform: translateY(-2px);
+        }
+
+        .dest-chip-label.active {
+            border-color: var(--turquoise);
+            background: var(--turquoise-light);
+            box-shadow: 0 4px 15px rgba(22, 184, 176, 0.2);
+        }
+
+        /* DURATION LIVE BADGE */
+        .duration-feedback-card {
+            margin-top: 10px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13.5px;
+            font-weight: 750;
+            background: var(--surface-subtle);
+            border: 1px dashed var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .duration-feedback-card.valid {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1.5px solid rgba(5, 150, 105, 0.4);
+        }
+
+        .duration-feedback-card.invalid {
+            background: var(--danger-light);
+            color: var(--danger);
+            border: 1.5px solid rgba(220, 38, 38, 0.4);
+        }
+
+        /* BCV BUTTON AND STATUS */
+        .bcv-fetch-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-bcv-fetch {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 18px;
+            min-height: 46px;
+            border-radius: 12px;
+            border: 1.5px solid var(--turquoise);
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+            font-size: 13.5px;
+            font-weight: 850;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.25s ease;
+        }
+
+        [data-theme="dark"] .btn-bcv-fetch {
+            color: #22d3ee;
+            border-color: #22d3ee;
+        }
+
+        .btn-bcv-fetch:hover {
+            background: var(--turquoise);
+            color: #0a1b2d;
+            transform: translateY(-2px);
+        }
+
+        .bcv-hint-text {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* BUS COUNT SELECTOR */
+        .bus-selector-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .bus-select-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            background: var(--surface-subtle);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .bus-select-btn:hover {
+            border-color: var(--turquoise);
+            transform: translateY(-2px);
+        }
+
+        .bus-select-btn.active {
+            border-color: var(--turquoise);
+            background: var(--turquoise-light);
+            box-shadow: 0 4px 16px rgba(22, 184, 176, 0.22);
+        }
+
+        .bus-select-count {
+            font-size: 18px;
+            font-weight: 900;
+            color: var(--navy);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        [data-theme="dark"] .bus-select-count {
+            color: #ffffff;
+        }
+
+        .bus-select-desc {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        /* DRAG AND DROP DROPZONES */
+        .dropzone-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .excel-dropzone {
+            position: relative;
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+            background: var(--surface-subtle);
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .excel-dropzone:hover {
+            border-color: var(--turquoise);
+            background: rgba(22, 184, 176, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .excel-dropzone.dragover {
+            border-color: var(--turquoise);
+            background: var(--turquoise-light);
+            border-style: solid;
+            box-shadow: 0 0 20px rgba(22, 184, 176, 0.35);
+        }
+
+        .excel-dropzone.has-file {
+            border-color: var(--success);
+            background: var(--success-light);
+            border-style: solid;
+        }
+
+        .dropzone-file-input {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .dropzone-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: rgba(22, 184, 176, 0.15);
+            color: var(--turquoise-dark);
+            display: grid;
+            place-items: center;
+            margin-bottom: 12px;
+            transition: all 0.25s ease;
+        }
+
+        [data-theme="dark"] .dropzone-icon-box {
+            color: #22d3ee;
+        }
+
+        .excel-dropzone.has-file .dropzone-icon-box {
+            background: rgba(5, 150, 105, 0.2);
+            color: var(--success);
+        }
+
+        .dropzone-title {
+            font-size: 15px;
+            font-weight: 850;
+            color: var(--navy);
+            margin-bottom: 4px;
+        }
+
+        [data-theme="dark"] .dropzone-title {
+            color: #ffffff;
+        }
+
+        .dropzone-prompt {
+            font-size: 12.5px;
+            font-weight: 650;
+            color: var(--muted);
+            max-width: 240px;
+        }
+
+        .dropzone-pill-success {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            background: var(--surface);
+            padding: 7px 14px;
+            border-radius: 30px;
+            font-size: 12.5px;
+            font-weight: 800;
+            color: var(--success);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.15);
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .excel-dropzone.has-file .dropzone-pill-success {
+            display: inline-flex;
+        }
+
+        .excel-dropzone.has-file .dropzone-prompt {
+            display: none;
+        }
+
+        /* LIVE ANALYSIS PREVIEW CARD */
+        .analysis-preview-card {
+            display: none;
+            background: var(--surface-subtle);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            margin-bottom: 24px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .analysis-preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .analysis-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analysis-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 30px;
+            background: var(--success-light);
+            color: var(--success);
+            font-size: 12.5px;
+            font-weight: 850;
+            border: 1px solid rgba(5, 150, 105, 0.3);
+        }
+
+        .analysis-stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .stat-badge-mini {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .stat-mini-num {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--navy);
+        }
+
+        [data-theme="dark"] .stat-mini-num {
+            color: #ffffff;
+        }
+
+        .stat-mini-label {
+            font-size: 11.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        /* GROUPS ACCORDION PREVIEW */
+        .preview-accordion-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 13.5px;
+            font-weight: 750;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preview-accordion-btn:hover {
+            border-color: var(--turquoise);
+        }
+
+        .preview-accordion-content {
+            display: none;
+            padding: 14px;
+            margin-top: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .preview-group-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .preview-group-item:last-child {
+            border-bottom: none;
+        }
+
+        .preview-group-name {
+            font-weight: 800;
+            color: var(--navy);
+        }
+
+        [data-theme="dark"] .preview-group-name {
+            color: #ffffff;
+        }
+
+        .preview-group-pax-count {
+            font-size: 11.5px;
+            font-weight: 850;
+            background: var(--turquoise-light);
+            color: var(--turquoise-dark);
+            padding: 3px 9px;
+            border-radius: 20px;
+        }
+
+        [data-theme="dark"] .preview-group-pax-count {
+            color: #22d3ee;
+        }
+
+        /* WIZARD ACTIONS FOOTER */
+        .wizard-footer {
+            padding: 20px 30px;
+            background: var(--surface-subtle);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-wizard {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px 26px;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14.5px;
+            font-weight: 850;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: none;
+        }
+
+        .btn-wizard-prev {
+            background: var(--surface);
+            color: var(--text-secondary);
+            border: 1.5px solid var(--border);
+        }
+
+        .btn-wizard-prev:hover {
+            border-color: var(--text-secondary);
+            transform: translateX(-2px);
+        }
+
+        .btn-wizard-next {
+            background: linear-gradient(135deg, #16b8b0 0%, #0d9488 100%);
+            color: #072a27;
+            box-shadow: 0 4px 18px rgba(22, 184, 176, 0.35);
+        }
+
+        .btn-wizard-next:hover {
+            background: linear-gradient(135deg, #19cdc4 0%, #0fa699 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(22, 184, 176, 0.45);
+        }
+
+        [data-theme="dark"] .btn-wizard-next {
+            background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+            color: #082f49;
+            box-shadow: 0 4px 18px rgba(34, 211, 238, 0.35);
+        }
+
+        .btn-analyze-preview {
+            background: var(--surface);
+            color: var(--turquoise-dark);
+            border: 2px solid var(--turquoise);
+        }
+
+        [data-theme="dark"] .btn-analyze-preview {
+            color: #22d3ee;
+            border-color: #22d3ee;
+        }
+
+        .btn-analyze-preview:hover {
+            background: var(--turquoise);
+            color: #0a1b2d;
+            transform: translateY(-2px);
+        }
+
+        .btn-submit-create {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            box-shadow: 0 4px 20px rgba(5, 150, 105, 0.4);
+            font-size: 15px;
+            padding: 14px 30px;
+        }
+
+        .btn-submit-create:hover {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(5, 150, 105, 0.5);
+        }
+
+        /* CELEBRATION MODAL ON SUCCESS */
+        .celebration-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(6, 15, 26, 0.75);
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .celebration-modal {
+            width: min(520px, 100%);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            padding: 38px 32px;
+            text-align: center;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35);
+            animation: modalScaleUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes modalScaleUp {
+            from { transform: scale(0.9) translateY(20px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .celebration-badge-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #16b8b0 0%, #059669 100%);
+            color: white;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 30px rgba(22, 184, 176, 0.45);
+        }
+
+        .celebration-title {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--navy);
+            margin-bottom: 8px;
+            letter-spacing: -0.4px;
+        }
+
+        [data-theme="dark"] .celebration-title {
+            color: #ffffff;
+        }
+
+        .celebration-desc {
+            font-size: 14.5px;
+            font-weight: 650;
+            color: var(--text-secondary);
+            margin-bottom: 22px;
+            line-height: 1.6;
+        }
+
+        .celebration-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            background: var(--surface-subtle);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+
+        .celebration-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .celebration-label {
+            font-size: 11px;
+            font-weight: 850;
+            text-transform: uppercase;
+            color: var(--muted);
+            letter-spacing: 0.4px;
+        }
+
+        .celebration-val {
+            font-size: 14.5px;
+            font-weight: 850;
+            color: var(--navy);
+            margin-top: 2px;
+        }
+
+        [data-theme="dark"] .celebration-val {
+            color: #ffffff;
+        }
+
+        .celebration-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-modal-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14.5px;
+            font-weight: 850;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-modal-primary {
+            background: linear-gradient(135deg, #16b8b0 0%, #0e8f89 100%);
+            color: #072e2b;
+            box-shadow: 0 4px 16px rgba(22, 184, 176, 0.35);
+        }
+
+        .btn-modal-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 22px rgba(22, 184, 176, 0.45);
+        }
+
+        .btn-modal-secondary {
+            background: var(--surface-subtle);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-modal-secondary:hover {
+            border-color: var(--turquoise);
+            color: var(--navy);
+        }
+
+        [data-theme="dark"] .btn-modal-secondary:hover {
+            color: #ffffff;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 820px) {
+            .form-grid-2, .form-grid-3, .dest-chips-container, .bus-selector-group, .analysis-stats-row {
+                grid-template-columns: 1fr;
+            }
+            .stepper-nav {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .step-divider {
+                display: none;
+            }
+            .wizard-section {
+                padding: 20px;
+            }
+        }
+    </style>
+    {% include "core/includes/dark_mode_head.html" %}
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+    <a href="{% url 'home' %}" class="brand">
+        <div class="brand-icon">V</div>
+        <div>
+            <div class="brand-name">VIAJES NENA</div>
+            <div class="brand-subtitle">Gestión Integral de Operaciones</div>
+        </div>
+    </a>
+
+    <div class="top-right">
+{% include "core/includes/dark_mode_toggle.html" %}
+
+        <a href="{% url 'home' %}" class="btn-back-home" title="Volver al panel principal">
+            <svg class="svg-icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            <span>Dashboard</span>
+        </a>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- PAGE HEADING -->
+    <section class="page-heading">
+        <div class="eyebrow-pill">
+            <span class="eyebrow-dot"></span>
+            <span>Nuevo Viaje y Listín Operativo</span>
+        </div>
+        <h1 class="page-title">Crear Viaje y Cargar Pasajeros</h1>
+        <p class="page-desc">
+            Configura las fechas y tasas de cambio del viaje e importa obligatoriamente el listín en formato Excel (.xlsx).
+            El viaje se inicializará de forma completa con todos sus pasajeros, grupos familiares y actividades sincronizadas.
+        </p>
+    </section>
+
+    <!-- MENSAJES DJANGO -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert-box {% if 'success' in message.tags %}success{% elif 'error' in message.tags %}error{% else %}success{% endif %}">
+                    {% if 'error' in message.tags %}
+                        <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                    {% else %}
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- STEPPER WIZARD INDICATOR -->
+    <nav class="stepper-nav" aria-label="Progreso de creación">
+        <div class="step-item active" id="stepIndicator1" onclick="irAlPaso(1)">
+            <div class="step-number" id="stepNum1">1</div>
+            <div class="step-text">
+                <span class="step-title">Datos del Viaje</span>
+                <span class="step-sub">Fechas, destino y tasas</span>
+            </div>
+        </div>
+
+        <div class="step-divider"></div>
+
+        <div class="step-item" id="stepIndicator2" onclick="irAlPaso(2)">
+            <div class="step-number" id="stepNum2">2</div>
+            <div class="step-text">
+                <span class="step-title">Carga de Listín</span>
+                <span class="step-sub">Excel obligatorio</span>
+            </div>
+        </div>
+
+        <div class="step-divider"></div>
+
+        <div class="step-item" id="stepIndicator3" onclick="irAlPaso(3)">
+            <div class="step-number" id="stepNum3">3</div>
+            <div class="step-text">
+                <span class="step-title">Verificación Final</span>
+                <span class="step-sub">Confirmar y registrar</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- FORMULARIO INTEGRAL -->
+    <form method="post" enctype="multipart/form-data" id="crearViajeForm" class="wizard-card">
+        {% csrf_token %}
+
+        <!-- ========================================================
+             PASO 1: DATOS GENERALES DEL VIAJE Y TASAS
+        ========================================================= -->
+        <section class="wizard-section active" id="wizardStep1">
+            <div class="section-header">
+                <h2>
+                    <svg class="svg-icon" style="color:var(--turquoise);" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span>Paso 1: Información General del Viaje</span>
+                </h2>
+                <span class="section-header-tag">Configuración Inicial</span>
+            </div>
+
+            <div class="form-grid-2">
+                <!-- Nombre del Viaje -->
+                <div class="form-field col-span-full">
+                    <label class="form-label" for="nombre">
+                        <span>Nombre Identificativo del Viaje</span>
+                        <span class="form-label-hint">Ejemplo: Chichiriviche Octubre 2026</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <svg class="svg-icon input-icon-lead" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        <input
+                            type="text"
+                            id="nombre"
+                            name="nombre"
+                            class="form-input has-icon"
+                            placeholder="Nombre del viaje..."
+                            value="{{ datos.nombre|default:'' }}"
+                            required
+                            maxlength="150"
+                        >
+                    </div>
+                </div>
+
+                <!-- Destino con Selección Visual -->
+                <div class="form-field col-span-full">
+                    <label class="form-label">
+                        <span>Destino Turístico</span>
+                        <span class="form-label-hint">Selecciona el destino programado</span>
+                    </label>
+                    <div class="dest-chips-container">
+                        <!-- Mochima edo Sucre -->
+                        <label class="dest-chip-label {% if datos.destino == 'Mochima edo Sucre' %}active{% endif %}" id="destLabelMochima">
+                            <input type="radio" name="destino" value="Mochima edo Sucre" {% if datos.destino == 'Mochima edo Sucre' %}checked{% endif %} onchange="actualizarDestino(this)">
+                            <div class="dest-chip-icon">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            </div>
+                            <div class="dest-chip-info">
+                                <span class="dest-chip-name">Mochima edo Sucre</span>
+                                <span class="dest-chip-badge">Edo. Sucre</span>
+                            </div>
+                        </label>
+
+                        <!-- Chichiriviche edo falcon -->
+                        <label class="dest-chip-label {% if datos.destino == 'Chichiriviche edo falcon' or not datos.destino or datos.destino == 'Chichiriviche' %}active{% endif %}" id="destLabelChichi">
+                            <input type="radio" name="destino" value="Chichiriviche edo falcon" {% if datos.destino == 'Chichiriviche edo falcon' or not datos.destino or datos.destino == 'Chichiriviche' %}checked{% endif %} onchange="actualizarDestino(this)">
+                            <div class="dest-chip-icon">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                            </div>
+                            <div class="dest-chip-info">
+                                <span class="dest-chip-name">Chichiriviche edo falcon</span>
+                                <span class="dest-chip-badge">Edo. Falcón</span>
+                            </div>
+                        </label>
+
+                        <!-- Margarita edo nueva esparta -->
+                        <label class="dest-chip-label {% if datos.destino == 'Margarita edo nueva esparta' %}active{% endif %}" id="destLabelMargarita">
+                            <input type="radio" name="destino" value="Margarita edo nueva esparta" {% if datos.destino == 'Margarita edo nueva esparta' %}checked{% endif %} onchange="actualizarDestino(this)">
+                            <div class="dest-chip-icon">
+                                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div class="dest-chip-info">
+                                <span class="dest-chip-name">Margarita edo nueva esparta</span>
+                                <span class="dest-chip-badge">Edo. Nueva Esparta</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Fechas con Validación en Vivo -->
+                <div class="form-field">
+                    <label class="form-label" for="fecha_inicio">
+                        <span>Fecha de Salida (Inicio)</span>
+                    </label>
+                    <input
+                        type="date"
+                        id="fecha_inicio"
+                        name="fecha_inicio"
+                        class="form-input"
+                        value="{{ datos.fecha_inicio|default:'' }}"
+                        required
+                        onchange="calcularDuracion()"
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label class="form-label" for="fecha_fin">
+                        <span>Fecha de Regreso (Fin)</span>
+                    </label>
+                    <input
+                        type="date"
+                        id="fecha_fin"
+                        name="fecha_fin"
+                        class="form-input"
+                        value="{{ datos.fecha_fin|default:'' }}"
+                        required
+                        onchange="calcularDuracion()"
+                    >
+                </div>
+
+                <!-- Feedback de duración calculada -->
+                <div class="col-span-full">
+                    <div class="duration-feedback-card" id="durationCard">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <svg class="svg-icon" id="durationIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span id="durationText">Selecciona la fecha de salida y regreso para calcular los días operativos.</span>
+                        </div>
+                        <span id="durationBadge" style="font-weight:850;font-size:12px;opacity:0.9;">Requerido: 3 o 4 días</span>
+                    </div>
+                </div>
+
+                <!-- Tasas de Cambio -->
+                <div class="form-field">
+                    <label class="form-label" for="tasa_usd_bs">
+                        <span>Tasa Oficial USD a Bolívares (Bs)</span>
+                    </label>
+                    <div class="bcv-fetch-row">
+                        <input
+                            type="number"
+                            id="tasa_usd_bs"
+                            name="tasa_usd_bs"
+                            class="form-input"
+                            value="{{ datos.tasa_usd_bs|default:'887.30' }}"
+                            step="0.01"
+                            min="0.01"
+                            required
+                        >
+                        <button type="button" class="btn-bcv-fetch" id="btnBcvFetch" onclick="actualizarTasaBCV()" title="Consultar tasa oficial en vivo desde el Banco Central de Venezuela">
+                            <svg class="svg-icon" id="bcvSpinIcon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                            <span>Actualizar BCV</span>
+                        </button>
+                    </div>
+                    <div class="bcv-hint-text" id="bcvStatusHint">Tasa oficial sugerida del BCV.</div>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-label" for="tasa_usd_cop">
+                        <span>Tasa Oficial USD a Pesos (COP)</span>
+                        <span class="form-label-hint">Pesos por Dólar</span>
+                    </label>
+                    <input
+                        type="number"
+                        id="tasa_usd_cop"
+                        name="tasa_usd_cop"
+                        class="form-input"
+                        value="{{ datos.tasa_usd_cop|default:'3200.00' }}"
+                        step="0.01"
+                        min="0.01"
+                        required
+                    >
+                    <div class="bcv-hint-text">Valor base para liquidación en Pesos Colombianos.</div>
+                </div>
+            </div>
+
+            <div class="wizard-footer" style="padding-left:0;padding-right:0;background:transparent;border-top:none;">
+                <div></div>
+                <button type="button" class="btn-wizard btn-wizard-next" onclick="validarYPasar(1, 2)">
+                    <span>Siguiente: Cargar Listín Obligatorio</span>
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PASO 2: CARGA OBLIGATORIA DEL LISTÍN EXCEL POR BUS
+        ========================================================= -->
+        <section class="wizard-section" id="wizardStep2">
+            <div class="section-header">
+                <h2>
+                    <svg class="svg-icon" style="color:var(--turquoise);" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    <span>Paso 2: Carga Obligatoria de Listín Excel (.xlsx)</span>
+                </h2>
+                <span class="section-header-tag" style="background:var(--danger-light);color:var(--danger);border-color:rgba(220,38,38,0.3);">Requisito Obligatorio</span>
+            </div>
+
+            <!-- Cantidad de Buses -->
+            <div class="form-field" style="margin-bottom:20px;">
+                <label class="form-label">
+                    <span>Cantidad de Buses Operativos</span>
+                    <span class="form-label-hint">Selecciona la cantidad para generar las casillas de importación</span>
+                </label>
+                <div class="bus-selector-group">
+                    <div class="bus-select-btn active" id="busBtn1" onclick="seleccionarCantidadBuses(1)">
+                        <div class="bus-select-count">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="15.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/><line x1="3" y1="11" x2="21" y2="11"/></svg>
+                            <span>1 Bus</span>
+                        </div>
+                        <span class="bus-select-desc">1 Archivo Excel de Listín</span>
+                    </div>
+
+                    <div class="bus-select-btn" id="busBtn2" onclick="seleccionarCantidadBuses(2)">
+                        <div class="bus-select-count">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="15.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/><line x1="3" y1="11" x2="21" y2="11"/></svg>
+                            <span>2 Buses</span>
+                        </div>
+                        <span class="bus-select-desc">2 Archivos de Listín</span>
+                    </div>
+
+                    <div class="bus-select-btn" id="busBtn3" onclick="seleccionarCantidadBuses(3)">
+                        <div class="bus-select-count">
+                            <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="15.5" r="1.5"/><circle cx="15.5" cy="15.5" r="1.5"/><line x1="3" y1="11" x2="21" y2="11"/></svg>
+                            <span>3 Buses</span>
+                        </div>
+                        <span class="bus-select-desc">3 Archivos de Listín</span>
+                    </div>
+                </div>
+                <input type="hidden" name="cantidad_buses" id="cantidad_buses" value="1">
+            </div>
+
+            <!-- Precio Los Juanes -->
+            <div class="form-grid-2" style="margin-bottom:20px;">
+                <div class="form-field">
+                    <label class="form-label" for="precio_juanes">
+                        <span>Precio de Actividad Los Juanes (USD por Persona)</span>
+                        <span class="form-label-hint">Por defecto $5.00 USD</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <span style="position:absolute;left:14px;font-weight:900;color:var(--success);">$</span>
+                        <input
+                            type="number"
+                            id="precio_juanes"
+                            name="precio_juanes"
+                            class="form-input"
+                            style="padding-left:34px;"
+                            value="{{ datos.precio_juanes|default:'5.00' }}"
+                            step="0.01"
+                            min="0"
+                            required
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <!-- DROPZONES DINÁMICOS POR BUS -->
+            <label class="form-label" style="margin-bottom:10px;">
+                <span>Archivos Excel del Listín (.xlsx)</span>
+                <span class="form-label-hint">Cada archivo debe contener la hoja llamada 'LISTIN'</span>
+            </label>
+
+            <div class="dropzone-container" id="dropzonesContainer">
+                <!-- Dropzone Bus 1 -->
+                <div class="excel-dropzone" id="dropzoneBus1">
+                    <input type="file" id="archivo_bus_1" name="archivo_bus_1" class="dropzone-file-input" accept=".xlsx" required onchange="manejarArchivoSeleccionado(1, this)">
+                    <div class="dropzone-icon-box">
+                        <svg class="svg-icon" style="width:28px;height:28px;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    </div>
+                    <div class="dropzone-title">Listín Bus 1 (Obligatorio)</div>
+                    <div class="dropzone-prompt">Arrastra el archivo Excel aquí o haz clic para seleccionarlo</div>
+                    <div class="dropzone-pill-success" id="pillFileBus1">
+                        <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span id="nameFileBus1">archivo.xlsx</span>
+                    </div>
+                </div>
+
+                <!-- Dropzone Bus 2 (oculto por defecto) -->
+                <div class="excel-dropzone" id="dropzoneBus2" style="display:none;">
+                    <input type="file" id="archivo_bus_2" name="archivo_bus_2" class="dropzone-file-input" accept=".xlsx" onchange="manejarArchivoSeleccionado(2, this)">
+                    <div class="dropzone-icon-box">
+                        <svg class="svg-icon" style="width:28px;height:28px;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    </div>
+                    <div class="dropzone-title">Listín Bus 2</div>
+                    <div class="dropzone-prompt">Arrastra el archivo Excel aquí o haz clic para seleccionarlo</div>
+                    <div class="dropzone-pill-success" id="pillFileBus2">
+                        <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span id="nameFileBus2">archivo.xlsx</span>
+                    </div>
+                </div>
+
+                <!-- Dropzone Bus 3 (oculto por defecto) -->
+                <div class="excel-dropzone" id="dropzoneBus3" style="display:none;">
+                    <input type="file" id="archivo_bus_3" name="archivo_bus_3" class="dropzone-file-input" accept=".xlsx" onchange="manejarArchivoSeleccionado(3, this)">
+                    <div class="dropzone-icon-box">
+                        <svg class="svg-icon" style="width:28px;height:28px;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                    </div>
+                    <div class="dropzone-title">Listín Bus 3</div>
+                    <div class="dropzone-prompt">Arrastra el archivo Excel aquí o haz clic para seleccionarlo</div>
+                    <div class="dropzone-pill-success" id="pillFileBus3">
+                        <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span id="nameFileBus3">archivo.xlsx</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÓN DE ANÁLISIS EN VIVO Y VALIDACIÓN -->
+            <div style="margin-bottom:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                <button type="button" class="btn-wizard btn-analyze-preview" id="btnAnalyzeListin" onclick="analizarListinEnVivo()">
+                    <svg class="svg-icon" id="analyzeSpinIcon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <span>Verificar y Previsualizar Listín</span>
+                </button>
+                <span style="font-size:12.5px;font-weight:650;color:var(--muted);" id="analyzePromptText">
+                    Haz clic para verificar que el Excel no contenga errores ni pasajeros duplicados.
+                </span>
+            </div>
+
+            <!-- TARJETA DE RESULTADOS DEL ANÁLISIS EN VIVO -->
+            <div class="analysis-preview-card" id="analysisPreviewCard">
+                <div class="analysis-preview-header">
+                    <div class="analysis-header-left">
+                        <span class="analysis-status-pill">
+                            <svg class="svg-icon" style="width:14px;height:14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Listín Verificado Exitosamente</span>
+                        </span>
+                        <span style="font-size:13px;font-weight:750;color:var(--text-secondary);" id="previewBusesSummary">1 Bus analizado</span>
+                    </div>
+                </div>
+
+                <div class="analysis-stats-row">
+                    <div class="stat-badge-mini">
+                        <div class="stat-mini-num" id="previewTotalPax">0</div>
+                        <div>
+                            <div class="stat-mini-label">Pasajeros Detectados</div>
+                            <div style="font-size:12px;color:var(--muted);font-weight:600;">Listos para importar</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-badge-mini">
+                        <div class="stat-mini-num" id="previewTotalGrupos">0</div>
+                        <div>
+                            <div class="stat-mini-label">Grupos Familiares</div>
+                            <div style="font-size:12px;color:var(--muted);font-weight:600;">Estructurados</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-badge-mini">
+                        <div class="stat-mini-num" id="previewDuracionValida">✓</div>
+                        <div>
+                            <div class="stat-mini-label">Estado de Validación</div>
+                            <div style="font-size:12px;color:var(--success);font-weight:700;">Sin duplicados</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Acordeón para inspeccionar grupos -->
+                <button type="button" class="preview-accordion-btn" onclick="toggleAccordionGrupos()">
+                    <span style="display:flex;align-items:center;gap:8px;">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span>Inspeccionar lista detallada de grupos y pasajeros</span>
+                    </span>
+                    <svg class="svg-icon" id="accordionArrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+
+                <div class="preview-accordion-content" id="previewGroupsList">
+                    <!-- Se rellena dinámicamente con JS -->
+                </div>
+            </div>
+
+            <div class="wizard-footer" style="padding-left:0;padding-right:0;background:transparent;border-top:none;">
+                <button type="button" class="btn-wizard btn-wizard-prev" onclick="irAlPaso(1)">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    <span>Volver al Paso 1</span>
+                </button>
+
+                <button type="button" class="btn-wizard btn-wizard-next" onclick="validarYPasar(2, 3)">
+                    <span>Siguiente: Verificación y Creación</span>
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================================
+             PASO 3: REVISIÓN GENERAL Y CREACIÓN DEFINITIVA
+        ========================================================= -->
+        <section class="wizard-section" id="wizardStep3">
+            <div class="section-header">
+                <h2>
+                    <svg class="svg-icon" style="color:var(--turquoise);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Paso 3: Verificación Final y Creación del Viaje</span>
+                </h2>
+                <span class="section-header-tag">Confirmación Definitiva</span>
+            </div>
+
+            <p style="font-size:14px;color:var(--text-secondary);font-weight:650;margin-bottom:20px;">
+                Revisa los datos consolidados antes de proceder. Al confirmar, el sistema registrará el viaje, sincronizará la lista de precios de productos, configurará los eventos diarios y cargará todos los pasajeros y grupos familiares del listín en una única operación segura.
+            </p>
+
+            <div class="celebration-summary-grid" style="margin-bottom:24px;">
+                <div class="celebration-item">
+                    <span class="celebration-label">Nombre del Viaje</span>
+                    <span class="celebration-val" id="summaryNombre">—</span>
+                </div>
+
+                <div class="celebration-item">
+                    <span class="celebration-label">Destino</span>
+                    <span class="celebration-val" id="summaryDestino">Chichiriviche edo falcon</span>
+                </div>
+
+                <div class="celebration-item">
+                    <span class="celebration-label">Fechas e Itinerario</span>
+                    <span class="celebration-val" id="summaryFechas">—</span>
+                </div>
+
+                <div class="celebration-item">
+                    <span class="celebration-label">Duración Operativa</span>
+                    <span class="celebration-val" id="summaryDuracion">—</span>
+                </div>
+
+                <div class="celebration-item">
+                    <span class="celebration-label">Tasa USD a Bolívares</span>
+                    <span class="celebration-val" id="summaryTasaBs">—</span>
+                </div>
+
+                <div class="celebration-item">
+                    <span class="celebration-label">Tasa USD a Pesos COP</span>
+                    <span class="celebration-val" id="summaryTasaCop">—</span>
+                </div>
+
+                <div class="celebration-item">
+                    <span class="celebration-label">Buses y Listín</span>
+                    <span class="celebration-val" id="summaryBuses">1 Bus configurado</span>
+                </div>
+
+                <div class="celebration-item">
+                    <span class="celebration-label">Actividad Los Juanes</span>
+                    <span class="celebration-val" id="summaryJuanes">$5.00 USD / persona</span>
+                </div>
+            </div>
+
+            <div class="alert-box success" style="margin-bottom:26px;">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>
+                    <strong>Transacción Integral Garantizada:</strong> El viaje no se dejará a medias ni sin pasajeros. Todo se inicializa atómicamente.
+                </span>
+            </div>
+
+            <div class="wizard-footer" style="padding-left:0;padding-right:0;background:transparent;border-top:none;">
+                <button type="button" class="btn-wizard btn-wizard-prev" onclick="irAlPaso(2)">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                    <span>Ajustar Listín</span>
+                </button>
+
+                <button type="submit" class="btn-wizard btn-submit-create" id="btnSubmitForm">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+                    <span>Finalizar y Crear Viaje Completo</span>
+                </button>
+            </div>
+        </section>
+
+    </form>
+
+</main>
+
+<!-- MODAL DE CELEBRACIÓN: CUANDO EL VIAJE FUE CREADO CON ÉXITO -->
+{% if viaje_creado %}
+<div class="celebration-overlay" id="celebrationModal">
+    <div class="celebration-modal" role="dialog" aria-modal="true">
+        <div class="celebration-badge-icon">
+            <svg class="svg-icon" style="width:40px;height:40px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+
+        <h2 class="celebration-title">¡Viaje Creado con Éxito!</h2>
+        <p class="celebration-desc">
+            El viaje <strong>«{{ viaje_creado.nombre }}»</strong> ha sido inicializado correctamente junto con sus grupos y listín de pasajeros.
+        </p>
+
+        <div class="celebration-summary-grid">
+            <div class="celebration-item">
+                <span class="celebration-label">Pasajeros Cargados</span>
+                <span class="celebration-val" style="color:var(--success);">{{ total_pasajeros }} Pasajeros</span>
+            </div>
+
+            <div class="celebration-item">
+                <span class="celebration-label">Grupos Familiares</span>
+                <span class="celebration-val">{{ total_grupos }} Grupos</span>
+            </div>
+
+            <div class="celebration-item">
+                <span class="celebration-label">Destino e Itinerario</span>
+                <span class="celebration-val">{{ viaje_creado.destino }} • {{ duracion_dias }} días</span>
+            </div>
+
+            <div class="celebration-item">
+                <span class="celebration-label">Actividad Los Juanes</span>
+                <span class="celebration-val">${{ precio_juanes }} USD</span>
+            </div>
+        </div>
+
+        <div class="celebration-actions">
+            <a href="{% url 'home' %}" class="btn-modal-action btn-modal-primary">
+                <svg class="svg-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>Ir al Panel de Control (Dashboard)</span>
+            </a>
+
+            <a href="{% url 'registrar_consumos' %}" class="btn-modal-action btn-modal-secondary">
+                <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <span>Registrar Primer Consumo</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    /* ========================================================
+       GESTIÓN DEL WIZARD (PASOS)
+    ======================================================== */
+    let pasoActual = 1;
+
+    function irAlPaso(paso) {
+        if (paso === 2 && !validarPaso1()) return;
+        if (paso === 3 && (!validarPaso1() || !validarPaso2())) return;
+
+        pasoActual = paso;
+
+        // Actualizar vistas
+        document.querySelectorAll(".wizard-section").forEach(function(s, idx) {
+            s.classList.toggle("active", idx + 1 === paso);
+        });
+
+        // Actualizar indicadores
+        for (let i = 1; i <= 3; i++) {
+            const ind = document.getElementById("stepIndicator" + i);
+            const num = document.getElementById("stepNum" + i);
+            ind.classList.remove("active", "completed");
+
+            if (i === paso) {
+                ind.classList.add("active");
+                num.textContent = i;
+            } else if (i < paso) {
+                ind.classList.add("completed");
+                num.innerHTML = "✓";
+            } else {
+                num.textContent = i;
+            }
+        }
+
+        if (paso === 3) {
+            actualizarResumenFinal();
+        }
+
+        window.scrollTo({ top: 120, behavior: "smooth" });
+    }
+
+    function validarYPasar(desde, hacia) {
+        if (desde === 1 && !validarPaso1()) return;
+        if (desde === 2 && !validarPaso2()) return;
+        irAlPaso(hacia);
+    }
+
+    function validarPaso1() {
+        const nombre = document.getElementById("nombre");
+        if (!nombre.value.trim()) {
+            alert("Por favor ingresa el nombre del viaje.");
+            nombre.focus();
+            return false;
+        }
+
+        const ini = document.getElementById("fecha_inicio").value;
+        const fin = document.getElementById("fecha_fin").value;
+        if (!ini || !fin) {
+            alert("Por favor selecciona la fecha de salida y de regreso.");
+            return false;
+        }
+
+        const dIni = new Date(ini);
+        const dFin = new Date(fin);
+        const dias = Math.round((dFin - dIni) / (1000 * 60 * 60 * 24));
+        if (dias !== 3 && dias !== 4) {
+            alert("El viaje debe tener una duración de 3 o 4 días operativos (actual: " + dias + " días). Corrige las fechas.");
+            return false;
+        }
+
+        const tasaBs = document.getElementById("tasa_usd_bs").value;
+        const tasaCop = document.getElementById("tasa_usd_cop").value;
+        if (!tasaBs || parseFloat(tasaBs) <= 0 || !tasaCop || parseFloat(tasaCop) <= 0) {
+            alert("Las tasas de cambio deben ser números mayores a cero.");
+            return false;
+        }
+
+        return true;
+    }
+
+    function validarPaso2() {
+        const cantBuses = parseInt(document.getElementById("cantidad_buses").value || "1");
+        for (let i = 1; i <= cantBuses; i++) {
+            const fileInput = document.getElementById("archivo_bus_" + i);
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                alert("Es OBLIGATORIO subir el archivo del listín para el Bus " + i + ". El viaje no se puede crear sin importar su listín de pasajeros.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /* ========================================================
+       CÁLCULO DINÁMICO DE DURACIÓN
+    ======================================================== */
+    function calcularDuracion() {
+        const ini = document.getElementById("fecha_inicio").value;
+        const fin = document.getElementById("fecha_fin").value;
+        const card = document.getElementById("durationCard");
+        const txt = document.getElementById("durationText");
+        const badge = document.getElementById("durationBadge");
+
+        if (!ini || !fin) {
+            card.className = "duration-feedback-card";
+            txt.textContent = "Selecciona la fecha de salida y regreso para calcular los días operativos.";
+            badge.textContent = "Requerido: 3 o 4 días";
+            return;
+        }
+
+        const dIni = new Date(ini);
+        const dFin = new Date(fin);
+        const dias = Math.round((dFin - dIni) / (1000 * 60 * 60 * 24));
+
+        if (dias < 0) {
+            card.className = "duration-feedback-card invalid";
+            txt.textContent = "La fecha de regreso no puede ser anterior a la de salida.";
+            badge.textContent = "Fechas Inválidas";
+        } else if (dias === 3 || dias === 4) {
+            card.className = "duration-feedback-card valid";
+            txt.textContent = "Duración válida calculada: " + dias + " días operativos (" + (dias === 3 ? "Itinerario Estándar" : "Itinerario Extendido") + ").";
+            badge.textContent = dias + " Días Operativos ✓";
+        } else {
+            card.className = "duration-feedback-card invalid";
+            txt.textContent = "Duración calculada: " + dias + " días. El sistema requiere viajes de 3 o 4 días operativos.";
+            badge.textContent = "Duración No Permitida";
+        }
+    }
+
+    /* ========================================================
+       SELECCIÓN DE DESTINO
+    ======================================================== */
+    function actualizarDestino(radio) {
+        document.querySelectorAll(".dest-chip-label").forEach(function(lbl) {
+            lbl.classList.remove("active");
+        });
+        radio.closest(".dest-chip-label").classList.add("active");
+    }
+
+    /* ========================================================
+       SELECCIÓN DE CANTIDAD DE BUSES
+    ======================================================== */
+    function seleccionarCantidadBuses(cant) {
+        document.getElementById("cantidad_buses").value = cant;
+
+        for (let i = 1; i <= 3; i++) {
+            const btn = document.getElementById("busBtn" + i);
+            const dropzone = document.getElementById("dropzoneBus" + i);
+            const input = document.getElementById("archivo_bus_" + i);
+
+            if (i <= cant) {
+                if (btn) btn.classList.toggle("active", i === cant);
+                if (dropzone) dropzone.style.display = "flex";
+                if (input) input.required = true;
+            } else {
+                if (btn) btn.classList.remove("active");
+                if (dropzone) dropzone.style.display = "none";
+                if (input) {
+                    input.required = false;
+                    input.value = "";
+                }
+                const pill = document.getElementById("pillFileBus" + i);
+                if (pill) pill.style.display = "none";
+                if (dropzone) dropzone.classList.remove("has-file");
+            }
+        }
+    }
+
+    /* ========================================================
+       MANEJO DE DRAG AND DROP Y ARCHIVOS
+    ======================================================== */
+    function manejarArchivoSeleccionado(numBus, input) {
+        const dropzone = document.getElementById("dropzoneBus" + numBus);
+        const pill = document.getElementById("pillFileBus" + numBus);
+        const nameSpan = document.getElementById("nameFileBus" + numBus);
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const sizeKB = (file.size / 1024).toFixed(1);
+            dropzone.classList.add("has-file");
+            nameSpan.textContent = file.name + " (" + sizeKB + " KB)";
+            pill.style.display = "inline-flex";
+        } else {
+            dropzone.classList.remove("has-file");
+            pill.style.display = "none";
+        }
+    }
+
+    // Drag and Drop listeners para dropzones
+    [1, 2, 3].forEach(function(num) {
+        const dz = document.getElementById("dropzoneBus" + num);
+        if (!dz) return;
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dz.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dz.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dz.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dz.classList.remove('dragover');
+            }, false);
+        });
+
+        dz.addEventListener('drop', function(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            const input = document.getElementById("archivo_bus_" + num);
+            if (files && files.length > 0) {
+                input.files = files;
+                manejarArchivoSeleccionado(num, input);
+            }
+        }, false);
+    });
+
+    /* ========================================================
+       ANÁLISIS EN VIVO DEL LISTÍN VÍA AJAX
+    ======================================================== */
+    function analizarListinEnVivo() {
+        const cantBuses = parseInt(document.getElementById("cantidad_buses").value || "1");
+        const formData = new FormData();
+        formData.append("cantidad_buses", cantBuses);
+
+        let filesPresent = 0;
+        for (let i = 1; i <= cantBuses; i++) {
+            const input = document.getElementById("archivo_bus_" + i);
+            if (input && input.files && input.files[0]) {
+                formData.append("archivo_bus_" + i, input.files[0]);
+                filesPresent++;
+            }
+        }
+
+        if (filesPresent < cantBuses) {
+            alert("Por favor selecciona el archivo Excel de cada bus antes de verificar.");
+            return;
+        }
+
+        const ini = document.getElementById("fecha_inicio").value;
+        const fin = document.getElementById("fecha_fin").value;
+        if (ini && fin) {
+            formData.append("fecha_inicio", ini);
+            formData.append("fecha_fin", fin);
+        }
+
+        // Token CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        const btn = document.getElementById("btnAnalyzeListin");
+        const spinIcon = document.getElementById("analyzeSpinIcon");
+        const promptText = document.getElementById("analyzePromptText");
+        btn.disabled = true;
+        promptText.textContent = "Analizando archivos Excel en memoria...";
+
+        fetch("{% url 'api_analizar_listin' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": csrfToken,
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            if (data.ok) {
+                promptText.textContent = "✓ Listín verificado sin duplicados. Todo listo para crear.";
+                promptText.style.color = "var(--success)";
+
+                // Mostrar tarjeta de preview
+                const previewCard = document.getElementById("analysisPreviewCard");
+                previewCard.style.display = "block";
+                document.getElementById("previewTotalPax").textContent = data.total_pasajeros;
+                document.getElementById("previewTotalGrupos").textContent = data.total_grupos;
+                document.getElementById("previewBusesSummary").textContent = data.cantidad_buses + " Bus(es) analizado(s)";
+
+                // Rellenar lista de grupos
+                const listContainer = document.getElementById("previewGroupsList");
+                listContainer.innerHTML = "";
+
+                data.buses.forEach(b => {
+                    const busHeader = document.createElement("div");
+                    busHeader.style.padding = "6px 10px";
+                    busHeader.style.fontWeight = "900";
+                    busHeader.style.fontSize = "12px";
+                    busHeader.style.color = "var(--turquoise-dark)";
+                    busHeader.style.textTransform = "uppercase";
+                    busHeader.textContent = b.label + " (" + b.total_pasajeros + " pasajeros en " + b.total_grupos + " grupos)";
+                    listContainer.appendChild(busHeader);
+
+                    b.grupos.forEach(g => {
+                        const item = document.createElement("div");
+                        item.className = "preview-group-item";
+                        item.innerHTML = `
+                            <span class="preview-group-name">${g.nombre}</span>
+                            <span class="preview-group-pax-count">${g.total_pasajeros} pax</span>
+                        `;
+                        listContainer.appendChild(item);
+                    });
+                });
+
+            } else {
+                promptText.textContent = "Error: " + data.error;
+                promptText.style.color = "var(--danger)";
+                alert("Error al verificar el listín:\n" + data.error);
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            promptText.textContent = "Error al conectar con el servidor.";
+            promptText.style.color = "var(--danger)";
+            alert("No se pudo conectar con el servidor para verificar el listín.");
+        });
+    }
+
+    function toggleAccordionGrupos() {
+        const content = document.getElementById("previewGroupsList");
+        const arrow = document.getElementById("accordionArrow");
+        const isOpen = content.style.display === "block";
+        content.style.display = isOpen ? "none" : "block";
+        arrow.style.transform = isOpen ? "rotate(0deg)" : "rotate(180deg)";
+    }
+
+    /* ========================================================
+       ACTUALIZACIÓN DEL RESUMEN FINAL (PASO 3)
+    ======================================================== */
+    function actualizarResumenFinal() {
+        document.getElementById("summaryNombre").textContent = document.getElementById("nombre").value || "Sin nombre";
+
+        const selDest = document.querySelector('input[name="destino"]:checked');
+        document.getElementById("summaryDestino").textContent = selDest ? selDest.value : "Chichiriviche edo falcon";
+
+        const ini = document.getElementById("fecha_inicio").value;
+        const fin = document.getElementById("fecha_fin").value;
+        document.getElementById("summaryFechas").textContent = (ini || "—") + " al " + (fin || "—");
+
+        if (ini && fin) {
+            const dias = Math.round((new Date(fin) - new Date(ini)) / (1000 * 60 * 60 * 24));
+            document.getElementById("summaryDuracion").textContent = dias + " días operativos";
+        }
+
+        document.getElementById("summaryTasaBs").textContent = (document.getElementById("tasa_usd_bs").value || "0") + " Bs.";
+        document.getElementById("summaryTasaCop").textContent = (document.getElementById("tasa_usd_cop").value || "0") + " COP";
+
+        const cantBuses = document.getElementById("cantidad_buses").value || "1";
+        document.getElementById("summaryBuses").textContent = cantBuses + " Bus(es) con listín adjunto";
+
+        const juanes = document.getElementById("precio_juanes").value || "5.00";
+        document.getElementById("summaryJuanes").textContent = "$" + juanes + " USD por persona";
+    }
+
+    /* ========================================================
+       CONSULTA EN VIVO TASA BCV
+    ======================================================== */
+    function actualizarTasaBCV() {
+        const btn = document.getElementById("btnBcvFetch");
+        const hint = document.getElementById("bcvStatusHint");
+        const input = document.getElementById("tasa_usd_bs");
+        btn.disabled = true;
+        hint.textContent = "Consultando tasa oficial del BCV...";
+        hint.style.color = "var(--turquoise-dark)";
+
+        fetch("/api/tasa-bcv/?forzar=1")
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                if (data.tasa) {
+                    input.value = data.tasa;
+                    hint.textContent = "Tasa BCV obtenida: " + data.tasa + " Bs. (" + (data.fecha_valor || "Hoy") + ") ✓";
+                    hint.style.color = "var(--success)";
+                } else if (data.error) {
+                    hint.textContent = data.error;
+                    hint.style.color = "var(--danger)";
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                hint.textContent = "Error al conectar con el servidor.";
+                hint.style.color = "var(--danger)";
+            });
+    }
+
+    // Inicialización al cargar la página
+    document.addEventListener("DOMContentLoaded", function() {
+        calcularDuracion();
+    });
+
+    // Prevención de doble submit
+    document.getElementById("crearViajeForm").addEventListener("submit", function() {
+        const btn = document.getElementById("btnSubmitForm");
+        btn.disabled = true;
+        btn.innerHTML = `
+            <svg class="svg-icon" style="animation:spin 1s linear infinite;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+            <span>Creando Viaje y Cargando Pasajeros...</span>
+        `;
+    });
+</script>
+
+<style>
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+</body>
+</html>
