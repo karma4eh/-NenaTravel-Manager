@@ -20,19 +20,23 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Configurar Gradle
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Configurar Gradle 8.5
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.5'
 
       - name: Compilar APK Debug
         run: |
           cd android
-          chmod +x gradlew || true
-          ./gradlew assembleDebug --stacktrace || gradle assembleDebug
+          gradle :app:assembleDebug --stacktrace --no-daemon
 
-      - name: Renombrar APK para distribucion
+      - name: Preparar archivo APK
         run: |
           mkdir -p build-output
-          cp $(find android/app/build/outputs/apk -name "*.apk" | head -n 1) build-output/ViajesNena-v1.0.0.apk || cp $(find . -name "*.apk" | head -n 1) build-output/ViajesNena-v1.0.0.apk
+          find android/app/build/outputs/apk -name "*.apk" -exec cp {} build-output/ViajesNena-v1.0.0.apk \;
           ls -lh build-output/
 
       - name: Subir APK como artefacto descargable
