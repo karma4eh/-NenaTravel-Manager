@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0f172a">
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- Vista de Error / Desconectado -->
+    <LinearLayout
+        android:id="@+id/layoutError"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="32dp"
+        android:visibility="gone"
+        android:background="#0f172a">
+
+        <ImageView
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:src="@drawable/app_banner"
+            android:contentDescription="Viajes Nena" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sin Conexión con el Servidor"
+            android:textColor="#ffffff"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp" />
+
+        <TextView
+            android:id="@+id/txtErrorDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No se pudo contactar el sistema de Viajes Nena. Verifica que estés conectado a la misma red Wi-Fi o que la dirección IP sea correcta."
+            android:textColor="#94a3b8"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginTop="12dp" />
+
+        <Button
+            android:id="@+id/btnRetry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🔄 Reintentar Conexión"
+            android:textColor="#ffffff"
+            android:backgroundTint="#2563eb"
+            android:layout_marginTop="24dp" />
+
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⚙️ Cambiar IP / Servidor"
+            android:textColor="#cbd5e1"
+            android:backgroundTint="#334155"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+    <!-- Boton flotante rapido para cambiar servidor si es necesario -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        app:fabSize="mini"
+        android:contentDescription="Ajustes de Servidor"
+        app:backgroundTint="#1e293b"
+        app:tint="#94a3b8" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
