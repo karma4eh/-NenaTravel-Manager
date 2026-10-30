@@ -20,15 +20,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Configurar Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Configurar Gradle 8.5
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.5'
 
       - name: Compilar APK Debug
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
         run: |
           cd android
           gradle :app:assembleDebug --stacktrace --no-daemon
