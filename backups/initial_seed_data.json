@@ -1,0 +1,546 @@
+[
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$fMbTdhsQySZP27YdaSDAC1$WHvxDXNh3NqgP+6tiSp6mRILky24gtFO5EMYizyROXQ=",
+    "last_login": "2026-10-29T23:00:54.419Z",
+    "is_superuser": true,
+    "username": "karma",
+    "first_name": "Kevin",
+    "last_name": "Mendez",
+    "email": "karma4eh@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-09-25T20:48:24.806Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$jG5xJqUxmHobij8D4Apykn$pRZB+PBiZf6pgeb8h/vc6lt6xJtqtvq5GbGm4xG3BK8=",
+    "last_login": "2026-10-29T23:00:55.083Z",
+    "is_superuser": false,
+    "username": "carlos.vendedor",
+    "first_name": "Carlos",
+    "last_name": "Mendoza",
+    "email": "carlos.mendoza@viajesnena.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2026-10-28T20:11:44.626Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$yjLVXjnY3f33jTjTrLDBHr$Rg+4AWNhWPmvVfpShga7xJ/374BJMoY4HsJ4JC+BYDY=",
+    "last_login": "2026-10-28T20:58:15.026Z",
+    "is_superuser": false,
+    "username": "ana.valero",
+    "first_name": "Ana",
+    "last_name": "Valero",
+    "email": "ana.valero@viajesnena.com",
+    "is_staff": false,
+    "is_active": false,
+    "date_joined": "2026-10-28T20:13:14.677Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "fields": {
+    "password": "pbkdf2_sha256$1500000$gNt1jZosVLis2AFgcusqTU$NUXnuCB/YLachfaIGbp6jowzFnY4hmNeMQMPqigpUCA=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "Ender",
+    "first_name": "Ender",
+    "last_name": "Colmenares",
+    "email": "Ender4he@gmail.com",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-10-28T21:15:00.748Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 1,
+  "fields": {
+    "nombre": "Cerveza botella",
+    "categoria": "bebidas",
+    "precio_base": "3000.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 2,
+  "fields": {
+    "nombre": "Refresco 2 litros",
+    "categoria": "bebidas",
+    "precio_base": "9600.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 3,
+  "fields": {
+    "nombre": "Agua 225 ml",
+    "categoria": "Bebidas",
+    "precio_base": "2000.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 4,
+  "fields": {
+    "nombre": "Sangria Caroreña Litro",
+    "categoria": "Bebidas",
+    "precio_base": "25600.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 5,
+  "fields": {
+    "nombre": "Gatorade",
+    "categoria": "Bebidas",
+    "precio_base": "9600.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 6,
+  "fields": {
+    "nombre": "Agua de 1.5 lt",
+    "categoria": "Bebidas",
+    "precio_base": "5000.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 7,
+  "fields": {
+    "nombre": "Zulia de lata",
+    "categoria": "Bebidas",
+    "precio_base": "4800.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 8,
+  "fields": {
+    "nombre": "Polar de lata",
+    "categoria": "bebidas",
+    "precio_base": "4800.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 9,
+  "fields": {
+    "nombre": "Bolsa de hielo",
+    "categoria": "Basicos",
+    "precio_base": "9600.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 10,
+  "fields": {
+    "nombre": "Sangria Malportada litro",
+    "categoria": "Bebidas",
+    "precio_base": "22400.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.producto",
+  "pk": 11,
+  "fields": {
+    "nombre": "Caroreña verano de lata",
+    "categoria": "Bebidas",
+    "precio_base": "6400.00",
+    "activo": true
+  }
+},
+{
+  "model": "core.actividad",
+  "pk": 10,
+  "fields": {
+    "nombre": "Los Juanes",
+    "activo": true
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 5,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-24T23:37:26.102Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 6,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-24T23:41:08.784Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 7,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-24T23:44:25.886Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 8,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-25T00:20:44.876Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 9,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-26T15:37:05.150Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 10,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-26T15:37:25.127Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 11,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-26T15:38:01.945Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 12,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-26T15:39:47.569Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 13,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-26T16:39:18.142Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 14,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-26T20:42:26.711Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 15,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-26T21:20:16.089Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 16,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-26T21:38:00.335Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 17,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-26T21:59:46.525Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 18,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-27T00:12:48.888Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 19,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-27T00:28:28.214Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 20,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-27T00:32:42.944Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 21,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-27T00:38:52.566Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 22,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-27T00:42:33.085Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 23,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-27T01:16:02.414Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 24,
+  "fields": {
+    "tasa": "994.04",
+    "fecha_valor": "Martes, 27 Octubre  2026",
+    "actualizado_en": "2026-10-27T04:39:45.927Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 25,
+  "fields": {
+    "tasa": "989.72",
+    "fecha_valor": "Miércoles, 28 Octubre  2026",
+    "actualizado_en": "2026-10-28T03:12:41.047Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 26,
+  "fields": {
+    "tasa": "989.72",
+    "fecha_valor": "Miércoles, 28 Octubre  2026",
+    "actualizado_en": "2026-10-28T03:19:00.590Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 27,
+  "fields": {
+    "tasa": "989.72",
+    "fecha_valor": "Miércoles, 28 Octubre  2026",
+    "actualizado_en": "2026-10-28T04:11:16.639Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 28,
+  "fields": {
+    "tasa": "989.72",
+    "fecha_valor": "Miércoles, 28 Octubre  2026",
+    "actualizado_en": "2026-10-28T17:07:51.156Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 29,
+  "fields": {
+    "tasa": "989.72",
+    "fecha_valor": "Miércoles, 28 Octubre  2026",
+    "actualizado_en": "2026-10-28T17:15:45.426Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 30,
+  "fields": {
+    "tasa": "989.39",
+    "fecha_valor": "Jueves, 29 Octubre  2026",
+    "actualizado_en": "2026-10-28T20:59:44.401Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 31,
+  "fields": {
+    "tasa": "989.39",
+    "fecha_valor": "Jueves, 29 Octubre  2026",
+    "actualizado_en": "2026-10-28T21:16:40.462Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 32,
+  "fields": {
+    "tasa": "989.39",
+    "fecha_valor": "Jueves, 29 Octubre  2026",
+    "actualizado_en": "2026-10-28T23:02:19.313Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 33,
+  "fields": {
+    "tasa": "992.80",
+    "fecha_valor": "Viernes, 30 Octubre  2026",
+    "actualizado_en": "2026-10-29T20:38:15.334Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 34,
+  "fields": {
+    "tasa": "992.80",
+    "fecha_valor": "Viernes, 30 Octubre  2026",
+    "actualizado_en": "2026-10-29T20:38:37.929Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 35,
+  "fields": {
+    "tasa": "992.80",
+    "fecha_valor": "Viernes, 30 Octubre  2026",
+    "actualizado_en": "2026-10-29T20:39:10.913Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 36,
+  "fields": {
+    "tasa": "992.80",
+    "fecha_valor": "Viernes, 30 Octubre  2026",
+    "actualizado_en": "2026-10-29T20:46:10.041Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 37,
+  "fields": {
+    "tasa": "992.80",
+    "fecha_valor": "Viernes, 30 Octubre  2026",
+    "actualizado_en": "2026-10-29T20:46:37.041Z"
+  }
+},
+{
+  "model": "core.tasabcv",
+  "pk": 38,
+  "fields": {
+    "tasa": "992.80",
+    "fecha_valor": "Viernes, 30 Octubre  2026",
+    "actualizado_en": "2026-10-29T20:49:58.516Z"
+  }
+},
+{
+  "model": "core.perfilusuario",
+  "pk": 1,
+  "fields": {
+    "user": [
+      "karma"
+    ],
+    "rol": "ADMIN",
+    "telefono": "04124204487",
+    "creado_en": "2026-10-28T20:02:41.774Z",
+    "actualizado_en": "2026-10-28T22:54:04.488Z"
+  }
+},
+{
+  "model": "core.perfilusuario",
+  "pk": 3,
+  "fields": {
+    "user": [
+      "carlos.vendedor"
+    ],
+    "rol": "VENDEDOR",
+    "telefono": "+58 414 789-1234",
+    "creado_en": "2026-10-28T20:11:45.566Z",
+    "actualizado_en": "2026-10-28T20:13:14.661Z"
+  }
+},
+{
+  "model": "core.perfilusuario",
+  "pk": 5,
+  "fields": {
+    "user": [
+      "ana.valero"
+    ],
+    "rol": "VENDEDOR",
+    "telefono": "+58 412 555-8899",
+    "creado_en": "2026-10-28T20:13:14.681Z",
+    "actualizado_en": "2026-10-28T20:13:14.709Z"
+  }
+},
+{
+  "model": "core.perfilusuario",
+  "pk": 6,
+  "fields": {
+    "user": [
+      "Ender"
+    ],
+    "rol": "ADMIN",
+    "telefono": "04124204487",
+    "creado_en": "2026-10-28T21:15:01.545Z",
+    "actualizado_en": "2026-10-28T21:15:01.562Z"
+  }
+}
+]

@@ -110,6 +110,8 @@ def asegurar_perfil_usuario(sender, instance, created, **kwargs):
     Garantiza que todo usuario de Django tenga su perfil con rol asignado.
     Los superusuarios se inicializan por defecto como ADMIN.
     """
+    if kwargs.get('raw', False):
+        return
     if created:
         rol_inicial = PerfilUsuario.ROL_ADMIN if instance.is_superuser else PerfilUsuario.ROL_VENDEDOR
         PerfilUsuario.objects.get_or_create(user=instance, defaults={'rol': rol_inicial})
