@@ -1,0 +1,250 @@
+/* =====================================================================
+   VIAJES NENA • MOBILE APP DESIGN SYSTEM (KARMA STUDIO)
+   Transformación completa a Experiencia Nativa de Aplicación Móvil
+   ===================================================================== */
+
+@media (max-width: 991.98px) {
+  /* --- 1. Ergonomía Táctil y Reset Nativo --- */
+  html, body {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overscroll-behavior-y: contain;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Evitar selección de texto molesta en controles */
+  .btn, .nav-link, .stat-card, .list-group-item, .badge, .navbar, .card-header,
+  .btn-check, .form-check-label, .table th {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Animación táctil suave (Sensación Nativa) */
+  .btn, .stat-card, .menu-card, .food-client-card, .list-group-item, .card {
+    transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.15s ease, background-color 0.15s ease !important;
+  }
+
+  .btn:active, .stat-card:active, .menu-card:active, .food-client-card:active {
+    transform: scale(0.97) !important;
+  }
+
+  /* Controles táctiles con altura mínima ergonómica (46px - 48px) */
+  .btn, .form-control, .form-select {
+    min-height: 46px;
+    font-size: 15px;
+    border-radius: 12px;
+  }
+
+  /* Barra de desplazamiento nativa oculta para look de app */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.4);
+    border-radius: 4px;
+  }
+
+  /* --- 2. Top App Bar Móvil --- */
+  .app-mobile-header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1020;
+    background: rgba(16, 43, 70, 0.96) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: max(10px, env(safe-area-inset-top, 10px)) 16px 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .app-mobile-header .brand-title {
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+  }
+
+  .app-mobile-header .brand-title .badge-status {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(22, 184, 176, 0.2);
+    color: #16b8b0;
+    border: 1px solid rgba(22, 184, 176, 0.4);
+  }
+
+  /* Ocultar barra de navegación web convencional en móviles */
+  .navbar-web-desktop {
+    display: none !important;
+  }
+
+  /* --- 3. Bottom Navigation Bar Fija (Estilo Material Design 3) --- */
+  .mobile-bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    background: rgba(10, 27, 45, 0.98) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex !important;
+    align-items: center;
+    justify-content: space-around;
+    z-index: 9999 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  .mobile-bottom-nav .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 16px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    flex: 1;
+    max-width: 80px;
+  }
+
+  .mobile-bottom-nav .nav-item .nav-icon {
+    font-size: 20px;
+    line-height: 1;
+    margin-bottom: 3px;
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-bottom-nav .nav-item.active {
+    color: #38bdf8;
+  }
+
+  .mobile-bottom-nav .nav-item.active .nav-icon {
+    transform: scale(1.15) translateY(-2px);
+  }
+
+  .mobile-bottom-nav .nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    width: 32px;
+    height: 4px;
+    background: #38bdf8;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+  }
+
+  .mobile-bottom-nav .nav-item:active {
+    transform: scale(0.92);
+  }
+
+  /* --- 4. Modales como Bottom Sheets Nativos en Teléfonos --- */
+  .modal-dialog {
+    margin: 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    transform: translateY(100%) !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .modal.show .modal-dialog {
+    transform: translateY(0) !important;
+  }
+
+  .modal-content {
+    border-radius: 24px 24px 0 0 !important;
+    border: none !important;
+    box-shadow: 0 -12px 35px rgba(0, 0, 0, 0.4) !important;
+    max-height: 86vh !important;
+    overflow-y: auto !important;
+    background: #0f172a !important;
+    color: #ffffff !important;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Tirador de agarre estilo iOS/Android Bottom Sheet */
+  .modal-content::before {
+    content: '';
+    display: block;
+    width: 44px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 3px;
+    margin: 10px auto 4px auto;
+  }
+
+  /* --- 5. Tarjetas Táctiles y Listas de Datos en Móvil --- */
+  .card {
+    border-radius: 18px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  /* Listas estilo app nativa */
+  .table-responsive {
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Tarjetas de comida / pasajeros touch-first */
+  .mobile-food-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 10px;
+  }
+
+  /* Quick action Floating Action Button */
+  .mobile-fab {
+    position: fixed;
+    right: 18px;
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+    z-index: 1000;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+/* Ocultar elementos exclusivos de móvil en pantallas de PC */
+@media (min-width: 992px) {
+  .mobile-bottom-nav,
+  .app-mobile-header,
+  .mobile-fab {
+    display: none !important;
+  }
+}

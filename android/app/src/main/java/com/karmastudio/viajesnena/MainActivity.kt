@@ -5,9 +5,12 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import android.webkit.*
 import android.widget.Button
 import android.widget.EditText
@@ -42,6 +45,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Integracion de barras del sistema con la estetica nativa de la app
+        configureSystemBars()
+
         setContentView(R.layout.activity_main)
 
         webView = findViewById(R.id.webView)
@@ -51,6 +58,7 @@ class MainActivity : AppCompatActivity() {
         btnSettings = findViewById(R.id.btnSettings)
         fabSettings = findViewById(R.id.fabSettings)
 
+        setupSwipeRefresh()
         setupWebView()
         setupListeners()
         setupBackNavigation()
@@ -58,20 +66,57 @@ class MainActivity : AppCompatActivity() {
         loadCurrentServer()
     }
 
+    private fun configureSystemBars() {
+        val darkBgColor = Color.parseColor("#0a1b2d")
+        window.statusBarColor = darkBgColor
+        window.navigationBarColor = darkBgColor
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.setSystemBarsAppearance(
+                0,
+                android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
+                android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = 0
+        }
+    }
+
+    private fun setupSwipeRefresh() {
+        // Colores tematicos nativos de Viajes Nena
+        swipeRefresh.setColorSchemeColors(
+            Color.parseColor("#16b8b0"),
+            Color.parseColor("#2563eb"),
+            Color.parseColor("#38bdf8")
+        )
+        swipeRefresh.setProgressBackgroundColorSchemeColor(Color.parseColor("#0f172a"))
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView() {
+        // Aceleracion por hardware para maxima fluidez a 60/120 FPS
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+        webView.isVerticalScrollBarEnabled = false
+        webView.isHorizontalScrollBarEnabled = false
+        webView.overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
+
         val settings = webView.settings
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
         settings.databaseEnabled = true
         settings.useWideViewPort = true
         settings.loadWithOverviewMode = true
-        settings.setSupportZoom(true)
-        settings.builtInZoomControls = true
+        settings.setSupportZoom(false)
+        settings.builtInZoomControls = false
         settings.displayZoomControls = false
         settings.allowFileAccess = true
         settings.allowContentAccess = true
         settings.cacheMode = WebSettings.LOAD_DEFAULT
+
+        // Identificador de App Nativa para optimizaciones de servidor
+        val defaultUa = settings.userAgentString
+        settings.userAgentString = "$defaultUa ViajesNenaApp/1.0 (Android Native; KarmaStudio)"
 
         webView.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
