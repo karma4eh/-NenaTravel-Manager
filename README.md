@@ -3,7 +3,8 @@
 ![Versión](https://img.shields.io/badge/Versi%C3%B3n-v1.0.0%20Beta-0ea5e9?style=for-the-badge)
 ![Django](https://img.shields.io/badge/Django-6.1.1-092e20?style=for-the-badge&logo=django)
 ![Python](https://img.shields.io/badge/Python-3.13-3776ab?style=for-the-badge&logo=python)
-![Entorno](https://img.shields.io/badge/Entorno-Local%20%2F%20LAN-10b981?style=for-the-badge)
+![Database](https://img.shields.io/badge/Database-Supabase%20PostgreSQL%2017-3ecf8e?style=for-the-badge&logo=supabase)
+![Mobile](https://img.shields.io/badge/Android-APK%20%2B%20PWA-34d399?style=for-the-badge&logo=android)
 ![Desarrollado por](https://img.shields.io/badge/Desarrollado%20por-Karma%20Studio-16b8b0?style=for-the-badge)
 
 Plataforma de software desarrollada a medida para centralizar, digitalizar y resguardar la logística operativa, control de pasajeros, finanzas multimoneda y distribución de servicios en **Viajes Nena**.
